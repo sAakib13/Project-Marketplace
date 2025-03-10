@@ -24,19 +24,19 @@ export async function GET() {
       industry: row.vars.industry ? row.vars.industry.split(',').map((ind: string) => ind.trim()) : ['Uncategorized'],
       links: [
         {
-          name: 'Telerivet Campaign',
-          url: `https://telerivet.com/dashboard/projects/${row.project_id}`,
+          name: 'Telerivet Project',
+          url:  row.vars.telerivet_url || `https://telerivet.com/`,
           description: row.vars.telerivet_description || 'Campaign automation and tracking',
           icon: '📱'
         },
         {
-          name: 'Canva Templates',
+          name: 'Canva Decks',
           url: row.vars.canva_url || 'https://www.canva.com/',
           description: row.vars.canva_description || 'Brand-aligned visual assets',
           icon: '🎨'
         },
         {
-          name: 'HubSpot Analytics',
+          name: 'HubSpot Article',
           url: row.vars.hubspot_url || 'https://app.hubspot.com/',
           description: row.vars.hubspot_description || 'Performance metrics and leads',
           icon: '📊'
