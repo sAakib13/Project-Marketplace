@@ -26,7 +26,7 @@ type Project = {
   }[];
 };
 
-const industries = ["FMCG", "Health", "NGO"];
+const industries = ["FMCG", "Health", "NGO", "Logistics"];
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
