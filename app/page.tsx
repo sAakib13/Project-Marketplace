@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -12,151 +12,45 @@ import {
 import { Search, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import axios from "axios";
 
-const projectsData = [
-  {
-    title: "Marketing Campaign Hub",
-    description:
-      "Centralized marketing campaign management and analytics platform for Q2 2024 initiatives.",
-    industry: ["FMCG", "Health"],
-    useCase: "SMS, Poll, Automation, Lead-gen",
-    links: [
-      {
-        name: "Telerivet Campaign",
-        url: "https://telerivet.com/dashboard",
-        description: "SMS campaign automation and tracking",
-        icon: "📱",
-      },
-      {
-        name: "Canva Templates",
-        url: "https://www.canva.com/",
-        description: "Brand-aligned visual assets and templates",
-        icon: "🎨",
-      },
-      {
-        name: "HubSpot Analytics",
-        url: "https://app.hubspot.com/",
-        description: "Campaign performance metrics and leads",
-        icon: "📊",
-      },
-    ],
-  },
-  {
-    title: "Customer Success Portal",
-    description:
-      "Dedicated platform for managing customer onboarding, support, and success metrics.",
-    industry: ["Health", "NGO"],
-    useCase: "Support, Onboarding, Success Tracking",
-    links: [
-      {
-        name: "Telerivet Support",
-        url: "https://telerivet.com/dashboard",
-        description: "Customer communication channels",
-        icon: "💬",
-      },
-      {
-        name: "Success Playbooks",
-        url: "https://www.canva.com/",
-        description: "Visual guides and documentation",
-        icon: "📚",
-      },
-      {
-        name: "HubSpot CRM",
-        url: "https://app.hubspot.com/",
-        description: "Customer relationship tracking",
-        icon: "🤝",
-      },
-    ],
-  },
-  {
-    title: "Product Launch Workspace",
-    description:
-      "Collaborative space for coordinating new product launches and feature releases.",
-    industry: ["FMCG"],
-    useCase: "Launch Coordination, Marketing, Lead-gen",
-
-    links: [
-      {
-        name: "Launch Announcements",
-        url: "https://telerivet.com/dashboard",
-        description: "Product launch communication",
-        icon: "🚀",
-      },
-      {
-        name: "Marketing Materials",
-        url: "https://www.canva.com/",
-        description: "Launch graphics and presentations",
-        icon: "✨",
-      },
-      {
-        name: "Lead Tracking",
-        url: "https://app.hubspot.com/",
-        description: "Launch campaign performance",
-        icon: "📈",
-      },
-    ],
-  },
-  {
-    title: "Sales Enablement Hub",
-    description:
-      "Resources and tools for empowering the sales team with latest materials and insights.",
-    industry: ["FMCG", "Health"],
-    useCase: "Sales Resources, Automation, CRM Integration",
-    links: [
-      {
-        name: "Sales Scripts",
-        url: "https://telerivet.com/dashboard",
-        description: "Automated sales messaging",
-        icon: "📝",
-      },
-      {
-        name: "Pitch Decks",
-        url: "https://www.canva.com/",
-        description: "Sales presentation templates",
-        icon: "🎯",
-      },
-      {
-        name: "Deal Pipeline",
-        url: "https://app.hubspot.com/",
-        description: "Sales pipeline management",
-        icon: "💼",
-      },
-    ],
-  },
-  {
-    title: "Event Management Center",
-    description:
-      "Comprehensive platform for planning and executing virtual and in-person events.",
-    industry: ["NGO"],
-    useCase: "Event Planning, Registration, Communication",
-    links: [
-      {
-        name: "Event Communications",
-        url: "https://telerivet.com/dashboard",
-        description: "Attendee messaging system",
-        icon: "📅",
-      },
-      {
-        name: "Event Branding",
-        url: "https://www.canva.com/",
-        description: "Event materials and badges",
-        icon: "🎪",
-      },
-      {
-        name: "Registration Data",
-        url: "https://app.hubspot.com/",
-        description: "Attendee tracking and follow-up",
-        icon: "📋",
-      },
-    ],
-  },
-];
+type Project = {
+  title: string;
+  description: string;
+  industry: string[];
+  links: {
+    name: string;
+    url: string;
+    description: string;
+    icon: string;
+  }[];
+};
 
 const industries = ["FMCG", "Health", "NGO"];
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get("/api/telerivet");
+        setProjects(response.data);
+        setError(null);
+      } catch (err) {
+        setError("Failed to load projects");
+        console.log("Error fetching projects:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const toggleIndustry = (industry: string) => {
     setSelectedIndustries((prev) =>
@@ -166,7 +60,7 @@ export default function Home() {
     );
   };
 
-  const filteredProjects = projectsData.filter((project) => {
+  const filteredProjects = projects.filter((project) => {
     const matchesSearch =
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -185,6 +79,22 @@ export default function Home() {
 
     return matchesSearch && matchesIndustry;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background via-secondary/30 to-background flex items-center justify-center">
+        <div className="text-2xl text-blue-400">Loading projects...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background via-secondary/30 to-background flex items-center justify-center">
+        <div className="text-2xl text-red-400">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background via-secondary/30 to-background pb-12">
@@ -226,7 +136,7 @@ export default function Home() {
         </div>
 
         {/* Project Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredProjects.map((project, projectIndex) => (
             <Card
               key={projectIndex}
@@ -277,8 +187,6 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-
-                <p>Use Case: {project.useCase}</p>
               </CardContent>
             </Card>
           ))}
