@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import axios from 'axios';
+import { NextResponse } from "next/server";
+import axios from "axios";
 
 const API_KEY = process.env.TELERIVET_API_KEY;
 const PROJECT_ID = process.env.TELERIVET_PROJECT_ID;
@@ -11,44 +11,90 @@ export async function GET() {
       `https://api.telerivet.com/v1/projects/${PROJECT_ID}/tables/${TABLE_ID}/rows`,
       {
         auth: {
-          username: API_KEY || '',
-          password: '',
+          username: API_KEY || "",
+          password: "",
         },
       }
     );
 
     // Transform the data to match our project structure
     const projects = response.data.data.map((row: any) => ({
-      title: row.vars.title || 'Untitled Project',
-      description: row.vars.description || 'No description available',
-      industry: row.vars.industry ? row.vars.industry.split(',').map((ind: string) => ind.trim()) : ['Uncategorized'],
+      title: row.vars.title || "Untitled Project",
+      description: row.vars.description || "No description available",
+      industry: row.vars.industry
+        ? row.vars.industry.split(",").map((ind: string) => ind.trim())
+        : ["Uncategorized"],
       links: [
-        {
-          name: 'Telerivet Project',
-          url:  row.vars.telerivet_url || `https://telerivet.com/`,
-          description: row.vars.telerivet_description || 'Campaign automation and tracking',
-          icon: '📱'
-        },
-        {
-          name: 'Canva Decks',
-          url: row.vars.canva_url || 'https://www.canva.com/',
-          description: row.vars.canva_description || 'Brand-aligned visual assets',
-          icon: '🎨'
-        },
-        {
-          name: 'HubSpot Article',
-          url: row.vars.hubspot_url || 'https://app.hubspot.com/',
-          description: row.vars.hubspot_description || 'Performance metrics and leads',
-          icon: '📊'
-        }
-      ]
+        // Only include Telerivet link if URL exists
+        ...(row.vars.telerivet_url
+          ? [
+              {
+                name: "Telerivet Project",
+                url: row.vars.telerivet_url,
+                description:
+                  row.vars.telerivet_description ||
+                  "Campaign automation and tracking",
+                icon: "📱",
+              },
+            ]
+          : []),
+        // Only include Canva link if URL exists
+        ...(row.vars.canva_url
+          ? [
+              {
+                name: "Canva Decks",
+                url: row.vars.canva_url,
+                description:
+                  row.vars.canva_description || "Brand-aligned visual assets",
+                icon: "🎨",
+              },
+            ]
+          : []),
+        // Only include HubSpot link if URL exists
+        ...(row.vars.hubspot_url
+          ? [
+              {
+                name: "HubSpot Article",
+                url: row.vars.hubspot_url,
+                description:
+                  row.vars.hubspot_description ||
+                  "Performance metrics and leads",
+                icon: "📊",
+              },
+            ]
+          : []),
+        // Only include Asana link if URL exists
+        ...(row.vars.asana_url
+          ? [
+              {
+                name: "Asana Project",
+                url: row.vars.asana_url,
+                description:
+                  row.vars.asana_description || "Project management and tasks",
+                icon: "📋",
+              },
+            ]
+          : []),
+        // Only include Live link if URL exists
+        ...(row.vars.live_url
+          ? [
+              {
+                name: "Live Project",
+                url: row.vars.live_url || "www.google.com",
+                description:
+                  row.vars.live_description || "View the live project",
+                icon: "🌐",
+              },
+            ]
+          : []),
+      ].filter(Boolean), // Remove any undefined entries
     }));
 
     return NextResponse.json(projects);
   } catch (error) {
-    console.error('Error fetching data from Telerivet:', error);
+    console.error("Error fetching data from Telerivet:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch projects' },
+      { error: "Failed to fetch projects" },
       { status: 500 }
     );
   }

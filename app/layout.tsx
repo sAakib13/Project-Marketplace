@@ -8,7 +8,7 @@ const oxanium = Oxanium({
 });
 
 export const metadata: Metadata = {
-  title: 'Project Hub',
+  title: 'Project Marketplace',
   description: 'Your centralized project management dashboard',
 };
 
