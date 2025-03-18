@@ -107,7 +107,7 @@ export default function Home() {
             </div>
             <Input
               type="search"
-              placeholder="Search projects, tools, or descriptions..."
+              placeholder="Search services or descriptions..."
               className="pl-10 h-12 text-lg bg-background/50 backdrop-blur-sm border-blue-500/20 focus-visible:ring-blue-500/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
