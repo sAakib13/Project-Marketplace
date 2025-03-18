@@ -64,17 +64,17 @@ export async function GET() {
             ]
           : []),
         // Only include Asana link if URL exists
-        ...(row.vars.asana_url
-          ? [
-              {
-                name: "Asana Project",
-                url: row.vars.asana_url,
-                description:
-                  row.vars.asana_description || "Project management and tasks",
-                icon: "📋",
-              },
-            ]
-          : []),
+        // ...(row.vars.asana_url
+        //   ? [
+        //       {
+        //         name: "Asana Project",
+        //         url: row.vars.asana_url,
+        //         description:
+        //           row.vars.asana_description || "Project management and tasks",
+        //         icon: "📋",
+        //       },
+        //     ]
+        //   : []),
         // Only include Live link if URL exists
         ...(row.vars.live_url
           ? [
