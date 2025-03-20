@@ -26,7 +26,27 @@ type Project = {
   }[];
 };
 
-const industries = ["FMCG", "Health", "NGO", "Logistics"];
+const industries = [
+  "FMCG",
+  "Health",
+  "NGO",
+  "Logistics",
+  "Telecom",
+  "Finance",
+  "Technology",
+  "Manufacturing",
+  "Retail",
+  "Education",
+  "Energy",
+  "Construction",
+  "Agriculture",
+  "Tourism",
+  "Media",
+  "Real Estate",
+  "Transportation",
+  "Environmental Services",
+  "Government Services",
+];
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
