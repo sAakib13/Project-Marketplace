@@ -9,8 +9,15 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Search, ExternalLink } from "lucide-react";
+import { Search, ExternalLink, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
 
@@ -26,16 +33,15 @@ type Project = {
   }[];
 };
 
-const industries = [
-  "FMCG",
-  "Health",
+// Main industries shown directly
+const mainIndustries = ["FMCG", "Health", "Technology", "Finance", "Retail"];
+
+// Other industries shown in filter
+const otherIndustries = [
   "NGO",
   "Logistics",
   "Telecom",
-  "Finance",
-  "Technology",
   "Manufacturing",
-  "Retail",
   "Education",
   "Energy",
   "Construction",
@@ -47,7 +53,6 @@ const industries = [
   "Environmental Services",
   "Government Services",
 ];
-
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -120,6 +125,30 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-background via-secondary/30 to-background pb-12">
       <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="text-center my-10">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent my-6">
+            Telerivet Solutions Marketplace
+          </h1>
+          <p className="text-lg text-muted-foreground leading-relaxed mx-auto px-4 md:px-8 lg:px-16">
+            The{" "}
+            <strong className="font-semibold">
+              Telerivet Solutions Marketplace
+            </strong>{" "}
+            is a comprehensive platform designed to empower organizations with
+            cutting-edge communication tools and solutions.
+          </p>
+          <p className="text-lg text-muted-foreground leading-relaxed mx-auto px-4 md:px-8 lg:px-16 mt-4">
+            This marketplace enables users to streamline customer engagement,
+            automate interactions, and scale operations efficiently. Telerivet
+            supports versatile use cases ranging from retail to logistics.
+          </p>
+          <p className="text-lg text-muted-foreground leading-relaxed mx-auto px-4 md:px-8 lg:px-16 mt-4">
+            Whether you're looking to enhance customer support, launch targeted
+            marketing campaigns, or implement innovative mobile solutions, the
+            Telerivet Solutions Marketplace offers endless possibilities to
+            drive meaningful results globally.
+          </p>
+        </div>
         {/* Search Section */}
         <div className="max-w-2xl mx-auto mb-8">
           <div className="relative mb-4">
@@ -129,15 +158,16 @@ export default function Home() {
             <Input
               type="search"
               placeholder="Search services or descriptions..."
-              className="pl-10 h-12 text-lg bg-background/50 backdrop-blur-sm border-blue-500/20 focus-visible:ring-blue-500/50"
+              className="pl-10 h-12 text-lg bg-background/50  backdrop-blur-sm border-blue-500/20 focus-visible:ring-blue-500/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           {/* Industry Filter */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            {industries.map((industry) => (
+          <div className="flex flex-wrap gap-2 justify-center items-center">
+            {/* Main Industries */}
+            {mainIndustries.map((industry) => (
               <Badge
                 key={industry}
                 variant={
@@ -153,6 +183,44 @@ export default function Home() {
                 {industry}
               </Badge>
             ))}
+
+            {/* Filter Popover for Other Industries */}
+            <Popover>
+              <PopoverTrigger>
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 px-6 py-2.5 h-auto text-sm hover:bg-blue-500/10 border-blue-500/30 hover:border-blue-500 hover:translate-y-[-2px] transition-all duration-200"
+                >
+                  <Filter className="h-4 w-4" />
+                  More Industries
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4">
+                <div className="space-y-4">
+                  <h4 className="font-medium text-sm">Select Industries</h4>
+                  <div className="space-y-2">
+                    {otherIndustries.map((industry) => (
+                      <div
+                        key={industry}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={industry}
+                          checked={selectedIndustries.includes(industry)}
+                          onCheckedChange={() => toggleIndustry(industry)}
+                        />
+                        <label
+                          htmlFor={industry}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {industry}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
