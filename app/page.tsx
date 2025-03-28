@@ -12,6 +12,13 @@ import {
 import { Search, ExternalLink, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -20,6 +27,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
+import projectDetails from "./api/projects.json";
 
 type Project = {
   title: string;
@@ -33,10 +41,22 @@ type Project = {
   }[];
 };
 
-// Main industries shown directly
+type ProjectDetails = {
+  title: string;
+  description: string;
+  salesPitch: {
+    overview: string;
+    benefits: string[];
+    useCase: string;
+    implementation: string[];
+    roi: {
+      metrics: string[];
+    };
+  };
+};
+
 const mainIndustries = ["FMCG", "Health", "Technology", "Finance", "Retail"];
 
-// Other industries shown in filter
 const otherIndustries = [
   "NGO",
   "Logistics",
@@ -60,6 +80,11 @@ export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(
+    null
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -77,6 +102,24 @@ export default function Home() {
 
     fetchProjects();
   }, []);
+
+  const fetchProjectDetails = async (projectId: string) => {
+    setLoadingDetails(true);
+    try {
+      // Instead of making an API call, we use the static JSON data
+      const details = projectDetails[projectId as keyof typeof projectDetails];
+      if (details) {
+        setSelectedProject(details);
+        setIsDialogOpen(true);
+      } else {
+        throw new Error("Project not found");
+      }
+    } catch (err) {
+      console.error("Error fetching project details:", err);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
 
   const toggleIndustry = (industry: string) => {
     setSelectedIndustries((prev) =>
@@ -149,6 +192,7 @@ export default function Home() {
             drive meaningful results globally.
           </p>
         </div>
+
         {/* Search Section */}
         <div className="max-w-2xl mx-auto mb-8">
           <div className="relative mb-4">
@@ -158,7 +202,7 @@ export default function Home() {
             <Input
               type="search"
               placeholder="Search services or descriptions..."
-              className="pl-10 h-12 text-lg bg-background/50  backdrop-blur-sm border-blue-500/20 focus-visible:ring-blue-500/50"
+              className="pl-10 h-12 text-lg bg-background/50 backdrop-blur-sm border-blue-500/20 focus-visible:ring-blue-500/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -166,7 +210,6 @@ export default function Home() {
 
           {/* Industry Filter */}
           <div className="flex flex-wrap gap-2 justify-center items-center">
-            {/* Main Industries */}
             {mainIndustries.map((industry) => (
               <Badge
                 key={industry}
@@ -184,7 +227,6 @@ export default function Home() {
               </Badge>
             ))}
 
-            {/* Filter Popover for Other Industries */}
             <Popover>
               <PopoverTrigger>
                 <Button
@@ -229,7 +271,8 @@ export default function Home() {
           {filteredProjects.map((project, projectIndex) => (
             <Card
               key={projectIndex}
-              className="bg-card/50 backdrop-blur-sm border-2 border-blue-500/20 hover:border-blue-500/40 transition-all duration-200 hover:translate-y-[-4px] hover:shadow-xl hover:shadow-blue-500/10"
+              className="bg-card/50 backdrop-blur-sm border-2 border-blue-500/20 hover:border-blue-500/40 transition-all duration-200 hover:translate-y-[-4px] hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer"
+              onClick={() => fetchProjectDetails(project.title)}
             >
               <CardHeader>
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -259,6 +302,7 @@ export default function Home() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-start space-x-4 p-3 transition-all duration-200 hover:bg-blue-500/10 hover:translate-x-2"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <span className="text-2xl">{link.icon}</span>
                         <div className="flex-1">
@@ -280,6 +324,88 @@ export default function Home() {
             </Card>
           ))}
         </div>
+
+        {/* Project Details Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-3xl">
+            {loadingDetails ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-xl text-blue-400">Loading details...</div>
+              </div>
+            ) : selectedProject ? (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                    {selectedProject.title}
+                  </DialogTitle>
+                  <DialogDescription className="text-lg mt-2">
+                    {selectedProject.description}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                      Overview
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {selectedProject.salesPitch.overview}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                      Key Benefits
+                    </h3>
+                    <ul className="list-disc list-inside space-y-2">
+                      {selectedProject.salesPitch.benefits.map(
+                        (benefit, index) => (
+                          <li key={index} className="text-muted-foreground">
+                            {benefit}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                      Use Case
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {selectedProject.salesPitch.useCase}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                      Implementation
+                    </h3>
+                    <ul className="list-disc list-inside space-y-2">
+                      {selectedProject.salesPitch.implementation.map(
+                        (step, index) => (
+                          <li key={index} className="text-muted-foreground">
+                            {step}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                      ROI & Metrics
+                    </h3>
+                    <ul className="list-disc list-inside space-y-2">
+                      {selectedProject.salesPitch.roi.metrics.map(
+                        (metric, index) => (
+                          <li key={index} className="text-muted-foreground">
+                            {metric}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </>
+            ) : null}
+          </DialogContent>
+        </Dialog>
 
         {/* No Results Message */}
         {filteredProjects.length === 0 && (
