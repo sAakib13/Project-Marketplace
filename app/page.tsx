@@ -81,7 +81,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(
-    null
+    null,
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -125,7 +125,7 @@ export default function Home() {
     setSelectedIndustries((prev) =>
       prev.includes(industry)
         ? prev.filter((i) => i !== industry)
-        : [...prev, industry]
+        : [...prev, industry],
     );
   };
 
@@ -136,10 +136,10 @@ export default function Home() {
       project.links.some(
         (link) =>
           link.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          link.description.toLowerCase().includes(searchQuery.toLowerCase())
+          link.description.toLowerCase().includes(searchQuery.toLowerCase()),
       ) ||
       project.industry.some((ind) =>
-        ind.toLowerCase().includes(searchQuery.toLowerCase())
+        ind.toLowerCase().includes(searchQuery.toLowerCase()),
       );
 
     const matchesIndustry =
@@ -151,7 +151,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background via-secondary/30 to-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background via-secondary/30 to-background">
         <div className="text-2xl text-blue-400">Loading projects...</div>
       </div>
     );
@@ -159,7 +159,7 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background via-secondary/30 to-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background via-secondary/30 to-background">
         <div className="text-2xl text-red-400">{error}</div>
       </div>
     );
@@ -167,12 +167,12 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background via-secondary/30 to-background pb-12">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="text-center my-10">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent my-6">
+      <div className="mx-auto max-w-6xl px-4 py-12">
+        <div className="my-10 text-center">
+          <h1 className="my-6 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-4xl font-bold text-transparent">
             Telerivet Solutions Marketplace
           </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed mx-auto px-4 md:px-8 lg:px-16">
+          <p className="mx-auto px-4 text-lg leading-relaxed text-muted-foreground md:px-8 lg:px-16">
             The{" "}
             <strong className="font-semibold">
               Telerivet Solutions Marketplace
@@ -180,12 +180,12 @@ export default function Home() {
             is a comprehensive platform designed to empower organizations with
             cutting-edge communication tools and solutions.
           </p>
-          <p className="text-lg text-muted-foreground leading-relaxed mx-auto px-4 md:px-8 lg:px-16 mt-4">
+          <p className="mx-auto mt-4 px-4 text-lg leading-relaxed text-muted-foreground md:px-8 lg:px-16">
             This marketplace enables users to streamline customer engagement,
             automate interactions, and scale operations efficiently. Telerivet
             supports versatile use cases ranging from retail to logistics.
           </p>
-          <p className="text-lg text-muted-foreground leading-relaxed mx-auto px-4 md:px-8 lg:px-16 mt-4">
+          <p className="mx-auto mt-4 px-4 text-lg leading-relaxed text-muted-foreground md:px-8 lg:px-16">
             Whether you're looking to enhance customer support, launch targeted
             marketing campaigns, or implement innovative mobile solutions, the
             Telerivet Solutions Marketplace offers endless possibilities to
@@ -194,32 +194,32 @@ export default function Home() {
         </div>
 
         {/* Search Section */}
-        <div className="max-w-2xl mx-auto mb-8">
+        <div className="mx-auto mb-8 max-w-2xl">
           <div className="relative mb-4">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
               <Search className="h-5 w-5 text-blue-400" />
             </div>
             <Input
               type="search"
               placeholder="Search services or descriptions..."
-              className="pl-10 h-12 text-lg bg-background/50 backdrop-blur-sm border-blue-500/20 focus-visible:ring-blue-500/50"
+              className="h-12 border-blue-500/20 bg-background/50 pl-10 text-lg backdrop-blur-sm focus-visible:ring-blue-500/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           {/* Industry Filter */}
-          <div className="flex flex-wrap gap-2 justify-center items-center">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {mainIndustries.map((industry) => (
               <Badge
                 key={industry}
                 variant={
                   selectedIndustries.includes(industry) ? "default" : "outline"
                 }
-                className={`cursor-pointer text-sm px-6 py-2.5 transition-all duration-200 ${
+                className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
                   selectedIndustries.includes(industry)
-                    ? "bg-blue-500 hover:bg-blue-600 hover:translate-y-[-2px] shadow-lg shadow-blue-500/25"
-                    : "hover:bg-blue-500/10 border-blue-500/30 hover:border-blue-500 hover:translate-y-[-2px]"
+                    ? "bg-blue-500 shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-600"
+                    : "border-blue-500/30 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
                 }`}
                 onClick={() => toggleIndustry(industry)}
               >
@@ -231,16 +231,16 @@ export default function Home() {
               <PopoverTrigger>
                 <Button
                   variant="outline"
-                  className="flex items-center gap-2 px-6 py-2.5 h-auto text-sm hover:bg-blue-500/10 border-blue-500/30 hover:border-blue-500 hover:translate-y-[-2px] transition-all duration-200"
+                  className="flex h-auto items-center gap-2 rounded-3xl border-blue-500/30 px-6 py-2.5 text-sm transition-all duration-200 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
                 >
                   <Filter className="h-4 w-4" />
                   More Industries
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-4">
-                <div className="space-y-4">
-                  <h4 className="font-medium text-sm">Select Industries</h4>
-                  <div className="space-y-2">
+                <div className="space-y-4 rounded-3xl">
+                  <h4 className="text-sm font-medium">Select Industries</h4>
+                  <div className="space-y-2 rounded-full">
                     {otherIndustries.map((industry) => (
                       <div
                         key={industry}
@@ -267,29 +267,29 @@ export default function Home() {
         </div>
 
         {/* Project Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project, projectIndex) => (
             <Card
               key={projectIndex}
-              className="bg-card/50 backdrop-blur-sm border-2 border-blue-500/20 hover:border-blue-500/40 transition-all duration-200 hover:translate-y-[-4px] hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer"
+              className="cursor-pointer border-2 border-blue-500/20 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
               onClick={() => fetchProjectDetails(project.title)}
             >
               <CardHeader>
-                <div className="flex flex-wrap gap-2 mb-3">
+                <div className="mb-3 flex flex-wrap gap-2">
                   {project.industry.map((ind) => (
                     <Badge
                       key={ind}
                       variant="secondary"
-                      className="bg-blue-500/10 text-blue-400 border-blue-500/30"
+                      className="border-blue-500/30 bg-blue-500/10 text-blue-400"
                     >
                       {ind}
                     </Badge>
                   ))}
                 </div>
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                <CardTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
                   {project.title}
                 </CardTitle>
-                <CardDescription className="text-lg mt-2">
+                <CardDescription className="mt-2 text-lg">
                   {project.description}
                 </CardDescription>
               </CardHeader>
@@ -301,7 +301,7 @@ export default function Home() {
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-start space-x-4 p-3 transition-all duration-200 hover:bg-blue-500/10 hover:translate-x-2"
+                        className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <span className="text-2xl">{link.icon}</span>
@@ -310,9 +310,9 @@ export default function Home() {
                             <h3 className="text-base font-semibold text-blue-400">
                               {link.name}
                             </h3>
-                            <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-blue-400" />
+                            <ExternalLink className="h-4 w-4 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="mt-1 text-sm text-muted-foreground">
                             {link.description}
                           </p>
                         </div>
@@ -335,16 +335,16 @@ export default function Home() {
             ) : selectedProject ? (
               <>
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                  <DialogTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
                     {selectedProject.title}
                   </DialogTitle>
-                  <DialogDescription className="text-lg mt-2">
+                  <DialogDescription className="mt-2 text-lg">
                     {selectedProject.description}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
                       Overview
                     </h3>
                     <p className="text-muted-foreground">
@@ -352,21 +352,21 @@ export default function Home() {
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
                       Key Benefits
                     </h3>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-inside list-disc space-y-2">
                       {selectedProject.salesPitch.benefits.map(
                         (benefit, index) => (
                           <li key={index} className="text-muted-foreground">
                             {benefit}
                           </li>
-                        )
+                        ),
                       )}
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
                       Use Case
                     </h3>
                     <p className="text-muted-foreground">
@@ -374,30 +374,30 @@ export default function Home() {
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
                       Implementation
                     </h3>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-inside list-disc space-y-2">
                       {selectedProject.salesPitch.implementation.map(
                         (step, index) => (
                           <li key={index} className="text-muted-foreground">
                             {step}
                           </li>
-                        )
+                        ),
                       )}
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
                       ROI & Metrics
                     </h3>
-                    <ul className="list-disc list-inside space-y-2">
+                    <ul className="list-inside list-disc space-y-2">
                       {selectedProject.salesPitch.roi.metrics.map(
                         (metric, index) => (
                           <li key={index} className="text-muted-foreground">
                             {metric}
                           </li>
-                        )
+                        ),
                       )}
                     </ul>
                   </div>
@@ -409,7 +409,7 @@ export default function Home() {
 
         {/* No Results Message */}
         {filteredProjects.length === 0 && (
-          <div className="text-center mt-12">
+          <div className="mt-12 text-center">
             <p className="text-xl text-muted-foreground">
               No projects found matching your search.
             </p>
