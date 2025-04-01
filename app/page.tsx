@@ -33,6 +33,8 @@ type Project = {
   title: string;
   description: string;
   industry: string[];
+  serialNo: string;
+  category: string;
   links: {
     name: string;
     url: string;
@@ -106,7 +108,6 @@ export default function Home() {
   const fetchProjectDetails = async (projectId: string) => {
     setLoadingDetails(true);
     try {
-      // Instead of making an API call, we use the static JSON data
       const details = projectDetails[projectId as keyof typeof projectDetails];
       if (details) {
         setSelectedProject(details);
@@ -148,6 +149,22 @@ export default function Home() {
 
     return matchesSearch && matchesIndustry;
   });
+
+  // Group projects by category
+  const groupedProjects = filteredProjects.reduce(
+    (acc, project) => {
+      const category = project.category || "Uncategorized";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(project);
+      return acc;
+    },
+    {} as Record<string, Project[]>,
+  );
+
+  // Sort categories alphabetically
+  const sortedCategories = Object.keys(groupedProjects).sort();
 
   if (loading) {
     return (
@@ -266,64 +283,76 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Project Cards Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredProjects.map((project, projectIndex) => (
-            <Card
-              key={projectIndex}
-              className="cursor-pointer border-2 border-blue-500/20 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
-              onClick={() => fetchProjectDetails(project.title)}
-            >
-              <CardHeader>
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {project.industry.map((ind) => (
-                    <Badge
-                      key={ind}
-                      variant="secondary"
-                      className="border-blue-500/30 bg-blue-500/10 text-blue-400"
-                    >
-                      {ind}
-                    </Badge>
-                  ))}
-                </div>
-                <CardTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
-                  {project.title}
-                </CardTitle>
-                <CardDescription className="mt-2 text-lg">
-                  {project.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {project.links.map((link, linkIndex) => (
-                    <div key={linkIndex} className="group">
-                      <Link
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <span className="text-2xl">{link.icon}</span>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-base font-semibold text-blue-400">
-                              {link.name}
-                            </h3>
-                            <ExternalLink className="h-4 w-4 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
-                          </div>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            {link.description}
-                          </p>
-                        </div>
-                      </Link>
+        {/* Project Cards Grid - Grouped by Category */}
+        {sortedCategories.map((category) => (
+          <div key={category} className="mb-12">
+            <h2 className="mb-6 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
+              {category}
+            </h2>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {groupedProjects[category].map((project) => (
+                <Card
+                  key={project.serialNo}
+                  className="cursor-pointer border-2 border-blue-500/20 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
+                  onClick={() => fetchProjectDetails(project.title)}
+                >
+                  <CardHeader>
+                    <div className="mb-3 flex items-center justify-between">
+                      <div className="flex flex-wrap gap-2">
+                        {project.industry.map((ind) => (
+                          <Badge
+                            key={ind}
+                            variant="secondary"
+                            className="border-blue-500/30 bg-blue-500/10 text-blue-400"
+                          >
+                            {ind}
+                          </Badge>
+                        ))}
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        #{project.serialNo}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    <CardTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
+                      {project.title}
+                    </CardTitle>
+                    <CardDescription className="mt-2 text-lg">
+                      {project.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {project.links.map((link, linkIndex) => (
+                        <div key={linkIndex} className="group">
+                          <Link
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span className="text-2xl">{link.icon}</span>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-base font-semibold text-blue-400">
+                                  {link.name}
+                                </h3>
+                                <ExternalLink className="h-4 w-4 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                              </div>
+                              <p className="mt-1 text-sm text-muted-foreground">
+                                {link.description}
+                              </p>
+                            </div>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ))}
 
         {/* Project Details Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -14,13 +14,15 @@ export async function GET() {
           username: API_KEY || "",
           password: "",
         },
-      }
+      },
     );
 
     // Transform the data to match our project structure
     const projects = response.data.data.map((row: any) => ({
       title: row.vars.title || "Untitled Project",
       description: row.vars.description || "No description available",
+      serialNo: row.vars.s_n || "000",
+      category: row.vars.category || "Uncategorized",
       industry: row.vars.industry
         ? row.vars.industry.split(",").map((ind: string) => ind.trim())
         : ["Uncategorized"],
@@ -63,18 +65,6 @@ export async function GET() {
               },
             ]
           : []),
-        // Only include Asana link if URL exists
-        // ...(row.vars.asana_url
-        //   ? [
-        //       {
-        //         name: "Asana Project",
-        //         url: row.vars.asana_url,
-        //         description:
-        //           row.vars.asana_description || "Project management and tasks",
-        //         icon: "📋",
-        //       },
-        //     ]
-        //   : []),
         // Only include Live link if URL exists
         ...(row.vars.live_url
           ? [
@@ -95,7 +85,7 @@ export async function GET() {
     console.error("Error fetching data from Telerivet:", error);
     return NextResponse.json(
       { error: "Failed to fetch projects" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
