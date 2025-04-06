@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Search, ExternalLink, Filter } from "lucide-react";
+import { Search, ExternalLink, Filter, Users, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -57,6 +57,8 @@ type ProjectDetails = {
   };
 };
 
+type ViewMode = "internal" | "customer";
+
 const mainIndustries = ["FMCG", "Health", "Technology", "Finance", "Retail"];
 
 const otherIndustries = [
@@ -87,6 +89,7 @@ export default function Home() {
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("customer");
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -128,6 +131,10 @@ export default function Home() {
         ? prev.filter((i) => i !== industry)
         : [...prev, industry],
     );
+  };
+
+  const toggleViewMode = () => {
+    setViewMode((prev) => (prev === "internal" ? "customer" : "internal"));
   };
 
   const filteredProjects = projects.filter((project) => {
@@ -186,9 +193,23 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-b from-background via-secondary/30 to-background pb-12">
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="my-10 text-center">
-          <h1 className="my-6 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-4xl font-bold text-transparent">
-            Telerivet Solutions Marketplace
-          </h1>
+          <div className="mb-6 flex items-center justify-center gap-4">
+            <h1 className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-4xl font-bold text-transparent">
+              Telerivet Solutions Marketplace
+            </h1>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10 rounded-full border-blue-500/30 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/10"
+              onClick={toggleViewMode}
+            >
+              {viewMode === "internal" ? (
+                <Users className="h-5 w-5 text-blue-400" />
+              ) : (
+                <User className="h-5 w-5 text-blue-400" />
+              )}
+            </Button>
+          </div>
           <p className="mx-auto px-4 text-lg leading-relaxed text-muted-foreground md:px-8 lg:px-16">
             The{" "}
             <strong className="font-semibold">
@@ -320,34 +341,36 @@ export default function Home() {
                       {project.description}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {project.links.map((link, linkIndex) => (
-                        <div key={linkIndex} className="group">
-                          <Link
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span className="text-2xl">{link.icon}</span>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-base font-semibold text-blue-400">
-                                  {link.name}
-                                </h3>
-                                <ExternalLink className="h-4 w-4 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                  {viewMode === "internal" && (
+                    <CardContent>
+                      <div className="space-y-4">
+                        {project.links.map((link, linkIndex) => (
+                          <div key={linkIndex} className="group">
+                            <Link
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span className="text-2xl">{link.icon}</span>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="text-base font-semibold text-blue-400">
+                                    {link.name}
+                                  </h3>
+                                  <ExternalLink className="h-4 w-4 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                                </div>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                  {link.description}
+                                </p>
                               </div>
-                              <p className="mt-1 text-sm text-muted-foreground">
-                                {link.description}
-                              </p>
-                            </div>
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
+                            </Link>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  )}
                 </Card>
               ))}
             </div>
