@@ -82,6 +82,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [projectsArticle, setProjectsArticle] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(
@@ -94,12 +95,20 @@ export default function Home() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get("/api/telerivet");
-        setProjects(response.data);
+        const [projectsRes, projectIdsRes] = await Promise.all([
+          axios.get("/api/telerivet"),
+          axios.get("/api/telerivet/id"),
+        ]);
+
+        console.log("Projects Response:", projectsRes.data);
+        console.log("Project IDs Response:", projectIdsRes.data);
+
+        setProjects(projectsRes.data); // or update this logic if you're combining both
+        setProjectsArticle(projectIdsRes.data); // or update this logic if you're combining both
         setError(null);
       } catch (err) {
         setError("Failed to load projects");
-        console.log("Error fetching projects:", err);
+        console.error("Error fetching project data:", err);
       } finally {
         setLoading(false);
       }
@@ -172,6 +181,17 @@ export default function Home() {
 
   // Sort categories alphabetically
   const sortedCategories = Object.keys(groupedProjects).sort();
+
+  const parseList = (str: string): string[] => {
+    try {
+      return str
+        .split(/",?\s*"?/)
+        .map((item) => item.replace(/^"|"$/g, "").trim())
+        .filter(Boolean);
+    } catch {
+      return [str]; // fallback if the format is not list-like
+    }
+  };
 
   if (loading) {
     return (
@@ -384,14 +404,14 @@ export default function Home() {
               <div className="flex items-center justify-center py-8">
                 <div className="text-xl text-blue-400">Loading details...</div>
               </div>
-            ) : selectedProject ? (
+            ) : projectsArticle ? (
               <>
                 <DialogHeader>
                   <DialogTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
-                    {selectedProject.title}
+                    {projectsArticle.title}
                   </DialogTitle>
                   <DialogDescription className="mt-2 text-lg">
-                    {selectedProject.description}
+                    {projectsArticle.description}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
@@ -400,7 +420,7 @@ export default function Home() {
                       Overview
                     </h3>
                     <p className="text-muted-foreground">
-                      {selectedProject.salesPitch.overview}
+                      {projectsArticle.overview}
                     </p>
                   </div>
                   <div>
@@ -408,13 +428,7 @@ export default function Home() {
                       Key Benefits
                     </h3>
                     <ul className="list-inside list-disc space-y-2">
-                      {selectedProject.salesPitch.benefits.map(
-                        (benefit, index) => (
-                          <li key={index} className="text-muted-foreground">
-                            {benefit}
-                          </li>
-                        ),
-                      )}
+                      {projectsArticle.benefits}
                     </ul>
                   </div>
                   <div>
@@ -422,7 +436,7 @@ export default function Home() {
                       Use Case
                     </h3>
                     <p className="text-muted-foreground">
-                      {selectedProject.salesPitch.useCase}
+                      {projectsArticle.useCase}
                     </p>
                   </div>
                   <div>
@@ -430,13 +444,7 @@ export default function Home() {
                       Implementation
                     </h3>
                     <ul className="list-inside list-disc space-y-2">
-                      {selectedProject.salesPitch.implementation.map(
-                        (step, index) => (
-                          <li key={index} className="text-muted-foreground">
-                            {step}
-                          </li>
-                        ),
-                      )}
+                      {projectsArticle.implementation}
                     </ul>
                   </div>
                   <div>
@@ -444,13 +452,7 @@ export default function Home() {
                       ROI & Metrics
                     </h3>
                     <ul className="list-inside list-disc space-y-2">
-                      {selectedProject.salesPitch.roi.metrics.map(
-                        (metric, index) => (
-                          <li key={index} className="text-muted-foreground">
-                            {metric}
-                          </li>
-                        ),
-                      )}
+                      {projectsArticle.roi_metrics}
                     </ul>
                   </div>
                 </div>
@@ -458,6 +460,57 @@ export default function Home() {
             ) : null}
           </DialogContent>
         </Dialog>
+
+        <div className="grid gap-6">
+          {projectsArticle.map((project, index) => (
+            <div
+              key={index}
+              className="rounded-2xl border bg-white p-6 shadow-md"
+            >
+              <h2 className="mb-2 text-2xl font-bold">{project.title}</h2>
+              <p className="mb-4 text-sm text-gray-600">
+                Serial No: {project.serialNo}
+              </p>
+
+              <p className="mb-4">
+                <strong>Description:</strong> {project.description}
+              </p>
+              <p className="mb-4">
+                <strong>Use Case:</strong> {project.usecase}
+              </p>
+              <p className="mb-4">
+                <strong>Overview:</strong> {project.overview}
+              </p>
+
+              <div className="mb-4">
+                <strong>Benefits:</strong>
+                <ul className="ml-4 mt-1 list-inside list-disc">
+                  {parseList(project.benefits).map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mb-4">
+                <strong>Implementation:</strong>
+                <ul className="ml-4 mt-1 list-inside list-disc">
+                  {parseList(project.implementation).map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <strong>ROI Metrics:</strong>
+                <ul className="ml-4 mt-1 list-inside list-disc">
+                  {parseList(project.roiMetrics).map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* No Results Message */}
         {filteredProjects.length === 0 && (
