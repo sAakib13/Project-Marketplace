@@ -46,15 +46,11 @@ type Project = {
 type ProjectDetails = {
   title: string;
   description: string;
-  salesPitch: {
-    overview: string;
-    benefits: string[];
-    useCase: string;
-    implementation: string[];
-    roi: {
-      metrics: string[];
-    };
-  };
+  overview: string;
+  benefits: string[];
+  usecase: string;
+  implementation: string[];
+  roiMetrics: string[];
 };
 
 type ViewMode = "internal" | "customer";
@@ -82,7 +78,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [projectsArticle, setProjectsArticle] = useState<Project[]>([]);
+  const [projectsArticle, setProjectsArticle] = useState<ProjectDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(
@@ -406,62 +402,66 @@ export default function Home() {
               </div>
             ) : projectsArticle ? (
               <>
-                <DialogHeader>
-                  <DialogTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
-                    {projectsArticle.title}
-                  </DialogTitle>
-                  <DialogDescription className="mt-2 text-lg">
-                    {projectsArticle.description}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-6 py-4">
-                  <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                      Overview
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {projectsArticle.overview}
-                    </p>
+                {projectsArticle.map((project, index) => (
+                  <div key={index}>
+                    <DialogHeader>
+                      <DialogTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
+                        {project.title}
+                      </DialogTitle>
+                      <DialogDescription className="mt-2 text-lg">
+                        {project.description}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6 py-4">
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                          Overview
+                        </h3>
+                        <p className="">
+                          {project.overview}
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                          Key Benefits
+                        </h3>
+                        <ul className="list-inside list-disc space-y-2">
+                          {project.benefits}
+                        </ul>
+                      </div>
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                          Use Case
+                        </h3>
+                        <p className="">
+                          {project.usecase}
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                          Implementation
+                        </h3>
+                        <ul className="list-inside list-disc space-y-2">
+                          {project.implementation}
+                        </ul>
+                      </div>
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                          ROI & Metrics
+                        </h3>
+                        <p className="list-inside list-disc space-y-2">
+                          {project.roiMetrics}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                      Key Benefits
-                    </h3>
-                    <ul className="list-inside list-disc space-y-2">
-                      {projectsArticle.benefits}
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                      Use Case
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {projectsArticle.useCase}
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                      Implementation
-                    </h3>
-                    <ul className="list-inside list-disc space-y-2">
-                      {projectsArticle.implementation}
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                      ROI & Metrics
-                    </h3>
-                    <ul className="list-inside list-disc space-y-2">
-                      {projectsArticle.roi_metrics}
-                    </ul>
-                  </div>
-                </div>
+                ))}
               </>
             ) : null}
           </DialogContent>
         </Dialog>
 
-        <div className="grid gap-6">
+        {/* <div className="grid gap-6">
           {projectsArticle.map((project, index) => (
             <div
               key={index}
@@ -510,7 +510,7 @@ export default function Home() {
               </div>
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* No Results Message */}
         {filteredProjects.length === 0 && (
