@@ -27,7 +27,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
-import projectDetails from "./api/projects.json";
 
 type Project = {
   title: string;
@@ -46,10 +45,11 @@ type Project = {
 type ProjectDetails = {
   title: string;
   description: string;
-  overview: string;
-  benefits: string[];
+  serialNo: string;
   usecase: string;
+  benefits: string[];
   implementation: string[];
+  overview: string;
   roiMetrics: string[];
 };
 
@@ -78,7 +78,6 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [projectsArticle, setProjectsArticle] = useState<ProjectDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(
@@ -91,20 +90,12 @@ export default function Home() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const [projectsRes, projectIdsRes] = await Promise.all([
-          axios.get("/api/telerivet"),
-          axios.get("/api/telerivet/id"),
-        ]);
-
-        console.log("Projects Response:", projectsRes.data);
-        console.log("Project IDs Response:", projectIdsRes.data);
-
-        setProjects(projectsRes.data); // or update this logic if you're combining both
-        setProjectsArticle(projectIdsRes.data); // or update this logic if you're combining both
+        const response = await axios.get("/api/telerivet");
+        setProjects(response.data);
         setError(null);
       } catch (err) {
         setError("Failed to load projects");
-        console.error("Error fetching project data:", err);
+        console.error("Error fetching projects:", err);
       } finally {
         setLoading(false);
       }
@@ -113,23 +104,23 @@ export default function Home() {
     fetchProjects();
   }, []);
 
-  const fetchProjectDetails = async (projectId: string) => {
+  //Need a serial number here and pass that to route
+  const fetchProjectDetails = async (serialNo: string) => {
     setLoadingDetails(true);
     try {
-      const details = projectDetails[projectId as keyof typeof projectDetails];
-      if (details) {
-        setSelectedProject(details);
-        setIsDialogOpen(true);
-      } else {
-        throw new Error("Project not found");
-      }
+      const response = await axios.get(`/api/telerivet/id`);
+      console.log(response);
+      setSelectedProject(response.data[0]);
+      setIsDialogOpen(true);
     } catch (err) {
       console.error("Error fetching project details:", err);
+      setError("Failed to load project details");
     } finally {
       setLoadingDetails(false);
     }
   };
 
+  console.log(selectedProject);
   const toggleIndustry = (industry: string) => {
     setSelectedIndustries((prev) =>
       prev.includes(industry)
@@ -177,17 +168,6 @@ export default function Home() {
 
   // Sort categories alphabetically
   const sortedCategories = Object.keys(groupedProjects).sort();
-
-  const parseList = (str: string): string[] => {
-    try {
-      return str
-        .split(/",?\s*"?/)
-        .map((item) => item.replace(/^"|"$/g, "").trim())
-        .filter(Boolean);
-    } catch {
-      return [str]; // fallback if the format is not list-like
-    }
-  };
 
   if (loading) {
     return (
@@ -331,7 +311,7 @@ export default function Home() {
                 <Card
                   key={project.serialNo}
                   className="cursor-pointer border-2 border-blue-500/20 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
-                  onClick={() => fetchProjectDetails(project.title)}
+                  onClick={() => fetchProjectDetails(project.serialNo)}
                 >
                   <CardHeader>
                     <div className="mb-3 flex items-center justify-between">
@@ -400,117 +380,62 @@ export default function Home() {
               <div className="flex items-center justify-center py-8">
                 <div className="text-xl text-blue-400">Loading details...</div>
               </div>
-            ) : projectsArticle ? (
+            ) : selectedProject ? (
               <>
-                {projectsArticle.map((project, index) => (
-                  <div key={index}>
-                    <DialogHeader>
-                      <DialogTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
-                        {project.title}
-                      </DialogTitle>
-                      <DialogDescription className="mt-2 text-lg">
-                        {project.description}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                          Overview
-                        </h3>
-                        <p className="">
-                          {project.overview}
-                        </p>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                          Key Benefits
-                        </h3>
-                        <ul className="list-inside list-disc space-y-2">
-                          {project.benefits}
-                        </ul>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                          Use Case
-                        </h3>
-                        <p className="">
-                          {project.usecase}
-                        </p>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                          Implementation
-                        </h3>
-                        <ul className="list-inside list-disc space-y-2">
-                          {project.implementation}
-                        </ul>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-400">
-                          ROI & Metrics
-                        </h3>
-                        <p className="list-inside list-disc space-y-2">
-                          {project.roiMetrics}
-                        </p>
-                      </div>
-                    </div>
+                <DialogHeader>
+                  <DialogTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
+                    {selectedProject.title}
+                  </DialogTitle>
+                  <DialogDescription className="mt-2 text-lg">
+                    {selectedProject.description}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
+                  <div>
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                      Overview
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {selectedProject.overview}
+                    </p>
                   </div>
-                ))}
+                  <div>
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                      Key Benefits
+                    </h3>
+                    <ul className="list-inside list-disc space-y-2">
+                      {selectedProject.benefits}
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                      Use Case
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {selectedProject.usecase}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                      Implementation
+                    </h3>
+                    <ul className="list-inside list-disc space-y-2">
+                      {selectedProject.implementation}
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                      ROI & Metrics
+                    </h3>
+                    <ul className="list-inside list-disc space-y-2">
+                      {selectedProject.roiMetrics}
+                    </ul>
+                  </div>
+                </div>
               </>
             ) : null}
           </DialogContent>
         </Dialog>
-
-        {/* <div className="grid gap-6">
-          {projectsArticle.map((project, index) => (
-            <div
-              key={index}
-              className="rounded-2xl border bg-white p-6 shadow-md"
-            >
-              <h2 className="mb-2 text-2xl font-bold">{project.title}</h2>
-              <p className="mb-4 text-sm text-gray-600">
-                Serial No: {project.serialNo}
-              </p>
-
-              <p className="mb-4">
-                <strong>Description:</strong> {project.description}
-              </p>
-              <p className="mb-4">
-                <strong>Use Case:</strong> {project.usecase}
-              </p>
-              <p className="mb-4">
-                <strong>Overview:</strong> {project.overview}
-              </p>
-
-              <div className="mb-4">
-                <strong>Benefits:</strong>
-                <ul className="ml-4 mt-1 list-inside list-disc">
-                  {parseList(project.benefits).map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mb-4">
-                <strong>Implementation:</strong>
-                <ul className="ml-4 mt-1 list-inside list-disc">
-                  {parseList(project.implementation).map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <strong>ROI Metrics:</strong>
-                <ul className="ml-4 mt-1 list-inside list-disc">
-                  {parseList(project.roiMetrics).map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
-        </div> */}
 
         {/* No Results Message */}
         {filteredProjects.length === 0 && (
