@@ -1,14 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
-
+export const dynamic = "force-dynamic";
 const API_KEY = process.env.TELERIVET_API_KEY;
 const PROJECT_ID = process.env.TELERIVET_PROJECT_ID;
 const TABLE_ID = process.env.TELERIVET_TABLE_ID_ARTICLE;
 
-export async function GET() {
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const { serialNo } = body;
+
+  if (!serialNo) {
+    return NextResponse.json(
+      { error: "Serial number is required" },
+      { status: 400 },
+    );
+  }
+
   try {
     const response = await axios.get(
-      `https://api.telerivet.com/v1/projects/${PROJECT_ID}/tables/${TABLE_ID}/rows?vars[s_n]=5`,
+      `https://api.telerivet.com/v1/projects/${PROJECT_ID}/tables/${TABLE_ID}/rows?vars[s_n]=${serialNo}`,
       {
         auth: {
           username: API_KEY || "",
@@ -27,14 +37,6 @@ export async function GET() {
       overview: row.vars.overview || "No overview available",
       roiMetrics: row.vars.roi_metrics?.split(",") || [],
     }));
-
-    console.log(projectsArticle);
-    //  Find the specific project by serial number
-    // const project = projects.find((p) => p.serialNo === params.id);
-
-    // if (!project) {
-    //   return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    // }
 
     return NextResponse.json(projectsArticle);
   } catch (error) {

@@ -108,7 +108,7 @@ export default function Home() {
   const fetchProjectDetails = async (serialNo: string) => {
     setLoadingDetails(true);
     try {
-      const response = await axios.get(`/api/telerivet/id`);
+      const response = await axios.post("/api/telerivet/id", { serialNo });
       console.log(response);
       setSelectedProject(response.data[0]);
       setIsDialogOpen(true);
@@ -395,7 +395,7 @@ export default function Home() {
                     <h3 className="mb-2 text-lg font-semibold text-blue-400">
                       Overview
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="">
                       {selectedProject.overview}
                     </p>
                   </div>
@@ -411,7 +411,7 @@ export default function Home() {
                     <h3 className="mb-2 text-lg font-semibold text-blue-400">
                       Use Case
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="">
                       {selectedProject.usecase}
                     </p>
                   </div>
