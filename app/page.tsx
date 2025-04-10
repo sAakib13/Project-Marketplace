@@ -104,12 +104,10 @@ export default function Home() {
     fetchProjects();
   }, []);
 
-  //Need a serial number here and pass that to route
   const fetchProjectDetails = async (serialNo: string) => {
     setLoadingDetails(true);
     try {
       const response = await axios.post("/api/telerivet/id", { serialNo });
-      console.log(response);
       setSelectedProject(response.data[0]);
       setIsDialogOpen(true);
     } catch (err) {
@@ -120,7 +118,6 @@ export default function Home() {
     }
   };
 
-  console.log(selectedProject);
   const toggleIndustry = (industry: string) => {
     setSelectedIndustries((prev) =>
       prev.includes(industry)
@@ -153,7 +150,6 @@ export default function Home() {
     return matchesSearch && matchesIndustry;
   });
 
-  // Group projects by category
   const groupedProjects = filteredProjects.reduce(
     (acc, project) => {
       const category = project.category || "Uncategorized";
@@ -166,31 +162,30 @@ export default function Home() {
     {} as Record<string, Project[]>,
   );
 
-  // Sort categories alphabetically
   const sortedCategories = Object.keys(groupedProjects).sort();
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background via-secondary/30 to-background">
-        <div className="text-2xl text-blue-400">Loading projects...</div>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-2xl text-blue-600">Loading projects...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background via-secondary/30 to-background">
-        <div className="text-2xl text-red-400">{error}</div>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-2xl text-red-600">{error}</div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-secondary/30 to-background pb-12">
+    <main className="min-h-screen bg-white pb-12">
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="my-10 text-center">
           <div className="mb-6 flex items-center justify-center gap-4">
-            <h1 className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-4xl font-bold text-transparent">
+            <h1 className="text-4xl font-bold text-blue-600">
               Telerivet Solutions Marketplace
             </h1>
             <Button
@@ -200,26 +195,26 @@ export default function Home() {
               onClick={toggleViewMode}
             >
               {viewMode === "internal" ? (
-                <Users className="h-5 w-5 text-blue-400" />
+                <Users className="h-5 w-5 text-blue-600" />
               ) : (
-                <User className="h-5 w-5 text-blue-400" />
+                <User className="h-5 w-5 text-blue-600" />
               )}
             </Button>
           </div>
-          <p className="mx-auto px-4 text-lg leading-relaxed text-muted-foreground md:px-8 lg:px-16">
+          <p className="mx-auto px-4 text-lg leading-relaxed text-gray-600 md:px-8 lg:px-16">
             The{" "}
-            <strong className="font-semibold">
+            <strong className="font-semibold text-blue-600">
               Telerivet Solutions Marketplace
             </strong>{" "}
             is a comprehensive platform designed to empower organizations with
             cutting-edge communication tools and solutions.
           </p>
-          <p className="mx-auto mt-4 px-4 text-lg leading-relaxed text-muted-foreground md:px-8 lg:px-16">
+          <p className="mx-auto mt-4 px-4 text-lg leading-relaxed text-gray-600 md:px-8 lg:px-16">
             This marketplace enables users to streamline customer engagement,
             automate interactions, and scale operations efficiently. Telerivet
             supports versatile use cases ranging from retail to logistics.
           </p>
-          <p className="mx-auto mt-4 px-4 text-lg leading-relaxed text-muted-foreground md:px-8 lg:px-16">
+          <p className="mx-auto mt-4 px-4 text-lg leading-relaxed text-gray-600 md:px-8 lg:px-16">
             Whether you're looking to enhance customer support, launch targeted
             marketing campaigns, or implement innovative mobile solutions, the
             Telerivet Solutions Marketplace offers endless possibilities to
@@ -227,22 +222,20 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Search Section */}
         <div className="mx-auto mb-8 max-w-2xl">
           <div className="relative mb-4">
             <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-              <Search className="h-5 w-5 text-blue-400" />
+              <Search className="h-5 w-5 text-blue-600" />
             </div>
             <Input
               type="search"
               placeholder="Search services or descriptions..."
-              className="h-12 border-blue-500/20 bg-background/50 pl-10 text-lg backdrop-blur-sm focus-visible:ring-blue-500/50"
+              className="h-12 border-blue-500/20 bg-white pl-10 text-lg focus-visible:ring-blue-500/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          {/* Industry Filter */}
           <div className="flex flex-wrap items-center justify-center gap-2">
             {mainIndustries.map((industry) => (
               <Badge
@@ -252,8 +245,8 @@ export default function Home() {
                 }
                 className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
                   selectedIndustries.includes(industry)
-                    ? "bg-blue-500 shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-600"
-                    : "border-blue-500/30 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
+                    : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
                 }`}
                 onClick={() => toggleIndustry(industry)}
               >
@@ -265,16 +258,18 @@ export default function Home() {
               <PopoverTrigger>
                 <Button
                   variant="outline"
-                  className="flex h-auto items-center gap-2 rounded-3xl border-blue-500/30 px-6 py-2.5 text-sm transition-all duration-200 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
+                  className="flex h-auto items-center gap-2 rounded-3xl border-blue-500/30 px-6 py-2.5 text-sm text-blue-600 transition-all duration-200 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
                 >
                   <Filter className="h-4 w-4" />
                   More Industries
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-64 p-4">
-                <div className="space-y-4 rounded-3xl">
-                  <h4 className="text-sm font-medium">Select Industries</h4>
-                  <div className="space-y-2 rounded-full">
+              <PopoverContent className="w-64 border-blue-500/20 bg-white p-4">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-gray-900">
+                    Select Industries
+                  </h4>
+                  <div className="space-y-2">
                     {otherIndustries.map((industry) => (
                       <div
                         key={industry}
@@ -284,10 +279,11 @@ export default function Home() {
                           id={industry}
                           checked={selectedIndustries.includes(industry)}
                           onCheckedChange={() => toggleIndustry(industry)}
+                          className="border-blue-500/30 text-blue-600"
                         />
                         <label
                           htmlFor={industry}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          className="text-sm font-medium text-gray-700"
                         >
                           {industry}
                         </label>
@@ -300,17 +296,16 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Project Cards Grid - Grouped by Category */}
         {sortedCategories.map((category) => (
           <div key={category} className="mb-12">
-            <h2 className="mb-6 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
+            <h2 className="mb-6 text-2xl font-bold text-blue-600">
               {category}
             </h2>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {groupedProjects[category].map((project) => (
                 <Card
                   key={project.serialNo}
-                  className="cursor-pointer border-2 border-blue-500/20 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
+                  className="cursor-pointer border-2 border-blue-500/20 bg-white transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
                   onClick={() => fetchProjectDetails(project.serialNo)}
                 >
                   <CardHeader>
@@ -320,20 +315,20 @@ export default function Home() {
                           <Badge
                             key={ind}
                             variant="secondary"
-                            className="border-blue-500/30 bg-blue-500/10 text-blue-400"
+                            className="border-blue-500/30 bg-blue-500/10 text-blue-600"
                           >
                             {ind}
                           </Badge>
                         ))}
                       </div>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-gray-500">
                         #{project.serialNo}
                       </span>
                     </div>
-                    <CardTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
+                    <CardTitle className="text-2xl font-bold text-blue-600">
                       {project.title}
                     </CardTitle>
-                    <CardDescription className="mt-2 text-lg">
+                    <CardDescription className="mt-2 text-lg text-gray-600">
                       {project.description}
                     </CardDescription>
                   </CardHeader>
@@ -352,12 +347,12 @@ export default function Home() {
                               <span className="text-2xl">{link.icon}</span>
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
-                                  <h3 className="text-base font-semibold text-blue-400">
+                                  <h3 className="text-base font-semibold text-blue-600">
                                     {link.name}
                                   </h3>
-                                  <ExternalLink className="h-4 w-4 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                                  <ExternalLink className="h-4 w-4 text-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
                                 </div>
-                                <p className="mt-1 text-sm text-muted-foreground">
+                                <p className="mt-1 text-sm text-gray-600">
                                   {link.description}
                                 </p>
                               </div>
@@ -373,62 +368,69 @@ export default function Home() {
           </div>
         ))}
 
-        {/* Project Details Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl border-blue-500/20 bg-white">
             {loadingDetails ? (
               <div className="flex items-center justify-center py-8">
-                <div className="text-xl text-blue-400">Loading details...</div>
+                <div className="text-xl text-blue-600">Loading details...</div>
               </div>
             ) : selectedProject ? (
               <>
                 <DialogHeader>
-                  <DialogTitle className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
+                  <DialogTitle className="text-2xl font-bold text-blue-600">
                     {selectedProject.title}
                   </DialogTitle>
-                  <DialogDescription className="mt-2 text-lg">
+                  <DialogDescription className="mt-2 text-lg text-gray-600">
                     {selectedProject.description}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                   <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-600">
                       Overview
                     </h3>
-                    <p className="">
-                      {selectedProject.overview}
-                    </p>
+                    <p className="text-gray-700">{selectedProject.overview}</p>
                   </div>
                   <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-600">
                       Key Benefits
                     </h3>
                     <ul className="list-inside list-disc space-y-2">
-                      {selectedProject.benefits}
+                      {selectedProject.benefits.map((benefit, index) => (
+                        <li key={index} className="text-gray-700">
+                          {benefit}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                   <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-600">
                       Use Case
                     </h3>
-                    <p className="">
-                      {selectedProject.usecase}
-                    </p>
+                    <p className="text-gray-700">{selectedProject.usecase}</p>
                   </div>
                   <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-600">
                       Implementation
                     </h3>
                     <ul className="list-inside list-disc space-y-2">
-                      {selectedProject.implementation}
+                      {selectedProject.implementation.map((step, index) => (
+                        <li key={index} className="text-gray-700">
+                          {step}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                   <div>
-                    <h3 className="mb-2 text-lg font-semibold text-blue-400">
+                    <h3 className="mb-2 text-lg font-semibold text-blue-600">
                       ROI & Metrics
                     </h3>
                     <ul className="list-inside list-disc space-y-2">
-                      {selectedProject.roiMetrics}
+                      {selectedProject.roiMetrics.map((metric, index) => (
+                        <li key={index} className="text-gray-700">
+                          {metric}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>
@@ -437,10 +439,9 @@ export default function Home() {
           </DialogContent>
         </Dialog>
 
-        {/* No Results Message */}
         {filteredProjects.length === 0 && (
           <div className="mt-12 text-center">
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-gray-600">
               No projects found matching your search.
             </p>
           </div>
