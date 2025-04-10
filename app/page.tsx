@@ -27,7 +27,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
-import projectDetails from "./api/projects.json";
 
 type Project = {
   title: string;
@@ -46,15 +45,12 @@ type Project = {
 type ProjectDetails = {
   title: string;
   description: string;
-  salesPitch: {
-    overview: string;
-    benefits: string[];
-    useCase: string;
-    implementation: string[];
-    roi: {
-      metrics: string[];
-    };
-  };
+  serialNo: string;
+  usecase: string;
+  benefits: string[];
+  implementation: string[];
+  overview: string;
+  roiMetrics: string[];
 };
 
 type ViewMode = "internal" | "customer";
@@ -99,7 +95,7 @@ export default function Home() {
         setError(null);
       } catch (err) {
         setError("Failed to load projects");
-        console.log("Error fetching projects:", err);
+        console.error("Error fetching projects:", err);
       } finally {
         setLoading(false);
       }
@@ -108,23 +104,23 @@ export default function Home() {
     fetchProjects();
   }, []);
 
-  const fetchProjectDetails = async (projectId: string) => {
+  //Need a serial number here and pass that to route
+  const fetchProjectDetails = async (serialNo: string) => {
     setLoadingDetails(true);
     try {
-      const details = projectDetails[projectId as keyof typeof projectDetails];
-      if (details) {
-        setSelectedProject(details);
-        setIsDialogOpen(true);
-      } else {
-        throw new Error("Project not found");
-      }
+      const response = await axios.post("/api/telerivet/id", { serialNo });
+      console.log(response);
+      setSelectedProject(response.data[0]);
+      setIsDialogOpen(true);
     } catch (err) {
       console.error("Error fetching project details:", err);
+      setError("Failed to load project details");
     } finally {
       setLoadingDetails(false);
     }
   };
 
+  console.log(selectedProject);
   const toggleIndustry = (industry: string) => {
     setSelectedIndustries((prev) =>
       prev.includes(industry)
@@ -315,7 +311,7 @@ export default function Home() {
                 <Card
                   key={project.serialNo}
                   className="cursor-pointer border-2 border-blue-500/20 bg-card/50 backdrop-blur-sm transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
-                  onClick={() => fetchProjectDetails(project.title)}
+                  onClick={() => fetchProjectDetails(project.serialNo)}
                 >
                   <CardHeader>
                     <div className="mb-3 flex items-center justify-between">
@@ -399,8 +395,8 @@ export default function Home() {
                     <h3 className="mb-2 text-lg font-semibold text-blue-400">
                       Overview
                     </h3>
-                    <p className="text-muted-foreground">
-                      {selectedProject.salesPitch.overview}
+                    <p className="">
+                      {selectedProject.overview}
                     </p>
                   </div>
                   <div>
@@ -408,21 +404,15 @@ export default function Home() {
                       Key Benefits
                     </h3>
                     <ul className="list-inside list-disc space-y-2">
-                      {selectedProject.salesPitch.benefits.map(
-                        (benefit, index) => (
-                          <li key={index} className="text-muted-foreground">
-                            {benefit}
-                          </li>
-                        ),
-                      )}
+                      {selectedProject.benefits}
                     </ul>
                   </div>
                   <div>
                     <h3 className="mb-2 text-lg font-semibold text-blue-400">
                       Use Case
                     </h3>
-                    <p className="text-muted-foreground">
-                      {selectedProject.salesPitch.useCase}
+                    <p className="">
+                      {selectedProject.usecase}
                     </p>
                   </div>
                   <div>
@@ -430,13 +420,7 @@ export default function Home() {
                       Implementation
                     </h3>
                     <ul className="list-inside list-disc space-y-2">
-                      {selectedProject.salesPitch.implementation.map(
-                        (step, index) => (
-                          <li key={index} className="text-muted-foreground">
-                            {step}
-                          </li>
-                        ),
-                      )}
+                      {selectedProject.implementation}
                     </ul>
                   </div>
                   <div>
@@ -444,13 +428,7 @@ export default function Home() {
                       ROI & Metrics
                     </h3>
                     <ul className="list-inside list-disc space-y-2">
-                      {selectedProject.salesPitch.roi.metrics.map(
-                        (metric, index) => (
-                          <li key={index} className="text-muted-foreground">
-                            {metric}
-                          </li>
-                        ),
-                      )}
+                      {selectedProject.roiMetrics}
                     </ul>
                   </div>
                 </div>

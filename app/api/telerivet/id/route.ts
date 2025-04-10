@@ -1,49 +1,49 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
+export const dynamic = "force-dynamic";
+const API_KEY = process.env.TELERIVET_API_KEY;
+const PROJECT_ID = process.env.TELERIVET_PROJECT_ID;
+const TABLE_ID = process.env.TELERIVET_TABLE_ID_ARTICLE;
 
-// Mock detailed data - replace with actual API call
-const getProjectDetails = (id: string) => ({
-  title: "Loyalty Project",
-  description: "Comprehensive SMS platform for enterprise communication",
-  salesPitch: {
-    overview:
-      "Our Enterprise SMS Solution revolutionizes how businesses communicate with their customers, offering unparalleled scalability and reliability.",
-    benefits: [
-      "Reach millions of customers instantly",
-      "99.9% delivery rate guarantee",
-      "Real-time analytics and reporting",
-      "Advanced segmentation capabilities",
-      "Automated workflow integration",
-    ],
-    useCase:
-      "Perfect for large-scale customer engagement, appointment reminders, and promotional campaigns. Our solution has helped companies achieve up to 40% increase in customer engagement.",
-    implementation: [
-      "Quick 48-hour setup process",
-      "Dedicated support team",
-      "Custom integration options",
-      "Comprehensive training included",
-    ],
-    roi: {
-      metrics: [
-        "25% reduction in customer service costs",
-        "35% increase in customer satisfaction",
-        "50% faster response times",
-        "ROI realized within 3 months",
-      ],
-    },
-  },
-});
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const { serialNo } = body;
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  if (!serialNo) {
+    return NextResponse.json(
+      { error: "Serial number is required" },
+      { status: 400 },
+    );
+  }
+
   try {
-    const details = getProjectDetails(params.id);
-    return NextResponse.json(details);
+    const response = await axios.get(
+      `https://api.telerivet.com/v1/projects/${PROJECT_ID}/tables/${TABLE_ID}/rows?vars[s_n]=${serialNo}`,
+      {
+        auth: {
+          username: API_KEY || "",
+          password: "",
+        },
+      },
+    );
+
+    const projectsArticle = response.data.data.map((row: any) => ({
+      title: row.vars.title || "Untitled Project",
+      description: row.vars.description || "No description available",
+      serialNo: row.vars.s_n || "000",
+      usecase: row.vars.usecase || "No use case provided",
+      benefits: row.vars.benefits?.split(",") || [],
+      implementation: row.vars.implementation?.split(",") || [],
+      overview: row.vars.overview || "No overview available",
+      roiMetrics: row.vars.roi_metrics?.split(",") || [],
+    }));
+
+    return NextResponse.json(projectsArticle);
   } catch (error) {
+    console.error("Error fetching data from Telerivet:", error);
     return NextResponse.json(
       { error: "Failed to fetch project details" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
