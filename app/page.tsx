@@ -77,6 +77,7 @@ const otherIndustries = [
   "Government Services",
 ];
 
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
