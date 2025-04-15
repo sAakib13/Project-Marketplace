@@ -27,7 +27,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
-import Logo from "./TR-white-logo.png"
+import Logo from "./TR-white-logo.png";
+import Hero from "./Hero.png";
 import Image from "next/image";
 
 type Project = {
@@ -195,7 +196,7 @@ export default function Home() {
               href="https://telerivet.com/solutions"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-white transition-colors hover:text-blue-600"
+              className="font-medium text-white transition-colors hover:text-blue-600"
             >
               Solutions
             </Link>
@@ -203,7 +204,7 @@ export default function Home() {
               href="https://telerivet.com/signup"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-white transition-colors hover:text-blue-600"
+              className="font-medium text-white transition-colors hover:text-blue-600"
             >
               Sign Up
             </Link>
@@ -211,7 +212,7 @@ export default function Home() {
               href="https://telerivet.com/login"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25"
+              className="rounded-full bg-blue-600 px-4 py-2 font-medium text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25"
             >
               Login
             </Link>
@@ -220,276 +221,308 @@ export default function Home() {
       </header>
 
       <main className="min-h-screen bg-gradient-to-r from-blue-100 to-white pb-12">
-        <div className="mx-auto max-w-6xl px-4 py-12">
-          <div className="my-10 text-center">
-            <div className="mb-6 flex items-center justify-center gap-4">
-              <h1 className="text-4xl font-bold text-blue-600">
-                Telerivet Solutions Marketplace
-              </h1>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-10 w-10 rounded-full border-blue-500/30 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/10"
+        <div className="mx-auto max-w-6xl px-4 py-4">
+          <div className="relative my-16 overflow-hidden">
+            <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
+              {/* Text Content */}
+              <div className="text-center md:text-left">
+                <h1 className="mb-6 text-5xl font-bold text-gray-900">
+                  Telerivet Solutions Marketplace
+                </h1>
+                <p className="mb-4 text-lg leading-relaxed text-gray-700">
+                  The{" "}
+                  <strong className="font-semibold text-blue-600">
+                    Telerivet Solutions Marketplace
+                  </strong>{" "}
+                  is a comprehensive platform designed to empower organizations
+                  with cutting-edge communication tools and solutions.
+                </p>
+                <p className="mb-4 text-lg leading-relaxed text-gray-700">
+                  Streamline customer engagement, automate interactions, and
+                  scale your operations with versatile tools, from retail to
+                  logistics.
+                </p>
+                <p className="mb-8 text-lg leading-relaxed text-gray-700">
+                  Whether you're enhancing support, launching marketing
+                  campaigns, or deploying mobile solutions — unlock endless
+                  possibilities to drive global impact.
+                </p>
+
+                {/* Call to Action Buttons */}
+                <div className="flex justify-center gap-4 md:justify-start">
+                  <a href="#solutions">
+                  <button className="rounded-full bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-blue-700">
+                    Get Started
+                  </button>
+                  </a>
+                  {/* <button className="rounded-full border border-blue-600 px-6 py-3 font-semibold text-blue-600 transition hover:bg-blue-50">
+                    Contact Us
+                  </button> */}
+                </div>
+              </div>
+
+              {/* Image or Illustration */}
+              <div className="flex justify-center md:justify-end">
+                <Image
+                  src={Hero}
+                  alt="Telerivet Solutions Illustration"
+                  width={500}
+                  className="h-auto w-full"
+                />
+              </div>
+            </div>
+
+            {/* Optional Toggle Button */}
+            <div className="absolute right-4 top-4">
+              <button
                 onClick={toggleViewMode}
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-blue-500/30 bg-white shadow transition hover:border-blue-500 hover:bg-blue-500/10"
               >
                 {viewMode === "internal" ? (
-                  <Users className="h-5 w-5 text-blue-600" />
+                  <Users className="h-6 w-6 text-blue-600" />
                 ) : (
-                  <User className="h-5 w-5 text-blue-600" />
+                  <User className="h-6 w-6 text-blue-600" />
                 )}
-              </Button>
-            </div>
-            <p className="mx-auto px-4 text-lg leading-relaxed text-gray-600 md:px-8 lg:px-16">
-              The{" "}
-              <strong className="font-semibold text-blue-600">
-                Telerivet Solutions Marketplace
-              </strong>{" "}
-              is a comprehensive platform designed to empower organizations with
-              cutting-edge communication tools and solutions.
-            </p>
-            <p className="mx-auto mt-4 px-4 text-lg leading-relaxed text-gray-600 md:px-8 lg:px-16">
-              This marketplace enables users to streamline customer engagement,
-              automate interactions, and scale operations efficiently. Telerivet
-              supports versatile use cases ranging from retail to logistics.
-            </p>
-            <p className="mx-auto mt-4 px-4 text-lg leading-relaxed text-gray-600 md:px-8 lg:px-16">
-              Whether you're looking to enhance customer support, launch
-              targeted marketing campaigns, or implement innovative mobile
-              solutions, the Telerivet Solutions Marketplace offers endless
-              possibilities to drive meaningful results globally.
-            </p>
-          </div>
-
-          <div className="mx-auto mb-8 max-w-2xl">
-            <div className="relative mb-4">
-              <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-                <Search className="h-5 w-5 text-blue-600" />
-              </div>
-              <Input
-                type="search"
-                placeholder="Search services or descriptions..."
-                className="h-12 border-blue-500/20 bg-white pl-10 text-lg focus-visible:ring-blue-500/50"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {mainIndustries.map((industry) => (
-                <Badge
-                  key={industry}
-                  variant={
-                    selectedIndustries.includes(industry)
-                      ? "default"
-                      : "outline"
-                  }
-                  className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
-                    selectedIndustries.includes(industry)
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
-                      : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
-                  }`}
-                  onClick={() => toggleIndustry(industry)}
-                >
-                  {industry}
-                </Badge>
-              ))}
-
-              <Popover>
-                <PopoverTrigger>
-                  <Button
-                    variant="outline"
-                    className="flex h-auto items-center gap-2 rounded-3xl border-blue-500/30 px-6 py-2.5 text-sm text-blue-600 transition-all duration-200 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
-                  >
-                    <Filter className="h-4 w-4" />
-                    More Industries
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 border-blue-500/20 bg-white p-4">
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-medium text-gray-900">
-                      Select Industries
-                    </h4>
-                    <div className="space-y-2">
-                      {otherIndustries.map((industry) => (
-                        <div
-                          key={industry}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={industry}
-                            checked={selectedIndustries.includes(industry)}
-                            onCheckedChange={() => toggleIndustry(industry)}
-                            className="border-blue-500/30 text-blue-600"
-                          />
-                          <label
-                            htmlFor={industry}
-                            className="text-sm font-medium text-gray-700"
-                          >
-                            {industry}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
+              </button>
             </div>
           </div>
 
-          {sortedCategories.map((category) => (
-            <div key={category} className="mb-12 w-full">
-              <h2 className="mb-6 text-2xl font-bold text-blue-600">
-                {category}
-              </h2>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {groupedProjects[category].map((project) => (
-                  <Card
-                    key={project.serialNo}
-                    className="cursor-pointer border-2 border-blue-500/20 bg-white transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
-                    onClick={() => fetchProjectDetails(project.serialNo)}
-                  >
-                    <CardHeader>
-                      <div className="mb-3 flex items-center justify-between">
-                        <div className="flex flex-wrap gap-2">
-                          {project.industry.map((ind) => (
-                            <Badge
-                              key={ind}
-                              variant="secondary"
-                              className="border-blue-500/30 bg-blue-500/10 text-blue-600"
-                            >
-                              {ind}
-                            </Badge>
-                          ))}
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          #{project.serialNo}
-                        </span>
-                      </div>
-                      <CardTitle className="text-2xl font-bold text-blue-600">
-                        {project.title}
-                      </CardTitle>
-                      <CardDescription className="mt-2 text-lg text-gray-600">
-                        {project.description}
-                      </CardDescription>
-                    </CardHeader>
-                    {viewMode === "internal" && (
-                      <CardContent>
-                        <div className="space-y-4">
-                          {project.links.map((link, linkIndex) => (
-                            <div key={linkIndex} className="group">
-                              <Link
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span className="text-2xl">{link.icon}</span>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="text-base font-semibold text-blue-600">
-                                      {link.name}
-                                    </h3>
-                                    <ExternalLink className="h-4 w-4 text-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
-                                  </div>
-                                  <p className="mt-1 text-sm text-gray-600">
-                                    {link.description}
-                                  </p>
-                                </div>
-                              </Link>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    )}
-                  </Card>
-                ))}
-              </div>
+            <div className="pb-20" id="solutions">
+              <hr className="rounded-full border-t-2 border-black opacity-80" />
             </div>
-          ))}
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-3xl border-blue-500/20 bg-white">
-              {loadingDetails ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-xl text-blue-600">
-                    Loading details...
-                  </div>
+            <div className="mx-auto mb-8 max-w-2xl">
+              <div className="relative mb-4">
+                <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                  <Search className="h-5 w-5 text-blue-600" />
                 </div>
-              ) : selectedProject ? (
-                <>
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-blue-600">
-                      {selectedProject.title}
-                    </DialogTitle>
-                    <DialogDescription className="mt-2 text-lg text-gray-600">
-                      {selectedProject.description}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-6 py-4">
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        Overview
-                      </h3>
-                      <p className="text-gray-700">
-                        {selectedProject.overview}
-                      </p>
-                    </div>
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        Key Benefits
-                      </h3>
-                      <ul className="list-inside list-disc space-y-2">
-                        {selectedProject.benefits.map((benefit, index) => (
-                          <li key={index} className="text-gray-700">
-                            {benefit}
-                          </li>
+                <Input
+                  type="search"
+                  placeholder="Search services or descriptions..."
+                  className="h-12 border-blue-500/20 bg-white pl-10 text-lg focus-visible:ring-blue-500/50"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {mainIndustries.map((industry) => (
+                  <Badge
+                    key={industry}
+                    variant={
+                      selectedIndustries.includes(industry)
+                        ? "default"
+                        : "outline"
+                    }
+                    className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
+                      selectedIndustries.includes(industry)
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
+                        : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
+                    }`}
+                    onClick={() => toggleIndustry(industry)}
+                  >
+                    {industry}
+                  </Badge>
+                ))}
+
+                <Popover>
+                  <PopoverTrigger>
+                    <Button
+                      variant="outline"
+                      className="flex h-auto items-center gap-2 rounded-3xl border-blue-500/30 px-6 py-2.5 text-sm text-blue-600 transition-all duration-200 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
+                    >
+                      <Filter className="h-4 w-4" />
+                      More Industries
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 border-blue-500/20 bg-white p-4">
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-gray-900">
+                        Select Industries
+                      </h4>
+                      <div className="space-y-2">
+                        {otherIndustries.map((industry) => (
+                          <div
+                            key={industry}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={industry}
+                              checked={selectedIndustries.includes(industry)}
+                              onCheckedChange={() => toggleIndustry(industry)}
+                              className="border-blue-500/30 text-blue-600"
+                            />
+                            <label
+                              htmlFor={industry}
+                              className="text-sm font-medium text-gray-700"
+                            >
+                              {industry}
+                            </label>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        Use Case
-                      </h3>
-                      <p className="text-gray-700">{selectedProject.usecase}</p>
-                    </div>
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        Implementation
-                      </h3>
-                      <ul className="list-inside list-disc space-y-2">
-                        {selectedProject.implementation.map((step, index) => (
-                          <li key={index} className="text-gray-700">
-                            {step}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        ROI & Metrics
-                      </h3>
-                      <ul className="list-inside list-disc space-y-2">
-                        {selectedProject.roiMetrics.map((metric, index) => (
-                          <li key={index} className="text-gray-700">
-                            {metric}
-                          </li>
-                        ))}
-                      </ul>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            {sortedCategories.map((category) => (
+              <div key={category} className="mb-12 w-full">
+                <h2 className="mb-6 text-2xl font-bold text-black">
+                  {category}
+                </h2>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {groupedProjects[category].map((project) => (
+                    <Card
+                      key={project.serialNo}
+                      className="cursor-pointer border-2 border-blue-500/20 bg-white transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
+                      onClick={() => fetchProjectDetails(project.serialNo)}
+                    >
+                      <CardHeader>
+                        <div className="mb-3 flex items-center justify-between">
+                          <div className="flex flex-wrap gap-2">
+                            {project.industry.map((ind) => (
+                              <Badge
+                                key={ind}
+                                variant="secondary"
+                                className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                              >
+                                {ind}
+                              </Badge>
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            #{project.serialNo}
+                          </span>
+                        </div>
+                        <CardTitle className="text-2xl font-bold text-blue-600">
+                          {project.title}
+                        </CardTitle>
+                        <CardDescription className="mt-2 text-lg text-gray-600">
+                          {project.description}
+                        </CardDescription>
+                      </CardHeader>
+                      {viewMode === "internal" && (
+                        <CardContent>
+                          <div className="space-y-4">
+                            {project.links.map((link, linkIndex) => (
+                              <div key={linkIndex} className="group">
+                                <Link
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <span className="text-2xl">{link.icon}</span>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <h3 className="text-base font-semibold text-blue-600">
+                                        {link.name}
+                                      </h3>
+                                      <ExternalLink className="h-4 w-4 text-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
+                                    </div>
+                                    <p className="mt-1 text-sm text-gray-600">
+                                      {link.description}
+                                    </p>
+                                  </div>
+                                </Link>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      )}
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent className="max-w-3xl border-blue-500/20 bg-white">
+                {loadingDetails ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-xl text-blue-600">
+                      Loading details...
                     </div>
                   </div>
-                </>
-              ) : null}
-            </DialogContent>
-          </Dialog>
+                ) : selectedProject ? (
+                  <>
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-bold text-blue-600">
+                        {selectedProject.title}
+                      </DialogTitle>
+                      <DialogDescription className="mt-2 text-lg text-gray-600">
+                        {selectedProject.description}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6 py-4">
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                          Overview
+                        </h3>
+                        <p className="text-gray-700">
+                          {selectedProject.overview}
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                          Key Benefits
+                        </h3>
+                        <ul className="list-inside list-disc space-y-2">
+                          {selectedProject.benefits.map((benefit, index) => (
+                            <li key={index} className="text-gray-700">
+                              {benefit}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                          Use Case
+                        </h3>
+                        <p className="text-gray-700">
+                          {selectedProject.usecase}
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                          Implementation
+                        </h3>
+                        <ul className="list-inside list-disc space-y-2">
+                          {selectedProject.implementation.map((step, index) => (
+                            <li key={index} className="text-gray-700">
+                              {step}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                          ROI & Metrics
+                        </h3>
+                        <ul className="list-inside list-disc space-y-2">
+                          {selectedProject.roiMetrics.map((metric, index) => (
+                            <li key={index} className="text-gray-700">
+                              {metric}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </>
+                ) : null}
+              </DialogContent>
+            </Dialog>
 
-          {filteredProjects.length === 0 && (
-            <div className="mt-12 text-center">
-              <p className="text-xl text-gray-600">
-                No projects found matching your search.
-              </p>
-            </div>
-          )}
+            {filteredProjects.length === 0 && (
+              <div className="mt-12 text-center">
+                <p className="text-xl text-gray-600">
+                  No projects found matching your search.
+                </p>
+              </div>
+            )}
         </div>
       </main>
     </>
