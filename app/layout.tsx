@@ -1,15 +1,16 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import { Oxanium } from 'next/font/google';
+import "./globals.css";
+import type { Metadata } from "next";
+import { Oxanium } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 
-const oxanium = Oxanium({ 
-  subsets: ['latin'],
-  display: 'swap',
+const oxanium = Oxanium({
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: 'Project Marketplace',
-  description: 'Your centralized project management dashboard',
+  title: "Project Marketplace",
+  description: "Your centralized project management dashboard",
 };
 
 export default function RootLayout({
@@ -19,7 +20,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={oxanium.className}>{children}</body>
+      <body className={oxanium.className}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
