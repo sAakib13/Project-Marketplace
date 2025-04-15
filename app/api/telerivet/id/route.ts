@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
       implementation: row.vars.implementation?.split(",") || [],
       overview: row.vars.overview || "No overview available",
       roiMetrics: row.vars.roi_metrics?.split(",") || [],
+      image: row.vars.image || [],
     }));
 
     return NextResponse.json(projectsArticle);

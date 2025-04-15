@@ -30,6 +30,7 @@ import axios from "axios";
 import Logo from "./TR-white-logo.png";
 import Hero from "./Hero.png";
 import Image from "next/image";
+import { Url } from "next/dist/shared/lib/router/router";
 
 type Project = {
   title: string;
@@ -51,6 +52,7 @@ type ProjectDetails = {
   serialNo: string;
   usecase: string;
   benefits: string[];
+  image: string;
   implementation: string[];
   overview: string;
   roiMetrics: string[];
@@ -76,7 +78,6 @@ const otherIndustries = [
   "Environmental Services",
   "Government Services",
 ];
-
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -112,6 +113,7 @@ export default function Home() {
     setLoadingDetails(true);
     try {
       const response = await axios.post("/api/telerivet/id", { serialNo });
+      console.log(response.data[0]);
       setSelectedProject(response.data[0]);
       setIsDialogOpen(true);
     } catch (err) {
@@ -227,7 +229,7 @@ export default function Home() {
             <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
               {/* Text Content */}
               <div className="text-center md:text-left">
-                <h1 className="mb-6 text-5xl font-bold text-gray-900">
+                <h1 className="mb-6 bg-gradient-to-r from-gray-900 via-gray-500 to-black bg-clip-text text-5xl font-bold text-transparent">
                   Telerivet Solutions Marketplace
                 </h1>
                 <p className="mb-4 text-lg leading-relaxed text-gray-700">
@@ -397,7 +399,7 @@ export default function Home() {
                           #{project.serialNo}
                         </span>
                       </div>
-                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-900 via-blue-600 to-black bg-clip-text text-transparent">
+                      <CardTitle className="bg-gradient-to-r from-blue-900 via-blue-600 to-black bg-clip-text text-2xl font-bold text-transparent">
                         {project.title}
                       </CardTitle>
                       <CardDescription className="mt-2 text-lg text-gray-600">
@@ -441,7 +443,7 @@ export default function Home() {
           ))}
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-3xl border-blue-500/20 bg-white">
+            <DialogContent className="max-w-3xl overflow-auto border-blue-500/20 bg-white">
               {loadingDetails ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-xl text-blue-600">
@@ -450,64 +452,81 @@ export default function Home() {
                 </div>
               ) : selectedProject ? (
                 <>
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-blue-600">
-                      {selectedProject.title}
-                    </DialogTitle>
-                    <DialogDescription className="mt-2 text-lg text-gray-600">
-                      {selectedProject.description}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-6 py-4">
+                  <div className="flex items-center justify-between mx-20">
                     <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        Overview
-                      </h3>
-                      <p className="text-gray-700">
-                        {selectedProject.overview}
-                      </p>
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold text-blue-600">
+                          {selectedProject.title}
+                        </DialogTitle>
+                        <DialogDescription className="mt-2 text-lg text-gray-600">
+                          {selectedProject.description}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-6 py-4">
+                        <div>
+                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                            Overview
+                          </h3>
+                          <p className="text-gray-700">
+                            {selectedProject.overview}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                            Key Benefits
+                          </h3>
+                          <ul className="list-inside list-disc space-y-2">
+                            {selectedProject.benefits.map((benefit, index) => (
+                              <li key={index} className="text-gray-700">
+                                {benefit}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div>
+                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                            Use Case
+                          </h3>
+                          <p className="text-gray-700">
+                            {selectedProject.usecase}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                            Implementation
+                          </h3>
+                          <ul className="list-inside list-disc space-y-2">
+                            {selectedProject.implementation.map(
+                              (step, index) => (
+                                <li key={index} className="text-gray-700">
+                                  {step}
+                                </li>
+                              ),
+                            )}
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                            ROI & Metrics
+                          </h3>
+                          <ul className="list-inside list-disc space-y-2">
+                            {selectedProject.roiMetrics.map((metric, index) => (
+                              <li key={index} className="text-gray-700">
+                                {metric}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        Key Benefits
-                      </h3>
-                      <ul className="list-inside list-disc space-y-2">
-                        {selectedProject.benefits.map((benefit, index) => (
-                          <li key={index} className="text-gray-700">
-                            {benefit}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        Use Case
-                      </h3>
-                      <p className="text-gray-700">{selectedProject.usecase}</p>
-                    </div>
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        Implementation
-                      </h3>
-                      <ul className="list-inside list-disc space-y-2">
-                        {selectedProject.implementation.map((step, index) => (
-                          <li key={index} className="text-gray-700">
-                            {step}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                        ROI & Metrics
-                      </h3>
-                      <ul className="list-inside list-disc space-y-2">
-                        {selectedProject.roiMetrics.map((metric, index) => (
-                          <li key={index} className="text-gray-700">
-                            {metric}
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="mb-6">
+                      <Image
+                        src={selectedProject.image}
+                        alt=""
+                        width={200}
+                        height={200}
+                      />
                     </div>
                   </div>
                 </>
