@@ -251,9 +251,9 @@ export default function Home() {
                 {/* Call to Action Buttons */}
                 <div className="flex justify-center gap-4 md:justify-start">
                   <a href="#solutions">
-                  <button className="rounded-full bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-blue-700">
-                    Get Started
-                  </button>
+                    <button className="rounded-full bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-blue-700">
+                      Get Started
+                    </button>
                   </a>
                   {/* <button className="rounded-full border border-blue-600 px-6 py-3 font-semibold text-blue-600 transition hover:bg-blue-50">
                     Contact Us
@@ -287,242 +287,240 @@ export default function Home() {
             </div>
           </div>
 
-            <div className="pb-20" id="solutions">
-              <hr className="rounded-full border-t-2 border-black opacity-80" />
+          <div className="pb-20" id="solutions">
+            <hr className="rounded-full border-t-2 border-black opacity-80" />
+          </div>
+
+          <div className="mx-auto mb-8 max-w-2xl">
+            <div className="relative mb-4">
+              <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                <Search className="h-5 w-5 text-blue-600" />
+              </div>
+              <Input
+                type="search"
+                placeholder="Search services or descriptions..."
+                className="h-12 border-blue-500/20 bg-white pl-10 text-lg focus-visible:ring-blue-500/50"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
 
-            <div className="mx-auto mb-8 max-w-2xl">
-              <div className="relative mb-4">
-                <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-                  <Search className="h-5 w-5 text-blue-600" />
-                </div>
-                <Input
-                  type="search"
-                  placeholder="Search services or descriptions..."
-                  className="h-12 border-blue-500/20 bg-white pl-10 text-lg focus-visible:ring-blue-500/50"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {mainIndustries.map((industry) => (
+                <Badge
+                  key={industry}
+                  variant={
+                    selectedIndustries.includes(industry)
+                      ? "default"
+                      : "outline"
+                  }
+                  className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
+                    selectedIndustries.includes(industry)
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
+                      : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
+                  }`}
+                  onClick={() => toggleIndustry(industry)}
+                >
+                  {industry}
+                </Badge>
+              ))}
 
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {mainIndustries.map((industry) => (
-                  <Badge
-                    key={industry}
-                    variant={
-                      selectedIndustries.includes(industry)
-                        ? "default"
-                        : "outline"
-                    }
-                    className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
-                      selectedIndustries.includes(industry)
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
-                        : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
-                    }`}
-                    onClick={() => toggleIndustry(industry)}
+              <Popover>
+                <PopoverTrigger>
+                  <Button
+                    variant="outline"
+                    className="flex h-auto items-center gap-2 rounded-3xl border-blue-500/30 px-6 py-2.5 text-sm text-blue-600 transition-all duration-200 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
                   >
-                    {industry}
-                  </Badge>
-                ))}
-
-                <Popover>
-                  <PopoverTrigger>
-                    <Button
-                      variant="outline"
-                      className="flex h-auto items-center gap-2 rounded-3xl border-blue-500/30 px-6 py-2.5 text-sm text-blue-600 transition-all duration-200 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
-                    >
-                      <Filter className="h-4 w-4" />
-                      More Industries
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 border-blue-500/20 bg-white p-4">
-                    <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-gray-900">
-                        Select Industries
-                      </h4>
-                      <div className="space-y-2">
-                        {otherIndustries.map((industry) => (
-                          <div
-                            key={industry}
-                            className="flex items-center space-x-2"
+                    <Filter className="h-4 w-4" />
+                    More Industries
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 border-blue-500/20 bg-white p-4">
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-gray-900">
+                      Select Industries
+                    </h4>
+                    <div className="space-y-2">
+                      {otherIndustries.map((industry) => (
+                        <div
+                          key={industry}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={industry}
+                            checked={selectedIndustries.includes(industry)}
+                            onCheckedChange={() => toggleIndustry(industry)}
+                            className="border-blue-500/30 text-blue-600"
+                          />
+                          <label
+                            htmlFor={industry}
+                            className="text-sm font-medium text-gray-700"
                           >
-                            <Checkbox
-                              id={industry}
-                              checked={selectedIndustries.includes(industry)}
-                              onCheckedChange={() => toggleIndustry(industry)}
-                              className="border-blue-500/30 text-blue-600"
-                            />
-                            <label
-                              htmlFor={industry}
-                              className="text-sm font-medium text-gray-700"
-                            >
-                              {industry}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-
-            {sortedCategories.map((category) => (
-              <div key={category} className="mb-12 w-full">
-                <h2 className="mb-6 text-2xl font-bold text-black">
-                  {category}
-                </h2>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {groupedProjects[category].map((project) => (
-                    <Card
-                      key={project.serialNo}
-                      className="cursor-pointer border-2 border-blue-500/20 bg-white transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
-                      onClick={() => fetchProjectDetails(project.serialNo)}
-                    >
-                      <CardHeader>
-                        <div className="mb-3 flex items-center justify-between">
-                          <div className="flex flex-wrap gap-2">
-                            {project.industry.map((ind) => (
-                              <Badge
-                                key={ind}
-                                variant="secondary"
-                                className="border-blue-500/30 bg-blue-500/10 text-blue-600"
-                              >
-                                {ind}
-                              </Badge>
-                            ))}
-                          </div>
-                          <span className="text-sm text-gray-500">
-                            #{project.serialNo}
-                          </span>
+                            {industry}
+                          </label>
                         </div>
-                        <CardTitle className="text-2xl font-bold text-blue-600">
-                          {project.title}
-                        </CardTitle>
-                        <CardDescription className="mt-2 text-lg text-gray-600">
-                          {project.description}
-                        </CardDescription>
-                      </CardHeader>
-                      {viewMode === "internal" && (
-                        <CardContent>
-                          <div className="space-y-4">
-                            {project.links.map((link, linkIndex) => (
-                              <div key={linkIndex} className="group">
-                                <Link
-                                  href={link.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <span className="text-2xl">{link.icon}</span>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <h3 className="text-base font-semibold text-blue-600">
-                                        {link.name}
-                                      </h3>
-                                      <ExternalLink className="h-4 w-4 text-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
-                                    </div>
-                                    <p className="mt-1 text-sm text-gray-600">
-                                      {link.description}
-                                    </p>
-                                  </div>
-                                </Link>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      )}
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogContent className="max-w-3xl border-blue-500/20 bg-white">
-                {loadingDetails ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="text-xl text-blue-600">
-                      Loading details...
+                      ))}
                     </div>
                   </div>
-                ) : selectedProject ? (
-                  <>
-                    <DialogHeader>
-                      <DialogTitle className="text-2xl font-bold text-blue-600">
-                        {selectedProject.title}
-                      </DialogTitle>
-                      <DialogDescription className="mt-2 text-lg text-gray-600">
-                        {selectedProject.description}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                          Overview
-                        </h3>
-                        <p className="text-gray-700">
-                          {selectedProject.overview}
-                        </p>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                          Key Benefits
-                        </h3>
-                        <ul className="list-inside list-disc space-y-2">
-                          {selectedProject.benefits.map((benefit, index) => (
-                            <li key={index} className="text-gray-700">
-                              {benefit}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                          Use Case
-                        </h3>
-                        <p className="text-gray-700">
-                          {selectedProject.usecase}
-                        </p>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                          Implementation
-                        </h3>
-                        <ul className="list-inside list-disc space-y-2">
-                          {selectedProject.implementation.map((step, index) => (
-                            <li key={index} className="text-gray-700">
-                              {step}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                          ROI & Metrics
-                        </h3>
-                        <ul className="list-inside list-disc space-y-2">
-                          {selectedProject.roiMetrics.map((metric, index) => (
-                            <li key={index} className="text-gray-700">
-                              {metric}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </>
-                ) : null}
-              </DialogContent>
-            </Dialog>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
 
-            {filteredProjects.length === 0 && (
-              <div className="mt-12 text-center">
-                <p className="text-xl text-gray-600">
-                  No projects found matching your search.
-                </p>
+          {sortedCategories.map((category) => (
+            <div key={category} className="mb-12 w-full">
+              <h2 className="mb-6 bg-gradient-to-r from-black via-blue-800 to-blue-500 bg-clip-text text-3xl font-bold text-transparent drop-shadow-sm">
+                {category}
+              </h2>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {groupedProjects[category].map((project) => (
+                  <Card
+                    key={project.serialNo}
+                    className="cursor-pointer border-2 border-blue-500/20 bg-white transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
+                    onClick={() => fetchProjectDetails(project.serialNo)}
+                  >
+                    <CardHeader>
+                      <div className="mb-3 flex items-center justify-between">
+                        <div className="flex flex-wrap gap-2">
+                          {project.industry.map((ind) => (
+                            <Badge
+                              key={ind}
+                              variant="secondary"
+                              className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                            >
+                              {ind}
+                            </Badge>
+                          ))}
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          #{project.serialNo}
+                        </span>
+                      </div>
+                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-900 via-blue-600 to-black bg-clip-text text-transparent">
+                        {project.title}
+                      </CardTitle>
+                      <CardDescription className="mt-2 text-lg text-gray-600">
+                        {project.description}
+                      </CardDescription>
+                    </CardHeader>
+                    {viewMode === "internal" && (
+                      <CardContent>
+                        <div className="space-y-4">
+                          {project.links.map((link, linkIndex) => (
+                            <div key={linkIndex} className="group">
+                              <Link
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <span className="text-2xl">{link.icon}</span>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="text-base font-semibold text-blue-600">
+                                      {link.name}
+                                    </h3>
+                                    <ExternalLink className="h-4 w-4 text-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
+                                  </div>
+                                  <p className="mt-1 text-sm text-gray-600">
+                                    {link.description}
+                                  </p>
+                                </div>
+                              </Link>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
               </div>
-            )}
+            </div>
+          ))}
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-3xl border-blue-500/20 bg-white">
+              {loadingDetails ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-xl text-blue-600">
+                    Loading details...
+                  </div>
+                </div>
+              ) : selectedProject ? (
+                <>
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold text-blue-600">
+                      {selectedProject.title}
+                    </DialogTitle>
+                    <DialogDescription className="mt-2 text-lg text-gray-600">
+                      {selectedProject.description}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-6 py-4">
+                    <div>
+                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                        Overview
+                      </h3>
+                      <p className="text-gray-700">
+                        {selectedProject.overview}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                        Key Benefits
+                      </h3>
+                      <ul className="list-inside list-disc space-y-2">
+                        {selectedProject.benefits.map((benefit, index) => (
+                          <li key={index} className="text-gray-700">
+                            {benefit}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                        Use Case
+                      </h3>
+                      <p className="text-gray-700">{selectedProject.usecase}</p>
+                    </div>
+                    <div>
+                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                        Implementation
+                      </h3>
+                      <ul className="list-inside list-disc space-y-2">
+                        {selectedProject.implementation.map((step, index) => (
+                          <li key={index} className="text-gray-700">
+                            {step}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                        ROI & Metrics
+                      </h3>
+                      <ul className="list-inside list-disc space-y-2">
+                        {selectedProject.roiMetrics.map((metric, index) => (
+                          <li key={index} className="text-gray-700">
+                            {metric}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </>
+              ) : null}
+            </DialogContent>
+          </Dialog>
+
+          {filteredProjects.length === 0 && (
+            <div className="mt-12 text-center">
+              <p className="text-xl text-gray-600">
+                No projects found matching your search.
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </>
