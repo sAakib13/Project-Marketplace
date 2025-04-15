@@ -27,6 +27,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
+import Logo from "./TR-white-logo.png"
+import Image from "next/image";
 
 type Project = {
   title: string;
@@ -185,7 +187,8 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-blue-500/20 bg-black/80 backdrop-blur-sm">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-white">Telerivet</span>
+            <span className="text-xl font-bold text-white"></span>
+            <Image src={Logo} alt="Telerivet Logo" width={200} height={200} />
           </div>
           <div className="flex items-center gap-6">
             <Link
