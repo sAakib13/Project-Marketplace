@@ -442,8 +442,11 @@ export default function Home() {
             </div>
           ))}
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-3xl overflow-auto border-blue-500/20 bg-white">
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+          >
+            <DialogContent className="max-w-3xl h-[40rem] overflow-auto border-blue-500/20 bg-white">
               {loadingDetails ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-xl text-blue-600">
@@ -452,7 +455,7 @@ export default function Home() {
                 </div>
               ) : selectedProject ? (
                 <>
-                  <div className="flex items-center justify-between mx-20">
+                  <div className="flex items-center justify-between">
                     <div>
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-bold text-blue-600">
