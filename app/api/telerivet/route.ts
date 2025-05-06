@@ -23,6 +23,7 @@ export async function GET() {
       description: row.vars.description || "No description available",
       serialNo: row.vars.s_n || "000",
       category: row.vars.category || "Uncategorized",
+      timeUpdated: row.time_updated,
       industry: row.vars.industry
         ? row.vars.industry.split(",").map((ind: string) => ind.trim())
         : ["Uncategorized"],

@@ -9,7 +9,15 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Search, ExternalLink, Filter, Users, User } from "lucide-react";
+import {
+  Search,
+  ExternalLink,
+  Filter,
+  Users,
+  User,
+  MessageSquare,
+  Phone,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -30,7 +38,6 @@ import axios from "axios";
 import Logo from "./TR-white-logo.png";
 import Hero from "./Hero.png";
 import Image from "next/image";
-import { Url } from "next/dist/shared/lib/router/router";
 
 type Project = {
   title: string;
@@ -38,6 +45,7 @@ type Project = {
   industry: string[];
   serialNo: string;
   category: string;
+  timeUpdated: number;
   links: {
     name: string;
     url: string;
@@ -79,9 +87,24 @@ const otherIndustries = [
   "Government Services",
 ];
 
+const channels = [
+  { name: "SMS", icon: <MessageSquare className="h-4 w-4" /> },
+  {
+    name: "WhatsApp",
+    icon: <MessageSquare className="h-4 w-4 text-green-600" />,
+  },
+  {
+    name: "Viber",
+    icon: <MessageSquare className="h-4 w-4 text-purple-600" />,
+  },
+  { name: "Voice", icon: <Phone className="h-4 w-4" /> },
+];
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
+  const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
+  const [showNewOnly, setShowNewOnly] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +119,11 @@ export default function Home() {
     const fetchProjects = async () => {
       try {
         const response = await axios.get("/api/telerivet");
-        setProjects(response.data);
+        const projectsWithTime = response.data.map((project: any) => ({
+          ...project,
+          timeUpdated: project.time_updated || Date.now() / 1000,
+        }));
+        setProjects(projectsWithTime);
         setError(null);
       } catch (err) {
         setError("Failed to load projects");
@@ -113,7 +140,6 @@ export default function Home() {
     setLoadingDetails(true);
     try {
       const response = await axios.post("/api/telerivet/id", { serialNo });
-      console.log(response.data[0]);
       setSelectedProject(response.data[0]);
       setIsDialogOpen(true);
     } catch (err) {
@@ -132,29 +158,51 @@ export default function Home() {
     );
   };
 
+  const toggleChannel = (channel: string) => {
+    setSelectedChannels((prev) =>
+      prev.includes(channel)
+        ? prev.filter((c) => c !== channel)
+        : [...prev, channel],
+    );
+  };
+
   const toggleViewMode = () => {
     setViewMode((prev) => (prev === "internal" ? "customer" : "internal"));
   };
 
-  const filteredProjects = projects.filter((project) => {
-    const matchesSearch =
-      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.links.some(
-        (link) =>
-          link.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          link.description.toLowerCase().includes(searchQuery.toLowerCase()),
-      ) ||
-      project.industry.some((ind) =>
-        ind.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+  const isNewService = (timeUpdated: number) => {
+    const oneMonthAgo = Date.now() / 1000 - 1 * 24 * 60 * 60;
+    return timeUpdated > oneMonthAgo;
+  };
 
-    const matchesIndustry =
-      selectedIndustries.length === 0 ||
-      project.industry.some((ind) => selectedIndustries.includes(ind));
+  const filteredProjects = projects
+    .filter((project) => {
+      const matchesSearch =
+        project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.links.some(
+          (link) =>
+            link.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            link.description.toLowerCase().includes(searchQuery.toLowerCase()),
+        ) ||
+        project.industry.some((ind) =>
+          ind.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
 
-    return matchesSearch && matchesIndustry;
-  });
+      const matchesIndustry =
+        selectedIndustries.length === 0 ||
+        project.industry.some((ind) => selectedIndustries.includes(ind));
+
+      const matchesNewOnly = !showNewOnly || isNewService(project.timeUpdated);
+
+      return matchesSearch && matchesIndustry && matchesNewOnly;
+    })
+    .sort((a, b) => {
+      if (showNewOnly) {
+        return b.timeUpdated - a.timeUpdated;
+      }
+      return 0;
+    });
 
   const groupedProjects = filteredProjects.reduce(
     (acc, project) => {
@@ -258,9 +306,6 @@ export default function Home() {
                       Get Started
                     </button>
                   </a>
-                  {/* <button className="rounded-full border border-blue-600 px-6 py-3 font-semibold text-blue-600 transition hover:bg-blue-50">
-                    Contact Us
-                  </button> */}
                 </div>
               </div>
 
@@ -306,6 +351,42 @@ export default function Home() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+            </div>
+
+            <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+              <Badge
+                variant={showNewOnly ? "default" : "outline"}
+                className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
+                  showNewOnly
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
+                    : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
+                }`}
+                onClick={() => setShowNewOnly(!showNewOnly)}
+              >
+                New Services
+              </Badge>
+
+              {channels.map((channel) => (
+                <Badge
+                  key={channel.name}
+                  variant={
+                    selectedChannels.includes(channel.name)
+                      ? "default"
+                      : "outline"
+                  }
+                  className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
+                    selectedChannels.includes(channel.name)
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
+                      : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
+                  }`}
+                  onClick={() => toggleChannel(channel.name)}
+                >
+                  <div className="flex items-center gap-2">
+                    {channel.icon}
+                    {channel.name}
+                  </div>
+                </Badge>
+              ))}
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -395,9 +476,19 @@ export default function Home() {
                             </Badge>
                           ))}
                         </div>
-                        <span className="text-sm text-gray-500">
-                          #{project.serialNo}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {isNewService(project.timeUpdated) && (
+                            <Badge
+                              variant="default"
+                              className="bg-green-500 text-white"
+                            >
+                              New
+                            </Badge>
+                          )}
+                          <span className="text-sm text-gray-500">
+                            #{project.serialNo}
+                          </span>
+                        </div>
                       </div>
                       <CardTitle className="bg-gradient-to-r from-blue-900 via-blue-600 to-black bg-clip-text text-2xl font-bold text-transparent">
                         {project.title}
@@ -405,6 +496,18 @@ export default function Home() {
                       <CardDescription className="mt-2 text-lg text-gray-600">
                         {project.description}
                       </CardDescription>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {channels.map((channel) => (
+                          <Badge
+                            key={channel.name}
+                            variant="outline"
+                            className="flex items-center gap-1 border-blue-500/30"
+                          >
+                            {channel.icon}
+                            {channel.name}
+                          </Badge>
+                        ))}
+                      </div>
                     </CardHeader>
                     {viewMode === "internal" && (
                       <CardContent>
@@ -442,11 +545,8 @@ export default function Home() {
             </div>
           ))}
 
-          <Dialog
-            open={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
-          >
-            <DialogContent className="max-w-3xl h-[40rem] overflow-auto border-blue-500/20 bg-white">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="h-[40rem] max-w-3xl overflow-auto border-blue-500/20 bg-white">
               {loadingDetails ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-xl text-blue-600">
