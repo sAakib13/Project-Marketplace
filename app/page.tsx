@@ -9,15 +9,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import {
-  Search,
-  ExternalLink,
-  Filter,
-  Users,
-  User,
-  MessageSquare,
-  Phone,
-} from "lucide-react";
+import { Search, ExternalLink, Filter, Users, User, MessageSquare, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -46,6 +38,7 @@ type Project = {
   serialNo: string;
   category: string;
   timeUpdated: number;
+  applicableRoutes: string[];
   links: {
     name: string;
     url: string;
@@ -89,14 +82,8 @@ const otherIndustries = [
 
 const channels = [
   { name: "SMS", icon: <MessageSquare className="h-4 w-4" /> },
-  {
-    name: "WhatsApp",
-    icon: <MessageSquare className="h-4 w-4 text-green-600" />,
-  },
-  {
-    name: "Viber",
-    icon: <MessageSquare className="h-4 w-4 text-purple-600" />,
-  },
+  { name: "WhatsApp", icon: <MessageSquare className="h-4 w-4 text-green-600" /> },
+  { name: "Viber", icon: <MessageSquare className="h-4 w-4 text-purple-600" /> },
   { name: "Voice", icon: <Phone className="h-4 w-4" /> },
 ];
 
@@ -108,9 +95,7 @@ export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(
-    null,
-  );
+  const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("customer");
@@ -121,7 +106,7 @@ export default function Home() {
         const response = await axios.get("/api/telerivet");
         const projectsWithTime = response.data.map((project: any) => ({
           ...project,
-          timeUpdated: project.time_updated || Date.now() / 1000,
+          timeUpdated: project.timeUpdated || Date.now() / 1000,
         }));
         setProjects(projectsWithTime);
         setError(null);
@@ -154,7 +139,7 @@ export default function Home() {
     setSelectedIndustries((prev) =>
       prev.includes(industry)
         ? prev.filter((i) => i !== industry)
-        : [...prev, industry],
+        : [...prev, industry]
     );
   };
 
@@ -162,7 +147,7 @@ export default function Home() {
     setSelectedChannels((prev) =>
       prev.includes(channel)
         ? prev.filter((c) => c !== channel)
-        : [...prev, channel],
+        : [...prev, channel]
     );
   };
 
@@ -171,8 +156,8 @@ export default function Home() {
   };
 
   const isNewService = (timeUpdated: number) => {
-    const oneMonthAgo = Date.now() / 1000 - 1 * 24 * 60 * 60;
-    return timeUpdated > oneMonthAgo;
+    const threeDaysAgo = Date.now() / 1000 - 3 * 24 * 60 * 60;
+    return timeUpdated > threeDaysAgo;
   };
 
   const filteredProjects = projects
@@ -183,19 +168,23 @@ export default function Home() {
         project.links.some(
           (link) =>
             link.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            link.description.toLowerCase().includes(searchQuery.toLowerCase()),
+            link.description.toLowerCase().includes(searchQuery.toLowerCase())
         ) ||
         project.industry.some((ind) =>
-          ind.toLowerCase().includes(searchQuery.toLowerCase()),
+          ind.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
       const matchesIndustry =
         selectedIndustries.length === 0 ||
         project.industry.some((ind) => selectedIndustries.includes(ind));
 
+      const matchesChannels =
+        selectedChannels.length === 0 ||
+        project.applicableRoutes.some((route) => selectedChannels.includes(route));
+
       const matchesNewOnly = !showNewOnly || isNewService(project.timeUpdated);
 
-      return matchesSearch && matchesIndustry && matchesNewOnly;
+      return matchesSearch && matchesIndustry && matchesChannels && matchesNewOnly;
     })
     .sort((a, b) => {
       if (showNewOnly) {
@@ -213,7 +202,7 @@ export default function Home() {
       acc[category].push(project);
       return acc;
     },
-    {} as Record<string, Project[]>,
+    {} as Record<string, Project[]>
   );
 
   const sortedCategories = Object.keys(groupedProjects).sort();
@@ -275,7 +264,6 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 py-4">
           <div className="relative my-16 overflow-hidden">
             <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
-              {/* Text Content */}
               <div className="text-center md:text-left">
                 <h1 className="mb-6 bg-gradient-to-r from-gray-900 via-gray-500 to-black bg-clip-text text-5xl font-bold text-transparent">
                   Telerivet Solutions Marketplace
@@ -299,7 +287,6 @@ export default function Home() {
                   possibilities to drive global impact.
                 </p>
 
-                {/* Call to Action Buttons */}
                 <div className="flex justify-center gap-4 md:justify-start">
                   <a href="#solutions">
                     <button className="rounded-full bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-blue-700">
@@ -309,7 +296,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Image or Illustration */}
               <div className="flex justify-center md:justify-end">
                 <Image
                   src={Hero}
@@ -320,7 +306,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Optional Toggle Button */}
             <div className="absolute right-4 top-4">
               <button
                 onClick={toggleViewMode}
@@ -369,11 +354,7 @@ export default function Home() {
               {channels.map((channel) => (
                 <Badge
                   key={channel.name}
-                  variant={
-                    selectedChannels.includes(channel.name)
-                      ? "default"
-                      : "outline"
-                  }
+                  variant={selectedChannels.includes(channel.name) ? "default" : "outline"}
                   className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
                     selectedChannels.includes(channel.name)
                       ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
@@ -393,11 +374,7 @@ export default function Home() {
               {mainIndustries.map((industry) => (
                 <Badge
                   key={industry}
-                  variant={
-                    selectedIndustries.includes(industry)
-                      ? "default"
-                      : "outline"
-                  }
+                  variant={selectedIndustries.includes(industry) ? "default" : "outline"}
                   className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
                     selectedIndustries.includes(industry)
                       ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
@@ -498,14 +475,16 @@ export default function Home() {
                       </CardDescription>
                       <div className="mt-4 flex flex-wrap gap-2">
                         {channels.map((channel) => (
-                          <Badge
-                            key={channel.name}
-                            variant="outline"
-                            className="flex items-center gap-1 border-blue-500/30"
-                          >
-                            {channel.icon}
-                            {channel.name}
-                          </Badge>
+                          project.applicableRoutes.includes(channel.name) && (
+                            <Badge
+                              key={channel.name}
+                              variant="outline"
+                              className="flex items-center gap-1 border-blue-500/30"
+                            >
+                              {channel.icon}
+                              {channel.name}
+                            </Badge>
+                          )
                         ))}
                       </div>
                     </CardHeader>
@@ -545,8 +524,11 @@ export default function Home() {
             </div>
           ))}
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="h-[40rem] max-w-3xl overflow-auto border-blue-500/20 bg-white">
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+          >
+            <DialogContent className="max-w-3xl h-[40rem] overflow-auto border-blue-500/20 bg-white">
               {loadingDetails ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-xl text-blue-600">

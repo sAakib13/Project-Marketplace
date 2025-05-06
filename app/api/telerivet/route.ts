@@ -24,6 +24,11 @@ export async function GET() {
       serialNo: row.vars.s_n || "000",
       category: row.vars.category || "Uncategorized",
       timeUpdated: row.time_updated,
+      applicableRoutes: row.vars.applicable_route
+        ? row.vars.applicable_route
+            .split(",")
+            .map((route: string) => route.trim())
+        : [],
       industry: row.vars.industry
         ? row.vars.industry.split(",").map((ind: string) => ind.trim())
         : ["Uncategorized"],
