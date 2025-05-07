@@ -9,7 +9,15 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Search, ExternalLink, Filter, Users, User, MessageSquare, Phone } from "lucide-react";
+import {
+  Search,
+  ExternalLink,
+  Filter,
+  Users,
+  User,
+  MessageSquare,
+  Phone,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -82,8 +90,14 @@ const otherIndustries = [
 
 const channels = [
   { name: "SMS", icon: <MessageSquare className="h-4 w-4" /> },
-  { name: "WhatsApp", icon: <MessageSquare className="h-4 w-4 text-green-600" /> },
-  { name: "Viber", icon: <MessageSquare className="h-4 w-4 text-purple-600" /> },
+  {
+    name: "WhatsApp",
+    icon: <MessageSquare className="h-4 w-4 text-green-600" />,
+  },
+  {
+    name: "Viber",
+    icon: <MessageSquare className="h-4 w-4 text-purple-600" />,
+  },
   { name: "Voice", icon: <Phone className="h-4 w-4" /> },
 ];
 
@@ -95,10 +109,15 @@ export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(
+    null,
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("customer");
+  const [expandedIndustries, setExpandedIndustries] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -139,7 +158,7 @@ export default function Home() {
     setSelectedIndustries((prev) =>
       prev.includes(industry)
         ? prev.filter((i) => i !== industry)
-        : [...prev, industry]
+        : [...prev, industry],
     );
   };
 
@@ -147,12 +166,19 @@ export default function Home() {
     setSelectedChannels((prev) =>
       prev.includes(channel)
         ? prev.filter((c) => c !== channel)
-        : [...prev, channel]
+        : [...prev, channel],
     );
   };
 
   const toggleViewMode = () => {
     setViewMode((prev) => (prev === "internal" ? "customer" : "internal"));
+  };
+
+  const toggleIndustryExpand = (serialNo: string) => {
+    setExpandedIndustries((prev) => ({
+      ...prev,
+      [serialNo]: !prev[serialNo],
+    }));
   };
 
   const isNewService = (timeUpdated: number) => {
@@ -168,10 +194,10 @@ export default function Home() {
         project.links.some(
           (link) =>
             link.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            link.description.toLowerCase().includes(searchQuery.toLowerCase())
+            link.description.toLowerCase().includes(searchQuery.toLowerCase()),
         ) ||
         project.industry.some((ind) =>
-          ind.toLowerCase().includes(searchQuery.toLowerCase())
+          ind.toLowerCase().includes(searchQuery.toLowerCase()),
         );
 
       const matchesIndustry =
@@ -180,11 +206,15 @@ export default function Home() {
 
       const matchesChannels =
         selectedChannels.length === 0 ||
-        project.applicableRoutes.some((route) => selectedChannels.includes(route));
+        project.applicableRoutes.some((route) =>
+          selectedChannels.includes(route),
+        );
 
       const matchesNewOnly = !showNewOnly || isNewService(project.timeUpdated);
 
-      return matchesSearch && matchesIndustry && matchesChannels && matchesNewOnly;
+      return (
+        matchesSearch && matchesIndustry && matchesChannels && matchesNewOnly
+      );
     })
     .sort((a, b) => {
       if (showNewOnly) {
@@ -202,7 +232,7 @@ export default function Home() {
       acc[category].push(project);
       return acc;
     },
-    {} as Record<string, Project[]>
+    {} as Record<string, Project[]>,
   );
 
   const sortedCategories = Object.keys(groupedProjects).sort();
@@ -354,7 +384,11 @@ export default function Home() {
               {channels.map((channel) => (
                 <Badge
                   key={channel.name}
-                  variant={selectedChannels.includes(channel.name) ? "default" : "outline"}
+                  variant={
+                    selectedChannels.includes(channel.name)
+                      ? "default"
+                      : "outline"
+                  }
                   className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
                     selectedChannels.includes(channel.name)
                       ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
@@ -374,7 +408,11 @@ export default function Home() {
               {mainIndustries.map((industry) => (
                 <Badge
                   key={industry}
-                  variant={selectedIndustries.includes(industry) ? "default" : "outline"}
+                  variant={
+                    selectedIndustries.includes(industry)
+                      ? "default"
+                      : "outline"
+                  }
                   className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
                     selectedIndustries.includes(industry)
                       ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
@@ -437,13 +475,34 @@ export default function Home() {
                 {groupedProjects[category].map((project) => (
                   <Card
                     key={project.serialNo}
-                    className="cursor-pointer border-2 border-blue-500/20 bg-white transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
+                    className="group relative cursor-pointer border-2 border-blue-500/20 bg-white transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
                     onClick={() => fetchProjectDetails(project.serialNo)}
                   >
-                    <CardHeader>
-                      <div className="mb-3 flex items-center justify-between">
+                    {isNewService(project.timeUpdated) && (
+                      <div className="absolute -right-2 -top-2 z-10">
+                        <Badge className="rounded-full bg-green-500 px-2 py-1 text-xs font-semibold text-white shadow-lg">
+                          New
+                        </Badge>
+                      </div>
+                    )}
+
+                    <CardHeader className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-500">
+                          #{project.serialNo}
+                        </span>
+                      </div>
+
+                      <div className="space-y-3">
+                        <CardTitle className="bg-gradient-to-r from-blue-900 via-blue-600 to-black bg-clip-text text-2xl font-bold text-transparent">
+                          {project.title}
+                        </CardTitle>
+
                         <div className="flex flex-wrap gap-2">
-                          {project.industry.map((ind) => (
+                          {(expandedIndustries[project.serialNo]
+                            ? project.industry
+                            : project.industry.slice(0, 3)
+                          ).map((ind) => (
                             <Badge
                               key={ind}
                               variant="secondary"
@@ -452,52 +511,58 @@ export default function Home() {
                               {ind}
                             </Badge>
                           ))}
+                          {!expandedIndustries[project.serialNo] &&
+                            project.industry.length > 3 && (
+                              <Badge
+                                variant="secondary"
+                                className="cursor-pointer border-blue-500/30 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleIndustryExpand(project.serialNo);
+                                }}
+                              >
+                                +{project.industry.length - 3}
+                              </Badge>
+                            )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          {isNewService(project.timeUpdated) && (
-                            <Badge
-                              variant="default"
-                              className="bg-green-500 text-white"
-                            >
-                              New
-                            </Badge>
+
+                        <div className="flex gap-2">
+                          {channels.map(
+                            (channel) =>
+                              project.applicableRoutes?.includes(
+                                channel.name,
+                              ) && (
+                                <div
+                                  key={channel.name}
+                                  className="group/channel relative"
+                                >
+                                  <div className="rounded-full border border-blue-500/30 bg-white p-2 transition-all duration-200 group-hover/channel:border-blue-500 group-hover/channel:bg-blue-500/10">
+                                    {channel.icon}
+                                  </div>
+                                  <div className="absolute -top-8 left-1/2 hidden -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs text-white group-hover/channel:block">
+                                    {channel.name}
+                                  </div>
+                                </div>
+                              ),
                           )}
-                          <span className="text-sm text-gray-500">
-                            #{project.serialNo}
-                          </span>
                         </div>
                       </div>
-                      <CardTitle className="bg-gradient-to-r from-blue-900 via-blue-600 to-black bg-clip-text text-2xl font-bold text-transparent">
-                        {project.title}
-                      </CardTitle>
-                      <CardDescription className="mt-2 text-lg text-gray-600">
+
+                      <CardDescription className="text-base text-gray-600">
                         {project.description}
                       </CardDescription>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {channels.map((channel) => (
-                          project.applicableRoutes.includes(channel.name) && (
-                            <Badge
-                              key={channel.name}
-                              variant="outline"
-                              className="flex items-center gap-1 border-blue-500/30"
-                            >
-                              {channel.icon}
-                              {channel.name}
-                            </Badge>
-                          )
-                        ))}
-                      </div>
                     </CardHeader>
+
                     {viewMode === "internal" && (
                       <CardContent>
                         <div className="space-y-4">
                           {project.links.map((link, linkIndex) => (
-                            <div key={linkIndex} className="group">
+                            <div key={linkIndex} className="group/link">
                               <Link
                                 href={link.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-start space-x-4 p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
+                                className="flex items-start space-x-4 rounded-lg p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <span className="text-2xl">{link.icon}</span>
@@ -506,7 +571,7 @@ export default function Home() {
                                     <h3 className="text-base font-semibold text-blue-600">
                                       {link.name}
                                     </h3>
-                                    <ExternalLink className="h-4 w-4 text-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
+                                    <ExternalLink className="h-4 w-4 text-blue-600 opacity-0 transition-opacity group-hover/link:opacity-100" />
                                   </div>
                                   <p className="mt-1 text-sm text-gray-600">
                                     {link.description}
@@ -524,11 +589,8 @@ export default function Home() {
             </div>
           ))}
 
-          <Dialog
-            open={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
-          >
-            <DialogContent className="max-w-3xl h-[40rem] overflow-auto border-blue-500/20 bg-white">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border-blue-500/20 bg-white p-6">
               {loadingDetails ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-xl text-blue-600">
@@ -537,81 +599,117 @@ export default function Home() {
                 </div>
               ) : selectedProject ? (
                 <>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold text-blue-600">
+                  <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                    <div className="lg:col-span-2">
+                      <DialogHeader className="mb-6">
+                        <DialogTitle className="text-3xl font-bold text-blue-600">
                           {selectedProject.title}
                         </DialogTitle>
                         <DialogDescription className="mt-2 text-lg text-gray-600">
                           {selectedProject.description}
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="space-y-6 py-4">
-                        <div>
-                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
+
+                      <div className="space-y-8">
+                        <section>
+                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
                             Overview
                           </h3>
                           <p className="text-gray-700">
                             {selectedProject.overview}
                           </p>
-                        </div>
-                        <div>
-                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                        </section>
+
+                        <section>
+                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
                             Key Benefits
                           </h3>
-                          <ul className="list-inside list-disc space-y-2">
+                          <ul className="grid gap-3">
                             {selectedProject.benefits.map((benefit, index) => (
-                              <li key={index} className="text-gray-700">
-                                {benefit}
+                              <li
+                                key={index}
+                                className="flex items-start gap-3"
+                              >
+                                <span className="mt-1 text-blue-500">•</span>
+                                <span className="text-gray-700">{benefit}</span>
                               </li>
                             ))}
                           </ul>
-                        </div>
+                        </section>
 
-                        <div>
-                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                        <section>
+                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
                             Use Case
                           </h3>
                           <p className="text-gray-700">
                             {selectedProject.usecase}
                           </p>
-                        </div>
-                        <div>
-                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
-                            Implementation
+                        </section>
+
+                        <section>
+                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
+                            Implementation Steps
                           </h3>
-                          <ul className="list-inside list-disc space-y-2">
+                          <ul className="grid gap-3">
                             {selectedProject.implementation.map(
                               (step, index) => (
-                                <li key={index} className="text-gray-700">
-                                  {step}
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-3"
+                                >
+                                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
+                                    {index + 1}
+                                  </span>
+                                  <span className="text-gray-700">{step}</span>
                                 </li>
                               ),
                             )}
                           </ul>
-                        </div>
-                        <div>
-                          <h3 className="mb-2 text-lg font-semibold text-blue-600">
+                        </section>
+
+                        <section>
+                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
                             ROI & Metrics
                           </h3>
-                          <ul className="list-inside list-disc space-y-2">
+                          <ul className="grid gap-3">
                             {selectedProject.roiMetrics.map((metric, index) => (
-                              <li key={index} className="text-gray-700">
-                                {metric}
+                              <li
+                                key={index}
+                                className="flex items-start gap-3"
+                              >
+                                <span className="mt-1 text-green-500">✓</span>
+                                <span className="text-gray-700">{metric}</span>
                               </li>
                             ))}
                           </ul>
-                        </div>
+                        </section>
                       </div>
                     </div>
-                    <div className="mb-6">
-                      <Image
-                        src={selectedProject.image}
-                        alt=""
-                        width={200}
-                        height={200}
-                      />
+
+                    <div className="lg:col-span-1">
+                      <div className="sticky top-6">
+                        <div className="overflow-hidden rounded-lg border border-blue-500/20 bg-blue-50/50 p-4">
+                          {selectedProject.image && (
+                            <Image
+                              src={selectedProject.image}
+                              alt={selectedProject.title}
+                              width={400}
+                              height={400}
+                              className="mb-4 rounded-lg"
+                            />
+                          )}
+                          <div className="space-y-4">
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-500">
+                                Service ID
+                              </h4>
+                              <p className="text-lg font-semibold text-blue-600">
+                                #{selectedProject.serialNo}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </>
