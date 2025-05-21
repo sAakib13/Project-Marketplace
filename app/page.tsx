@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,6 +16,9 @@ import {
   User,
   MessageSquare,
   Phone,
+  ChevronLeft,
+  ChevronRight,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,11 +35,17 @@ import {
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import Link from "next/link";
 import axios from "axios";
 import Logo from "./TR-white-logo.png";
 import Hero from "./Hero.png";
 import Image from "next/image";
+import { useKeenSlider } from "keen-slider/react";
+import "keen-slider/keen-slider.min.css";
 
 type Project = {
   title: string;
@@ -101,6 +109,36 @@ const channels = [
   { name: "Voice", icon: <Phone className="h-4 w-4" /> },
 ];
 
+const heroSlides = [
+  {
+    title: "Telerivet Solutions Marketplace",
+    description:
+      "The Telerivet Solutions Marketplace is a comprehensive platform designed to empower organizations with cutting-edge communication tools and solutions.",
+    image:
+      "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  },
+  {
+    title: "Enterprise Communication Solutions",
+    description:
+      "Streamline customer engagement, automate interactions, and scale your operations with versatile tools, from retail to logistics.",
+    image:
+      "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  },
+  {
+    title: "Global Impact Through Innovation",
+    description:
+      "Whether you're enhancing support, launching marketing campaigns, or deploying mobile solutions — unlock endless possibilities to drive global impact.",
+    image:
+      "https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  },
+];
+
+const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  organization: z.string().min(2, "Organization must be at least 2 characters"),
+});
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
@@ -118,6 +156,55 @@ export default function Home() {
   const [expandedIndustries, setExpandedIndustries] = useState<{
     [key: string]: boolean;
   }>({});
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [showRegistration, setShowRegistration] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
+    initial: 0,
+    slideChanged(slider) {
+      setCurrentSlide(slider.track.details.rel);
+    },
+    loop: true,
+    mode: "snap",
+    slides: { perView: 1 },
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (instanceRef.current) {
+        instanceRef.current.next();
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [instanceRef]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const showThreshold = window.innerHeight * 0.5;
+
+      if (scrollPosition > showThreshold && !hasScrolled && !formSubmitted) {
+        setHasScrolled(true);
+        setShowRegistration(true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasScrolled, formSubmitted]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -184,6 +271,16 @@ export default function Home() {
   const isNewService = (timeUpdated: number) => {
     const threeDaysAgo = Date.now() / 1000 - 3 * 24 * 60 * 60;
     return timeUpdated > threeDaysAgo;
+  };
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      console.log("Form submitted:", data);
+      setFormSubmitted(true);
+      setShowRegistration(false);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   const filteredProjects = projects
@@ -292,49 +389,72 @@ export default function Home() {
 
       <main className="min-h-screen bg-gradient-to-r from-blue-100 to-white pb-12">
         <div className="mx-auto max-w-6xl px-4 py-4">
-          <div className="relative my-16 overflow-hidden">
-            <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
-              <div className="text-center md:text-left">
-                <h1 className="mb-6 bg-gradient-to-r from-gray-900 via-gray-500 to-black bg-clip-text text-5xl font-bold text-transparent">
-                  Telerivet Solutions Marketplace
-                </h1>
-                <p className="mb-4 text-lg leading-relaxed text-gray-700">
-                  The{" "}
-                  <strong className="font-semibold text-blue-600">
-                    Telerivet Solutions Marketplace
-                  </strong>{" "}
-                  is a comprehensive platform designed to empower organizations
-                  with cutting-edge communication tools and solutions.
-                </p>
-                <p className="mb-4 text-lg leading-relaxed text-gray-700">
-                  Streamline customer engagement, automate interactions, and
-                  scale your operations with versatile tools, from retail to
-                  logistics.
-                </p>
-                <p className="mb-8 text-lg leading-relaxed text-gray-700">
-                  Whether you're enhancing support, launching marketing
-                  campaigns, or deploying mobile solutions — unlock endless
-                  possibilities to drive global impact.
-                </p>
-
-                <div className="flex justify-center gap-4 md:justify-start">
-                  <a href="#solutions">
-                    <button className="rounded-full bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-blue-700">
-                      Get Started
-                    </button>
-                  </a>
+          <div className="relative my-16">
+            <div
+              ref={sliderRef}
+              className="keen-slider rounded-2xl bg-white shadow-2xl"
+            >
+              {heroSlides.map((slide, index) => (
+                <div
+                  key={index}
+                  className="keen-slider__slide relative flex min-h-[500px] items-center overflow-hidden"
+                >
+                  <Image
+                    src={slide.image}
+                    alt={slide.title}
+                    fill
+                    className="object-cover opacity-20"
+                  />
+                  <div className="relative z-10 grid grid-cols-1 items-center gap-8 p-12 md:grid-cols-2">
+                    <div className="text-center md:text-left">
+                      <h1 className="mb-6 bg-gradient-to-r from-gray-900 via-gray-500 to-black bg-clip-text text-5xl font-bold text-transparent">
+                        {slide.title}
+                      </h1>
+                      <p className="mb-8 text-lg leading-relaxed text-gray-700">
+                        {slide.description}
+                      </p>
+                      <div className="flex justify-center gap-4 md:justify-start">
+                        <a href="#solutions">
+                          <button className="rounded-full bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-blue-700">
+                            Get Started
+                          </button>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              <div className="flex justify-center md:justify-end">
-                <Image
-                  src={Hero}
-                  alt="Telerivet Solutions Illustration"
-                  width={500}
-                  className="h-auto w-full"
-                />
-              </div>
+              ))}
             </div>
+
+            {instanceRef.current && (
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+                {[...Array(heroSlides.length)].map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      instanceRef.current?.moveToIdx(idx);
+                    }}
+                    className={`h-2 w-2 rounded-full transition-all ${
+                      currentSlide === idx ? "w-6 bg-blue-600" : "bg-blue-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={() => instanceRef.current?.prev()}
+              className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition hover:bg-white"
+            >
+              <ChevronLeft className="h-6 w-6 text-blue-600" />
+            </button>
+
+            <button
+              onClick={() => instanceRef.current?.next()}
+              className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition hover:bg-white"
+            >
+              <ChevronRight className="h-6 w-6 text-blue-600" />
+            </button>
 
             <div className="absolute right-4 top-4">
               <button
@@ -714,6 +834,76 @@ export default function Home() {
                   </div>
                 </>
               ) : null}
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={showRegistration} onOpenChange={setShowRegistration}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-blue-600">
+                  Get Access to More Features
+                </DialogTitle>
+                <DialogDescription>
+                  Join our community to unlock exclusive content and features.
+                </DialogDescription>
+              </DialogHeader>
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-4 pt-4"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    {...register("name")}
+                    className="border-blue-500/20"
+                    placeholder="John Doe"
+                  />
+                  {errors.name && (
+                    <p className="text-sm text-red-500">
+                      {errors.name.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    {...register("email")}
+                    className="border-blue-500/20"
+                    placeholder="john@example.com"
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-red-500">
+                      {errors.email.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="organization">Organization</Label>
+                  <Input
+                    id="organization"
+                    {...register("organization")}
+                    className="border-blue-500/20"
+                    placeholder="Your Company"
+                  />
+                  {errors.organization && (
+                    <p className="text-sm text-red-500">
+                      {errors.organization.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Register
+                </Button>
+              </form>
             </DialogContent>
           </Dialog>
 
