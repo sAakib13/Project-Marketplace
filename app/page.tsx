@@ -360,28 +360,12 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-6">
             <Link
-              href="https://telerivet.com/solutions"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-white transition-colors hover:text-blue-600"
-            >
-              Solutions
-            </Link>
-            <Link
-              href="https://telerivet.com/signup"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-white transition-colors hover:text-blue-600"
-            >
-              Sign Up
-            </Link>
-            <Link
-              href="https://telerivet.com/login"
+              href="#solutions"
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-full bg-blue-600 px-4 py-2 font-medium text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25"
             >
-              Login
+              Get Started
             </Link>
           </div>
         </nav>
@@ -392,12 +376,12 @@ export default function Home() {
           <div className="relative my-16">
             <div
               ref={sliderRef}
-              className="keen-slider rounded-2xl bg-white shadow-2xl"
+              className="keen-slider rounded-2xl bg-white shadow-xl"
             >
               {heroSlides.map((slide, index) => (
                 <div
                   key={index}
-                  className="keen-slider__slide relative flex min-h-[500px] items-center overflow-hidden"
+                  className="keen-slider__slide relative flex min-h-[400px] items-center overflow-hidden"
                 >
                   <Image
                     src={slide.image}
@@ -405,22 +389,11 @@ export default function Home() {
                     fill
                     className="object-cover opacity-20"
                   />
-                  <div className="relative z-10 grid grid-cols-1 items-center gap-8 p-12 md:grid-cols-2">
-                    <div className="text-center md:text-left">
-                      <h1 className="mb-6 bg-gradient-to-r from-gray-900 via-gray-500 to-black bg-clip-text text-5xl font-bold text-transparent">
-                        {slide.title}
-                      </h1>
-                      <p className="mb-8 text-lg leading-relaxed text-gray-700">
-                        {slide.description}
-                      </p>
-                      <div className="flex justify-center gap-4 md:justify-start">
-                        <a href="#solutions">
-                          <button className="rounded-full bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-blue-700">
-                            Get Started
-                          </button>
-                        </a>
-                      </div>
-                    </div>
+                  <div className="relative z-10 mx-auto max-w-3xl p-12 text-center">
+                    <h1 className="mb-6 text-4xl font-bold text-gray-900">
+                      {slide.title}
+                    </h1>
+                    <p className="text-lg text-gray-600">{slide.description}</p>
                   </div>
                 </div>
               ))}
@@ -525,7 +498,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2">
-              {mainIndustries.map((industry) => (
+              {/* {mainIndustries.map((industry) => (
                 <Badge
                   key={industry}
                   variant={
@@ -542,9 +515,9 @@ export default function Home() {
                 >
                   {industry}
                 </Badge>
-              ))}
+              ))} */}
 
-              <Popover>
+              {/* <Popover>
                 <PopoverTrigger>
                   <Button
                     variant="outline"
@@ -582,7 +555,7 @@ export default function Home() {
                     </div>
                   </div>
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
             </div>
           </div>
 
