@@ -568,114 +568,71 @@ export default function Home() {
                 {groupedProjects[category].map((project) => (
                   <Card
                     key={project.serialNo}
-                    className="group relative cursor-pointer border-2 border-blue-500/20 bg-white transition-all duration-200 hover:translate-y-[-4px] hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
+                    className="group relative cursor-pointer overflow-hidden border-0 bg-white shadow-lg transition-all duration-200 hover:shadow-xl"
                     onClick={() => fetchProjectDetails(project.serialNo)}
                   >
-                    {isNewService(project.timeUpdated) && (
-                      <div className="absolute -right-2 -top-2 z-10">
-                        <Badge className="rounded-full bg-green-500 px-2 py-1 text-xs font-semibold text-white shadow-lg">
-                          New
-                        </Badge>
+                    {project.links[0]?.url && (
+                      <div className="relative h-48 w-full overflow-hidden">
+                        <Image
+                          src={project.links[0].url}
+                          alt={project.title}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        {isNewService(project.timeUpdated) && (
+                          <div className="absolute right-3 top-3">
+                            <Badge className="bg-green-500 text-white">
+                              New
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                     )}
 
                     <CardHeader className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-500">
-                          #{project.serialNo}
-                        </span>
-                      </div>
-
-                      <div className="space-y-3">
-                        <CardTitle className="bg-gradient-to-r from-blue-900 via-blue-600 to-black bg-clip-text text-2xl font-bold text-transparent">
+                      <div className="space-y-2">
+                        <CardTitle className="text-xl font-semibold text-gray-900">
                           {project.title}
                         </CardTitle>
-
                         <div className="flex flex-wrap gap-2">
-                          {(expandedIndustries[project.serialNo]
-                            ? project.industry
-                            : project.industry.slice(0, 3)
-                          ).map((ind) => (
+                          {project.industry.slice(0, 3).map((ind) => (
                             <Badge
                               key={ind}
                               variant="secondary"
-                              className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                              className="bg-blue-50 text-blue-700"
                             >
                               {ind}
                             </Badge>
                           ))}
-                          {!expandedIndustries[project.serialNo] &&
-                            project.industry.length > 3 && (
-                              <Badge
-                                variant="secondary"
-                                className="cursor-pointer border-blue-500/30 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleIndustryExpand(project.serialNo);
-                                }}
-                              >
-                                +{project.industry.length - 3}
-                              </Badge>
-                            )}
-                        </div>
-
-                        <div className="flex gap-2">
-                          {channels.map(
-                            (channel) =>
-                              project.applicableRoutes?.includes(
-                                channel.name,
-                              ) && (
-                                <div
-                                  key={channel.name}
-                                  className="group/channel relative"
-                                >
-                                  <div className="rounded-full border border-blue-500/30 bg-white p-2 transition-all duration-200 group-hover/channel:border-blue-500 group-hover/channel:bg-blue-500/10">
-                                    {channel.icon}
-                                  </div>
-                                  <div className="absolute -top-8 left-1/2 hidden -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs text-white group-hover/channel:block">
-                                    {channel.name}
-                                  </div>
-                                </div>
-                              ),
+                          {project.industry.length > 3 && (
+                            <Badge
+                              variant="secondary"
+                              className="bg-gray-50 text-gray-600"
+                            >
+                              +{project.industry.length - 3}
+                            </Badge>
                           )}
                         </div>
                       </div>
-
-                      <CardDescription className="text-base text-gray-600">
+                      <CardDescription className="text-gray-600">
                         {project.description}
                       </CardDescription>
-                    </CardHeader>
-
-                    {viewMode === "internal" && (
-                      <CardContent>
-                        <div className="space-y-4">
-                          {project.links.map((link, linkIndex) => (
-                            <div key={linkIndex} className="group/link">
-                              <Link
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-start space-x-4 rounded-lg p-3 transition-all duration-200 hover:translate-x-2 hover:bg-blue-500/10"
-                                onClick={(e) => e.stopPropagation()}
+                      <div className="flex gap-2">
+                        {channels.map(
+                          (channel) =>
+                            project.applicableRoutes?.includes(
+                              channel.name,
+                            ) && (
+                              <div
+                                key={channel.name}
+                                className="rounded-full bg-gray-50 p-2"
                               >
-                                <span className="text-2xl">{link.icon}</span>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="text-base font-semibold text-blue-600">
-                                      {link.name}
-                                    </h3>
-                                    <ExternalLink className="h-4 w-4 text-blue-600 opacity-0 transition-opacity group-hover/link:opacity-100" />
-                                  </div>
-                                  <p className="mt-1 text-sm text-gray-600">
-                                    {link.description}
-                                  </p>
-                                </div>
-                              </Link>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    )}
+                                {channel.icon}
+                              </div>
+                            ),
+                        )}
+                      </div>
+                    </CardHeader>
                   </Card>
                 ))}
               </div>
@@ -683,7 +640,7 @@ export default function Home() {
           ))}
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border-blue-500/20 bg-white p-6">
+            <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
               {loadingDetails ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-xl text-blue-600">
@@ -691,121 +648,65 @@ export default function Home() {
                   </div>
                 </div>
               ) : selectedProject ? (
-                <>
-                  <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    <div className="lg:col-span-2">
-                      <DialogHeader className="mb-6">
-                        <DialogTitle className="text-3xl font-bold text-blue-600">
-                          {selectedProject.title}
-                        </DialogTitle>
-                        <DialogDescription className="mt-2 text-lg text-gray-600">
-                          {selectedProject.description}
-                        </DialogDescription>
-                      </DialogHeader>
-
-                      <div className="space-y-8">
-                        <section>
-                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
-                            Overview
-                          </h3>
-                          <p className="text-gray-700">
-                            {selectedProject.overview}
-                          </p>
-                        </section>
-
-                        <section>
-                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
-                            Key Benefits
-                          </h3>
-                          <ul className="grid gap-3">
-                            {selectedProject.benefits.map((benefit, index) => (
-                              <li
-                                key={index}
-                                className="flex items-start gap-3"
-                              >
-                                <span className="mt-1 text-blue-500">•</span>
-                                <span className="text-gray-700">{benefit}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </section>
-
-                        <section>
-                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
-                            Use Case
-                          </h3>
-                          <p className="text-gray-700">
-                            {selectedProject.usecase}
-                          </p>
-                        </section>
-
-                        <section>
-                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
-                            Implementation Steps
-                          </h3>
-                          <ul className="grid gap-3">
-                            {selectedProject.implementation.map(
-                              (step, index) => (
-                                <li
-                                  key={index}
-                                  className="flex items-start gap-3"
-                                >
-                                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
-                                    {index + 1}
-                                  </span>
-                                  <span className="text-gray-700">{step}</span>
-                                </li>
-                              ),
-                            )}
-                          </ul>
-                        </section>
-
-                        <section>
-                          <h3 className="mb-4 text-xl font-semibold text-blue-600">
-                            ROI & Metrics
-                          </h3>
-                          <ul className="grid gap-3">
-                            {selectedProject.roiMetrics.map((metric, index) => (
-                              <li
-                                key={index}
-                                className="flex items-start gap-3"
-                              >
-                                <span className="mt-1 text-green-500">✓</span>
-                                <span className="text-gray-700">{metric}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </section>
-                      </div>
-                    </div>
-
-                    <div className="lg:col-span-1">
-                      <div className="sticky top-6">
-                        <div className="overflow-hidden rounded-lg border border-blue-500/20 bg-blue-50/50 p-4">
-                          {selectedProject.image && (
-                            <Image
-                              src={selectedProject.image}
-                              alt={selectedProject.title}
-                              width={400}
-                              height={400}
-                              className="mb-4 rounded-lg"
-                            />
-                          )}
-                          <div className="space-y-4">
-                            <div>
-                              <h4 className="text-sm font-medium text-gray-500">
-                                Service ID
-                              </h4>
-                              <p className="text-lg font-semibold text-blue-600">
-                                #{selectedProject.serialNo}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                  <div>
+                    {selectedProject.image && (
+                      <Image
+                        src={selectedProject.image}
+                        alt={selectedProject.title}
+                        width={600}
+                        height={400}
+                        className="rounded-lg object-cover"
+                      />
+                    )}
+                    <DialogHeader className="mt-6">
+                      <DialogTitle className="text-2xl font-bold text-gray-900">
+                        {selectedProject.title}
+                      </DialogTitle>
+                      <DialogDescription className="mt-2 text-gray-600">
+                        {selectedProject.description}
+                      </DialogDescription>
+                    </DialogHeader>
                   </div>
-                </>
+
+                  <div className="space-y-6">
+                    <section>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Overview
+                      </h3>
+                      <p className="mt-2 text-gray-600">
+                        {selectedProject.overview}
+                      </p>
+                    </section>
+
+                    <section>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Key Benefits
+                      </h3>
+                      <ul className="mt-2 space-y-2">
+                        {selectedProject.benefits.map((benefit, index) => (
+                          <li
+                            key={index}
+                            className="flex items-start gap-2 text-gray-600"
+                          >
+                            <span className="text-blue-500">•</span>
+                            {benefit}
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        setIsDialogOpen(false);
+                        setShowRegistration(true);
+                      }}
+                    >
+                      Get Started
+                    </Button>
+                  </div>
+                </div>
               ) : null}
             </DialogContent>
           </Dialog>
@@ -813,24 +714,20 @@ export default function Home() {
           <Dialog open={showRegistration} onOpenChange={setShowRegistration}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-blue-600">
-                  Get Access to More Features
+                <DialogTitle className="text-xl font-semibold text-gray-900">
+                  Get Started
                 </DialogTitle>
                 <DialogDescription>
-                  Join our community to unlock exclusive content and features.
+                  Enter your details to access our solutions.
                 </DialogDescription>
               </DialogHeader>
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="space-y-4 pt-4"
-              >
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
                     {...register("name")}
-                    className="border-blue-500/20"
-                    placeholder="John Doe"
+                    className="border-gray-200"
                   />
                   {errors.name && (
                     <p className="text-sm text-red-500">
@@ -845,8 +742,7 @@ export default function Home() {
                     id="email"
                     type="email"
                     {...register("email")}
-                    className="border-blue-500/20"
-                    placeholder="john@example.com"
+                    className="border-gray-200"
                   />
                   {errors.email && (
                     <p className="text-sm text-red-500">
@@ -860,8 +756,7 @@ export default function Home() {
                   <Input
                     id="organization"
                     {...register("organization")}
-                    className="border-blue-500/20"
-                    placeholder="Your Company"
+                    className="border-gray-200"
                   />
                   {errors.organization && (
                     <p className="text-sm text-red-500">
@@ -870,11 +765,8 @@ export default function Home() {
                   )}
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  Register
+                <Button type="submit" className="w-full">
+                  Continue
                 </Button>
               </form>
             </DialogContent>
