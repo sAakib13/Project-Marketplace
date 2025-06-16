@@ -574,7 +574,7 @@ export default function Home() {
                     {project.links[0]?.url && (
                       <div className="relative h-48 w-full overflow-hidden">
                         <Image
-                          src={project.links[0].url}
+                          src="https://picsum.photos/200/300"
                           alt={project.title}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
