@@ -7,6 +7,7 @@ A modern communication-based project marketplace built with **Next.js**, featuri
 ## 📌 Project Overview
 
 This app helps users explore categorized communication solutions like SMS, WhatsApp, and Viber campaigns. It enables:
+
 - 🔍 Browsing & searching for communication projects
 - 📄 Viewing detailed project info
 - 📬 Registering interest via a validated form
@@ -15,18 +16,18 @@ This app helps users explore categorized communication solutions like SMS, Whats
 
 ## ⚙️ Tech Stack
 
-| Purpose | Tools/Libraries |
-|--------|------------------|
-| **Framework** | Next.js, TypeScript, React |
-| **Styling** | TailwindCSS, Oxanium font, clsx |
-| **UI** | shadcn/ui, Lucide Icons, Radix UI |
-| **Carousel** | keen-slider, embla-carousel |
-| **Forms** | react-hook-form, zod |
-| **State** | React hooks |
-| **API** | Axios, Telerivet REST API |
-| **Validation** | zod, @hookform/resolvers |
-| **Charts** | recharts |
-| **Date Handling** | date-fns, react-day-picker |
+| Purpose           | Tools/Libraries                   |
+| ----------------- | --------------------------------- |
+| **Framework**     | Next.js, TypeScript, React        |
+| **Styling**       | TailwindCSS, Oxanium font, clsx   |
+| **UI**            | shadcn/ui, Lucide Icons, Radix UI |
+| **Carousel**      | keen-slider, embla-carousel       |
+| **Forms**         | react-hook-form, zod              |
+| **State**         | React hooks                       |
+| **API**           | Axios, Telerivet REST API         |
+| **Validation**    | zod, @hookform/resolvers          |
+| **Charts**        | recharts                          |
+| **Date Handling** | date-fns, react-day-picker        |
 
 ---
 
@@ -52,7 +53,7 @@ This app helps users explore categorized communication solutions like SMS, Whats
 
 ### Installation
 
-```bash
+````bash
 git clone https://github.com/your-org/telerivet-marketplace.git
 cd telerivet-marketplace
 npm install
@@ -62,7 +63,7 @@ npm install
 ```bash
 npm run dev
 
-```
+````
 
 ### Build
 
@@ -89,10 +90,10 @@ TELERIVET_API_KEY=your_secret_key
 
 ## 📡 API Endpoints
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| `GET` | `/api/projects` | Fetch all available services |
-| `POST` | `/api/article` | Fetch project by serial number |
+| Method | Endpoint        | Description                    |
+| ------ | --------------- | ------------------------------ |
+| `GET`  | `/api/projects` | Fetch all available services   |
+| `POST` | `/api/article`  | Fetch project by serial number |
 
 ---
 
@@ -123,36 +124,4 @@ npm run format
 
 ## 🛡 License
 
-MIT © YourCompany
-
-```
-
----
-
-## ✅ Developer Onboarding Documentation
-
-```md
-# 🧭 Developer Onboarding Guide
-
-Welcome to the **Telerivet Solutions Marketplace**! This guide helps you get productive fast.
-
----
-
-## 🛠️ Setup
-
-1. Clone the repo:
-
-```bash
-git clone https://github.com/your-org/telerivet-marketplace.git
-cd telerivet-marketplace
-
-```
-
-1. Install dependencies:
-
-```bash
-npm install
-
-```
-
-1. Create `.env.local` with your API keys.
+MIT
