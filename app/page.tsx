@@ -157,17 +157,8 @@ export default function Home() {
     [key: string]: boolean;
   }>({});
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showRegistration, setShowRegistration] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-  });
 
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     initial: 0,
@@ -190,21 +181,6 @@ export default function Home() {
       clearInterval(interval);
     };
   }, [instanceRef]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const showThreshold = window.innerHeight * 0.5;
-
-      if (scrollPosition > showThreshold && !hasScrolled && !formSubmitted) {
-        setHasScrolled(true);
-        setShowRegistration(true);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasScrolled, formSubmitted]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -271,16 +247,6 @@ export default function Home() {
   const isNewService = (timeUpdated: number) => {
     const threeDaysAgo = Date.now() / 1000 - 3 * 24 * 60 * 60;
     return timeUpdated > threeDaysAgo;
-  };
-
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    try {
-      console.log("Form submitted:", data);
-      setFormSubmitted(true);
-      setShowRegistration(false);
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    }
   };
 
   const filteredProjects = projects
@@ -700,7 +666,6 @@ export default function Home() {
                       className="w-full"
                       onClick={() => {
                         setIsDialogOpen(false);
-                        setShowRegistration(true);
                       }}
                     >
                       Get Started
@@ -708,67 +673,6 @@ export default function Home() {
                   </div>
                 </div>
               ) : null}
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={showRegistration} onOpenChange={setShowRegistration}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-semibold text-gray-900">
-                  Get Started
-                </DialogTitle>
-                <DialogDescription>
-                  Enter your details to access our solutions.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    {...register("name")}
-                    className="border-gray-200"
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">
-                      {errors.name.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    {...register("email")}
-                    className="border-gray-200"
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">
-                      {errors.email.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="organization">Organization</Label>
-                  <Input
-                    id="organization"
-                    {...register("organization")}
-                    className="border-gray-200"
-                  />
-                  {errors.organization && (
-                    <p className="text-sm text-red-500">
-                      {errors.organization.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <Button type="submit" className="w-full">
-                  Continue
-                </Button>
-              </form>
             </DialogContent>
           </Dialog>
 
