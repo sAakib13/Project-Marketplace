@@ -125,3 +125,7 @@ npm run format
 ## 🛡 License
 
 MIT
+
+## 📃 For more info
+
+Visit this document [Document](https://docs.google.com/document/d/11tLeV3DK2C7YMR6LhXq5-TXjvI-W0-_1J0pcuafi6aA/edit?usp=sharing)
