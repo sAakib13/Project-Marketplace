@@ -157,8 +157,6 @@ export default function Home() {
     [key: string]: boolean;
   }>({});
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [hasScrolled, setHasScrolled] = useState(false);
-  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     initial: 0,
@@ -320,10 +318,12 @@ export default function Home() {
     <>
       <header className="sticky top-0 z-50 border-b border-blue-500/20 bg-black/80 backdrop-blur-sm">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-white"></span>
+          {/* Left section: Toggle + Logo */}
+          <div className="flex items-center gap-4">
             <Image src={Logo} alt="Telerivet Logo" width={200} height={200} />
           </div>
+
+          {/* Right section: Get Started Button */}
           <div className="flex items-center gap-6">
             <Link
               href="#solutions"
@@ -333,6 +333,17 @@ export default function Home() {
             >
               Get Started
             </Link>
+
+            <button
+              onClick={toggleViewMode}
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-blue-500/30 bg-white shadow transition hover:border-blue-500 hover:bg-blue-500/10"
+            >
+              {viewMode === "internal" ? (
+                <Users className="h-6 w-6 text-blue-600" />
+              ) : (
+                <User className="h-6 w-6 text-blue-600" />
+              )}
+            </button>
           </div>
         </nav>
       </header>
@@ -394,19 +405,6 @@ export default function Home() {
             >
               <ChevronRight className="h-6 w-6 text-blue-600" />
             </button>
-
-            <div className="absolute right-4 top-4">
-              <button
-                onClick={toggleViewMode}
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-blue-500/30 bg-white shadow transition hover:border-blue-500 hover:bg-blue-500/10"
-              >
-                {viewMode === "internal" ? (
-                  <Users className="h-6 w-6 text-blue-600" />
-                ) : (
-                  <User className="h-6 w-6 text-blue-600" />
-                )}
-              </button>
-            </div>
           </div>
 
           <div className="pb-20" id="solutions">
