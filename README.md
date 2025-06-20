@@ -56,3 +56,103 @@ This app helps users explore categorized communication solutions like SMS, Whats
 git clone https://github.com/your-org/telerivet-marketplace.git
 cd telerivet-marketplace
 npm install
+
+### Development
+
+```bash
+npm run dev
+
+```
+
+### Build
+
+```bash
+npm run build
+
+```
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env.local` file with:
+
+```
+TELERIVET_PROJECT_ID=your_project_id
+TELERIVET_TABLE_ID=your_services_table
+TELERIVET_TABLE_ID_ARTICLE=your_article_table
+TELERIVET_API_KEY=your_secret_key
+
+```
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/projects` | Fetch all available services |
+| `POST` | `/api/article` | Fetch project by serial number |
+
+---
+
+## 📂 Project Structure
+
+```
+/app
+  /layout.tsx        → Global styling, font, metadata
+  /page.tsx          → Main marketplace page
+/components          → UI elements (Cards, Dialogs, Filters)
+/lib                 → Utility functions
+/styles              → Tailwind & globals.css
+
+```
+
+---
+
+## 👥 Contributing
+
+We welcome PRs! Please fork the repo and submit a pull request for review. Run `prettier` before committing:
+
+```bash
+npm run format
+
+```
+
+---
+
+## 🛡 License
+
+MIT © YourCompany
+
+```
+
+---
+
+## ✅ Developer Onboarding Documentation
+
+```md
+# 🧭 Developer Onboarding Guide
+
+Welcome to the **Telerivet Solutions Marketplace**! This guide helps you get productive fast.
+
+---
+
+## 🛠️ Setup
+
+1. Clone the repo:
+
+```bash
+git clone https://github.com/your-org/telerivet-marketplace.git
+cd telerivet-marketplace
+
+```
+
+1. Install dependencies:
+
+```bash
+npm install
+
+```
+
+1. Create `.env.local` with your API keys.
