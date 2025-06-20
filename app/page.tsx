@@ -349,68 +349,66 @@ export default function Home() {
       </header>
 
       <main className="min-h-screen bg-gradient-to-r from-blue-100 to-white pb-12">
-        <div className="mx-auto max-w-6xl px-4 py-4">
-          <div className="relative my-16">
-            <div
-              ref={sliderRef}
-              className="keen-slider rounded-2xl bg-white shadow-xl"
-            >
-              {heroSlides.map((slide, index) => (
-                <div
-                  key={index}
-                  className="keen-slider__slide relative flex min-h-[400px] items-center overflow-hidden"
-                >
-                  <Image
-                    src={slide.image}
-                    alt={slide.title}
-                    fill
-                    className="object-cover opacity-20"
-                  />
-                  <div className="relative z-10 mx-auto max-w-3xl p-12 text-center">
+        <div className="relative h-full w-full">
+          <div
+            ref={sliderRef}
+            className="keen-slider rounded-2xl bg-white shadow-xl"
+          >
+            {heroSlides.map((slide, index) => (
+              <div
+                key={index}
+                className="keen-slider__slide relative flex min-h-[1000px] items-center overflow-hidden"
+              >
+                <Image
+                  src={slide.image}
+                  alt={slide.title}
+                  fill
+                  className="object-cover opacity-20"
+                />
+                <div className="relative z-10 mx-auto h-[50vh] max-w-3xl p-12 text-center">
+                  <div className="flex flex-col items-center justify-center h-full">
                     <h1 className="mb-6 text-4xl font-bold text-gray-900">
                       {slide.title}
                     </h1>
                     <p className="text-lg text-gray-600">{slide.description}</p>
                   </div>
                 </div>
+              </div>
+            ))}
+          </div>
+
+          {instanceRef.current && (
+            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+              {[...Array(heroSlides.length)].map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    instanceRef.current?.moveToIdx(idx);
+                  }}
+                  className={`h-2 w-2 rounded-full transition-all ${
+                    currentSlide === idx ? "w-6 bg-blue-600" : "bg-blue-300"
+                  }`}
+                />
               ))}
             </div>
+          )}
 
-            {instanceRef.current && (
-              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-                {[...Array(heroSlides.length)].map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      instanceRef.current?.moveToIdx(idx);
-                    }}
-                    className={`h-2 w-2 rounded-full transition-all ${
-                      currentSlide === idx ? "w-6 bg-blue-600" : "bg-blue-300"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
+          <button
+            onClick={() => instanceRef.current?.prev()}
+            className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition hover:bg-white"
+          >
+            <ChevronLeft className="h-6 w-6 text-blue-600" />
+          </button>
 
-            <button
-              onClick={() => instanceRef.current?.prev()}
-              className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition hover:bg-white"
-            >
-              <ChevronLeft className="h-6 w-6 text-blue-600" />
-            </button>
+          <button
+            onClick={() => instanceRef.current?.next()}
+            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition hover:bg-white"
+          >
+            <ChevronRight className="h-6 w-6 text-blue-600" />
+          </button>
+        </div>
 
-            <button
-              onClick={() => instanceRef.current?.next()}
-              className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg backdrop-blur-sm transition hover:bg-white"
-            >
-              <ChevronRight className="h-6 w-6 text-blue-600" />
-            </button>
-          </div>
-
-          <div className="pb-20" id="solutions">
-            <hr className="rounded-full border-t-2 border-black opacity-80" />
-          </div>
-
+        <div className="mx-auto mt-4 max-w-6xl px-4 py-4">
           <div className="mx-auto mb-8 max-w-2xl">
             <div className="relative mb-4">
               <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
