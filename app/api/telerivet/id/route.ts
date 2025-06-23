@@ -38,6 +38,8 @@ export async function POST(req: NextRequest) {
       overview: row.vars.overview || "No overview available",
       roiMetrics: row.vars.roi_metrics?.split(",") || [],
       image: row.vars.image || [],
+      industry: row.vars.industry || [],
+      applicableRoutes: row.vars.applicable_route || [],
     }));
 
     return NextResponse.json(projectsArticle);

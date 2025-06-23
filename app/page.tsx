@@ -74,6 +74,8 @@ type ProjectDetails = {
   implementation: string[];
   overview: string;
   roiMetrics: string[];
+  applicableRoutes: string[];
+  industry: string;
 };
 
 type ViewMode = "internal" | "customer";
@@ -648,64 +650,130 @@ export default function Home() {
                   </div>
                 </div>
               ) : selectedProject ? (
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                  <div>
-                    {selectedProject.image && (
-                      <Image
-                        src={selectedProject.image}
-                        alt={selectedProject.title}
-                        width={600}
-                        height={400}
-                        className="rounded-lg object-cover"
-                      />
-                    )}
-                    <DialogHeader className="mt-6">
-                      <DialogTitle className="text-2xl font-bold text-gray-900">
-                        {selectedProject.title}
-                      </DialogTitle>
-                      <DialogDescription className="mt-2 text-gray-600">
-                        {selectedProject.description}
-                      </DialogDescription>
-                    </DialogHeader>
-                  </div>
+                (() => {
+                  console.log("Selected Project Data:", selectedProject);
+                  return (
+                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                      {/* LEFT SIDE: IMAGE + HEADER */}
+                      <div>
+                        {selectedProject.image && (
+                          <Image
+                            src={
+                              selectedProject.image
+                                ? "https://picsum.photos/400/400 "
+                                : selectedProject.image // need to be added as image url
+                            }
+                            alt={selectedProject.title}
+                            width={400}
+                            height={400}
+                            className="rounded-lg object-cover"
+                          />
+                        )}
+                      </div>
 
-                  <div className="space-y-6">
-                    <section>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Overview
-                      </h3>
-                      <p className="mt-2 text-gray-600">
-                        {selectedProject.overview}
-                      </p>
-                    </section>
+                      {/* RIGHT SIDE: DETAILS */}
+                      <div className="space-y-6">
+                        {/* Header Section */}
+                        <DialogHeader className="mt-6 space-y-4">
+                          <DialogTitle className="text-2xl font-bold text-gray-900">
+                            {selectedProject.title}
+                          </DialogTitle>
 
-                    <section>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Key Benefits
-                      </h3>
-                      <ul className="mt-2 space-y-2">
-                        {selectedProject.benefits.map((benefit, index) => (
-                          <li
-                            key={index}
-                            className="flex items-start gap-2 text-gray-600"
-                          >
-                            <span className="text-blue-500">•</span>
-                            {benefit}
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
+                          <DialogDescription className="gap-8 text-gray-600">
+                            {selectedProject.description}
+                          </DialogDescription>
 
-                    <Button
-                      className="w-full"
-                      onClick={() => {
-                        setIsDialogOpen(false);
-                      }}
-                    >
-                      Get Started
-                    </Button>
-                  </div>
-                </div>
+                          {/* Industry Tags */}
+                          <div className="flex flex-wrap gap-4">
+                            {(selectedProject.industry?.split(", ") || [])
+                              .slice(0, 3)
+                              .map((ind) => (
+                                <Badge
+                                  key={ind}
+                                  variant="secondary"
+                                  className="bg-blue-50 text-blue-700"
+                                >
+                                  {ind}
+                                </Badge>
+                              ))}
+                            {selectedProject.industry?.split(", ").length >
+                              3 && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-gray-50 text-gray-600"
+                              >
+                                +
+                                {selectedProject.industry.split(", ").length -
+                                  3}
+                              </Badge>
+                            )}
+                          </div>
+                        </DialogHeader>
+
+                        {/* Overview Section */}
+                        <section>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Overview
+                          </h3>
+                          <p className="mt-2 text-gray-600">
+                            {selectedProject.overview}
+                          </p>
+                        </section>
+
+                        {/* Key Benefits */}
+                        <section>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Key Benefits
+                          </h3>
+                          <ul className="mt-2 space-y-2">
+                            {selectedProject.benefits?.map((benefit, index) => (
+                              <li
+                                key={index}
+                                className="flex items-start gap-2 text-gray-600"
+                              >
+                                <span className="text-blue-500">•</span>
+                                {benefit}
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+
+                        {/* Applicable Channels */}
+                        {selectedProject.applicableRoutes?.length > 0 && (
+                          <section>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              Channels
+                            </h3>
+                            <div className="mt-2 flex flex-wrap gap-3">
+                              {channels.map(
+                                (channel) =>
+                                  selectedProject.applicableRoutes.includes(
+                                    channel.name,
+                                  ) && (
+                                    <div
+                                      key={channel.name}
+                                      className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-800"
+                                    >
+                                      {channel.icon}
+                                      <span>{channel.name}</span>
+                                    </div>
+                                  ),
+                              )}
+                            </div>
+                          </section>
+                        )}
+
+                        {/* Call To Action */}
+                        <Button
+                          className="w-full"
+                          onClick={() => setIsDialogOpen(false)}
+                        >
+                          Get Started
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })()
               ) : null}
             </DialogContent>
           </Dialog>
