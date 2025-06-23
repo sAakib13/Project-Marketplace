@@ -1,13 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { useKeenSlider } from "keen-slider/react";
+import { useForm } from "react-hook-form";
+import axios from "axios";
+import Link from "next/link";
+import Image from "next/image";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// Icons
 import {
   Search,
   ExternalLink,
@@ -19,7 +20,19 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Pencil,
+  Trash,
 } from "lucide-react";
+
+// UI components
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -36,69 +49,13 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import Link from "next/link";
-import axios from "axios";
+
+// Assets
 import Logo from "./TR-white-logo.png";
-import Hero from "./Hero.png";
-import Image from "next/image";
-import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
-import { Pencil, Trash } from "lucide-react"; // Or use Heroicons if preferred
 
-type Project = {
-  title: string;
-  description: string;
-  industry: string[];
-  serialNo: string;
-  category: string;
-  timeUpdated: number;
-  applicableRoutes: string[];
-  links: {
-    name: string;
-    url: string;
-    description: string;
-    icon: string;
-  }[];
-};
-
-type ProjectDetails = {
-  title: string;
-  description: string;
-  serialNo: string;
-  usecase: string;
-  benefits: string[];
-  image: string;
-  implementation: string[];
-  overview: string;
-  roiMetrics: string[];
-  applicableRoutes: string[];
-  industry: string;
-};
-
-type ViewMode = "internal" | "customer";
-
-const mainIndustries = ["FMCG", "Health", "Technology", "Finance", "Retail"];
-
-const otherIndustries = [
-  "NGO",
-  "Logistics",
-  "Telecom",
-  "Manufacturing",
-  "Education",
-  "Energy",
-  "Construction",
-  "Agriculture",
-  "Tourism",
-  "Media",
-  "Real Estate",
-  "Transportation",
-  "Environmental Services",
-  "Government Services",
-];
-
+// Communication channels with their icons
+// CONSTANTS
 const channels = [
   { name: "SMS", icon: <MessageSquare className="h-4 w-4" /> },
   {
@@ -112,6 +69,7 @@ const channels = [
   { name: "Voice", icon: <Phone className="h-4 w-4" /> },
 ];
 
+// Hero slides for the carousel
 const heroSlides = [
   {
     title: "Telerivet Solutions Marketplace",
@@ -136,13 +94,72 @@ const heroSlides = [
   },
 ];
 
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  organization: z.string().min(2, "Organization must be at least 2 characters"),
-});
+// View modes for the application
+type ViewMode = "internal" | "customer";
 
+/**
+ * Type definition for a Project
+ * @typedef {Object} Project
+ * @property {string} title - The title of the project
+ * @property {string} description - Short description of the project
+ * @property {string[]} industry - Industries this project applies to
+ * @property {string} serialNo - Unique identifier for the project
+ * @property {string} category - Category of the project
+ * @property {number} timeUpdated - Timestamp of last update
+ * @property {string[]} applicableRoutes - Communication channels supported
+ * @property {Array<{name: string, url: string, description: string, icon: string}>} links - Related links
+ */
+type Project = {
+  title: string;
+  description: string;
+  industry: string[];
+  serialNo: string;
+  category: string;
+  timeUpdated: number;
+  applicableRoutes: string[];
+  links: {
+    name: string;
+    url: string;
+    description: string;
+    icon: string;
+  }[];
+};
+
+/**
+ * Type definition for detailed Project information
+ * @typedef {Object} ProjectDetails
+ * @property {string} title - Project title
+ * @property {string} description - Detailed description
+ * @property {string} serialNo - Unique identifier
+ * @property {string} usecase - Use case description
+ * @property {string[]} benefits - List of benefits
+ * @property {string} image - URL to project image
+ * @property {string[]} implementation - Implementation steps
+ * @property {string} overview - High-level overview
+ * @property {string[]} roiMetrics - ROI metrics
+ * @property {string[]} applicableRoutes - Supported channels
+ * @property {string} industry - Primary industry
+ */
+type ProjectDetails = {
+  title: string;
+  description: string;
+  serialNo: string;
+  usecase: string;
+  benefits: string[];
+  image: string;
+  implementation: string[];
+  overview: string;
+  roiMetrics: string[];
+  applicableRoutes: string[];
+  industry: string;
+};
+
+/**
+ * Main component for the Telerivet Solutions Marketplace
+ * @returns {JSX.Element} The rendered component
+ */
 export default function Home() {
+  // State management for various features
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
@@ -160,7 +177,21 @@ export default function Home() {
     [key: string]: boolean;
   }>({});
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editProject, setEditProject] = useState(null);
 
+  // Form state for project editing
+  const [formState, setFormState] = useState({
+    title: "",
+    description: "",
+    industry: "",
+    image: "",
+    overview: "",
+    benefits: [""],
+    applicableRoutes: [],
+  });
+
+  // Keen Slider configuration for the hero carousel
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     initial: 0,
     slideChanged(slider) {
@@ -171,6 +202,7 @@ export default function Home() {
     slides: { perView: 1 },
   });
 
+  // Auto-advance slides every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       if (instanceRef.current) {
@@ -183,7 +215,12 @@ export default function Home() {
     };
   }, [instanceRef]);
 
+  // Fetch projects on component mount
   useEffect(() => {
+    /**
+     * Fetches projects from the API and updates state
+     * @async
+     */
     const fetchProjects = async () => {
       try {
         const response = await axios.get("/api/telerivet");
@@ -204,6 +241,10 @@ export default function Home() {
     fetchProjects();
   }, []);
 
+  /**
+   * Fetches detailed information for a specific project
+   * @param {string} serialNo - The unique identifier of the project
+   */
   const fetchProjectDetails = async (serialNo: string) => {
     setLoadingDetails(true);
     try {
@@ -218,6 +259,10 @@ export default function Home() {
     }
   };
 
+  /**
+   * Toggles an industry in the filter selection
+   * @param {string} industry - The industry to toggle
+   */
   const toggleIndustry = (industry: string) => {
     setSelectedIndustries((prev) =>
       prev.includes(industry)
@@ -226,6 +271,10 @@ export default function Home() {
     );
   };
 
+  /**
+   * Toggles a communication channel in the filter selection
+   * @param {string} channel - The channel to toggle
+   */
   const toggleChannel = (channel: string) => {
     setSelectedChannels((prev) =>
       prev.includes(channel)
@@ -234,10 +283,17 @@ export default function Home() {
     );
   };
 
+  /**
+   * Switches between internal and customer view modes
+   */
   const toggleViewMode = () => {
     setViewMode((prev) => (prev === "internal" ? "customer" : "internal"));
   };
 
+  /**
+   * Expands or collapses the industries list for a project
+   * @param {string} serialNo - The project's unique identifier
+   */
   const toggleIndustryExpand = (serialNo: string) => {
     setExpandedIndustries((prev) => ({
       ...prev,
@@ -245,18 +301,32 @@ export default function Home() {
     }));
   };
 
+  /**
+   * Checks if a project was recently updated (within 3 days)
+   * @param {number} timeUpdated - Timestamp of last update
+   * @returns {boolean} True if the project is considered "new"
+   */
   const isNewService = (timeUpdated: number) => {
     const threeDaysAgo = Date.now() / 1000 - 3 * 24 * 60 * 60;
     return timeUpdated > threeDaysAgo;
   };
 
+  /**
+   * Handles project update action
+   * @param {Project} project - The project to update
+   */
   const handleUpdate = (project: Project) => {
-    // Implement update logic here
+    // TODO: Implement update logic
     console.log("Update project:", project);
   };
 
+  /**
+   * Filters and sorts projects based on current filters and search query
+   * @type {Project[]}
+   */
   const filteredProjects = projects
     .filter((project) => {
+      // Check if project matches search query
       const matchesSearch =
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -269,16 +339,19 @@ export default function Home() {
           ind.toLowerCase().includes(searchQuery.toLowerCase()),
         );
 
+      // Check if project matches selected industries
       const matchesIndustry =
         selectedIndustries.length === 0 ||
         project.industry.some((ind) => selectedIndustries.includes(ind));
 
+      // Check if project matches selected channels
       const matchesChannels =
         selectedChannels.length === 0 ||
         project.applicableRoutes.some((route) =>
           selectedChannels.includes(route),
         );
 
+      // Check if project matches "new only" filter
       const matchesNewOnly = !showNewOnly || isNewService(project.timeUpdated);
 
       return (
@@ -292,6 +365,7 @@ export default function Home() {
       return 0;
     });
 
+  // Group projects by category for display
   const groupedProjects = filteredProjects.reduce(
     (acc, project) => {
       const category = project.category || "Uncategorized";
@@ -304,8 +378,10 @@ export default function Home() {
     {} as Record<string, Project[]>,
   );
 
+  // Sort categories alphabetically
   const sortedCategories = Object.keys(groupedProjects).sort();
 
+  // Loading state
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
@@ -314,6 +390,7 @@ export default function Home() {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
