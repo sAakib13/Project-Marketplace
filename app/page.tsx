@@ -250,6 +250,11 @@ export default function Home() {
     return timeUpdated > threeDaysAgo;
   };
 
+  const handleUpdate = (project: Project) => {
+    // Implement update logic here
+    console.log("Update project:", project);
+  };
+
   const filteredProjects = projects
     .filter((project) => {
       const matchesSearch =
@@ -565,7 +570,7 @@ export default function Home() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // handleUpdate(project);
+                              handleUpdate(project);
                             }}
                             className="rounded-full bg-white/80 p-2 text-blue-600 hover:bg-white"
                             title="Edit"
@@ -660,12 +665,12 @@ export default function Home() {
                           <Image
                             src={
                               selectedProject.image
-                                ? "https://picsum.photos/400/400 "
+                                ? "https://picsum.photos/400/500 "
                                 : selectedProject.image // need to be added as image url
                             }
                             alt={selectedProject.title}
                             width={400}
-                            height={400}
+                            height={500}
                             className="rounded-lg object-cover"
                           />
                         )}
@@ -764,12 +769,12 @@ export default function Home() {
                         )}
 
                         {/* Call To Action */}
-                        <Button
+                        {/* <Button
                           className="w-full"
                           onClick={() => setIsDialogOpen(false)}
                         >
                           Get Started
-                        </Button>
+                        </Button> */}
                       </div>
                     </div>
                   );
