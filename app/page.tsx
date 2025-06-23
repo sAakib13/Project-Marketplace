@@ -46,6 +46,7 @@ import Hero from "./Hero.png";
 import Image from "next/image";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
+import { Pencil, Trash } from "lucide-react"; // Or use Heroicons if preferred
 
 type Project = {
   title: string;
@@ -366,7 +367,7 @@ export default function Home() {
                   className="object-cover opacity-20"
                 />
                 <div className="relative z-10 mx-auto h-[50vh] max-w-3xl p-12 text-center">
-                  <div className="flex flex-col items-center justify-center h-full">
+                  <div className="flex h-full flex-col items-center justify-center">
                     <h1 className="mb-6 text-4xl font-bold text-gray-900">
                       {slide.title}
                     </h1>
@@ -408,6 +409,7 @@ export default function Home() {
           </button>
         </div>
 
+        {/* SEARCH FEILD  */}
         <div className="mx-auto mt-4 max-w-6xl px-4 py-4">
           <div className="mx-auto mb-8 max-w-2xl">
             <div className="relative mb-4">
@@ -423,6 +425,7 @@ export default function Home() {
               />
             </div>
 
+            {/* BADGES AND FILTERS */}
             <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
               <Badge
                 variant={showNewOnly ? "default" : "outline"}
@@ -533,6 +536,7 @@ export default function Home() {
                     className="group relative cursor-pointer overflow-hidden border-0 bg-white shadow-lg transition-all duration-200 hover:shadow-xl"
                     onClick={() => fetchProjectDetails(project.serialNo)}
                   >
+                    {/* Project image (if present) */}
                     {project.links[0]?.url && (
                       <div className="relative h-48 w-full overflow-hidden">
                         <Image
@@ -541,17 +545,49 @@ export default function Home() {
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
                         />
+
+                        {/* Overlay for better text/icon visibility */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+
+                        {/* "New" Badge */}
                         {isNewService(project.timeUpdated) && (
-                          <div className="absolute right-3 top-3">
-                            <Badge className="bg-green-500 text-white">
+                          <div className="absolute left-3 top-3 z-20">
+                            <Badge className="bg-green-500 text-white shadow">
                               New
                             </Badge>
                           </div>
                         )}
+
+                        {/* Edit/Delete Icons */}
+                        <div className="absolute right-3 top-3 z-20 flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // handleUpdate(project);
+                            }}
+                            className="rounded-full bg-white/80 p-2 text-blue-600 hover:bg-white"
+                            title="Edit"
+                            aria-label="Edit project"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // handleDelete(project.serialNo);
+                            }}
+                            className="rounded-full bg-white/80 p-2 text-red-600 hover:bg-white"
+                            title="Delete"
+                            aria-label="Delete project"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     )}
 
-                    <CardHeader className="space-y-4">
+                    {/* Card content */}
+                    <CardHeader className="space-y-4 p-4">
                       <div className="space-y-2">
                         <CardTitle className="text-xl font-semibold text-gray-900">
                           {project.title}
@@ -576,9 +612,11 @@ export default function Home() {
                           )}
                         </div>
                       </div>
+
                       <CardDescription className="text-gray-600">
                         {project.description}
                       </CardDescription>
+
                       <div className="flex gap-2">
                         {channels.map(
                           (channel) =>
