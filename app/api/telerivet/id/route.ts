@@ -4,7 +4,7 @@ import axios from "axios";
 export const dynamic = "force-dynamic";
 const API_KEY = process.env.TELERIVET_API_KEY;
 const PROJECT_ID = process.env.TELERIVET_PROJECT_ID;
-const TABLE_ID = process.env.TELERIVET_TABLE_ID_ARTICLE;
+const TABLE_ID = process.env.TELERIVET_TABLE_ID;
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -32,14 +32,14 @@ export async function POST(req: NextRequest) {
       title: row.vars.title || "Untitled Project",
       description: row.vars.description || "No description available",
       serialNo: row.vars.s_n || "000",
-      usecase: row.vars.usecase || "No use case provided",
-      benefits: row.vars.benefits?.split(",") || [],
       implementation: row.vars.implementation?.split(",") || [],
       overview: row.vars.overview || "No overview available",
-      roiMetrics: row.vars.roi_metrics?.split(",") || [],
-      image: row.vars.image || [],
+      card_image: row.vars.card_image || "no-image.png",
       industry: row.vars.industry || [],
       applicableRoutes: row.vars.applicable_route || [],
+      // usecase: row.vars.usecase || "No use case provided",
+      // benefits: row.vars.benefits?.split(",") || [],
+      // roiMetrics: row.vars.roi_metrics?.split(",") || [],
     }));
 
     return NextResponse.json(projectsArticle);
