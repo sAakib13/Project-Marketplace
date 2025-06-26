@@ -202,6 +202,30 @@ export default function Home() {
     slides: { perView: 1 },
   });
 
+  const [editingProject, setEditingProject] = useState(null);
+  const [formValues, setFormValues] = useState({
+    title: "",
+    description: "",
+    industry: [],
+    category: "",
+    telerivetDescription: "",
+    telerivetUrl: "",
+    applicableRoutes: [],
+  });
+
+  const handleUpdate = (project) => {
+    setEditingProject(project);
+    setFormValues({
+      title: project.title,
+      description: project.description,
+      industry: project.industry,
+      category: project.category,
+      telerivetDescription: project.telerivetDescription,
+      telerivetUrl: project.telerivetUrl,
+      applicableRoutes: project.applicableRoutes || [],
+    });
+  };
+
   // Auto-advance slides every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -315,10 +339,6 @@ export default function Home() {
    * Handles project update action
    * @param {Project} project - The project to update
    */
-  const handleUpdate = (project: Project) => {
-    // TODO: Implement update logic
-    console.log("Update project:", project);
-  };
 
   /**
    * Filters and sorts projects based on current filters and search query
@@ -722,6 +742,114 @@ export default function Home() {
               </div>
             </div>
           ))}
+
+          {/* Edit Form  */}
+          {editingProject && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+              <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 text-xl font-bold">Edit Project</h3>
+
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={formValues.title}
+                    onChange={(e) =>
+                      setFormValues({ ...formValues, title: e.target.value })
+                    }
+                    placeholder="Title"
+                    className="w-full rounded border px-3 py-2"
+                  />
+
+                  <textarea
+                    value={formValues.description}
+                    onChange={(e) =>
+                      setFormValues({
+                        ...formValues,
+                        description: e.target.value,
+                      })
+                    }
+                    placeholder="Description"
+                    className="w-full rounded border px-3 py-2"
+                    rows={3}
+                  />
+
+                  <input
+                    type="text"
+                    value={formValues.industry}
+                    onChange={(e) =>
+                      setFormValues({ ...formValues, industry: e.target.value })
+                    }
+                    placeholder="Industry"
+                    className="w-full rounded border px-3 py-2"
+                  />
+
+                  <input
+                    type="text"
+                    value={formValues.category}
+                    onChange={(e) =>
+                      setFormValues({ ...formValues, category: e.target.value })
+                    }
+                    placeholder="Category"
+                    className="w-full rounded border px-3 py-2"
+                  />
+
+                  <textarea
+                    value={formValues.telerivetDescription}
+                    onChange={(e) =>
+                      setFormValues({
+                        ...formValues,
+                        telerivetDescription: e.target.value,
+                      })
+                    }
+                    placeholder="Telerivet Description"
+                    className="w-full rounded border px-3 py-2"
+                    rows={3}
+                  />
+
+                  <input
+                    type="url"
+                    value={formValues.telerivetUrl}
+                    onChange={(e) =>
+                      setFormValues({
+                        ...formValues,
+                        telerivetUrl: e.target.value,
+                      })
+                    }
+                    placeholder="Telerivet URL"
+                    className="w-full rounded border px-3 py-2"
+                  />
+
+                  <input
+                    type="text"
+                    value={formValues.applicableRoutes}
+                    onChange={(e) =>
+                      setFormValues({
+                        ...formValues,
+                        applicableRoutes: e.target.value,
+                      })
+                    }
+                    placeholder="Applicable Routes"
+                    className="w-full rounded border px-3 py-2"
+                  />
+                </div>
+
+                <div className="mt-6 flex justify-end gap-2">
+                  <button
+                    onClick={() => setEditingProject(null)}
+                    className="rounded bg-gray-100 px-4 py-2 text-sm text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    // onClick={handleSave}
+                    className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
