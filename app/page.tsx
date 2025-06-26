@@ -127,6 +127,7 @@ type Project = {
   category: string;
   timeUpdated: number;
   applicableRoutes: string[];
+  card_image: string; // Use card_image for displaying images
   rowId?: string; // Add rowId for API operations
   links: {
     name: string;
@@ -143,6 +144,7 @@ type ProjectDetails = {
   usecase: string;
   benefits: string[];
   image: string;
+  card_image?: string;
   implementation: string[];
   overview: string;
   roiMetrics: string[];
@@ -161,6 +163,7 @@ const editFormSchema = z.object({
   hubspotUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   liveUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   applicableRoutes: z.array(z.string()),
+  card_image: z.string().url("Invalid image URL").optional().or(z.literal("")),
 });
 
 export default function Home() {
@@ -207,6 +210,7 @@ export default function Home() {
     hubspotUrl: string;
     liveUrl: string;
     applicableRoutes: string[];
+    card_image: string;
   }>({
     resolver: zodResolver(editFormSchema),
     defaultValues: {
@@ -219,6 +223,7 @@ export default function Home() {
       hubspotUrl: "",
       liveUrl: "",
       applicableRoutes: [],
+      card_image: "",
     },
   });
 
@@ -298,6 +303,7 @@ export default function Home() {
         project.links.find((l) => l.name === "HubSpot Article")?.url || "",
       liveUrl: project.links.find((l) => l.name === "Live Project")?.url || "",
       applicableRoutes: project.applicableRoutes || [],
+      card_image: project.card_image || "",
     });
 
     setEditDialogOpen(true);
@@ -321,6 +327,7 @@ export default function Home() {
           hubspot_url: data.hubspotUrl,
           live_url: data.liveUrl,
           applicable_route: data.applicableRoutes.join(","),
+          card_image: data.card_image,
         },
       };
 
@@ -342,6 +349,7 @@ export default function Home() {
                 category: data.category,
                 industry: data.industry.split(",").map((i: string) => i.trim()),
                 applicableRoutes: data.applicableRoutes,
+                card_image: data.card_image,
                 links: [
                   ...(data.telerivetUrl
                     ? [
@@ -465,6 +473,7 @@ export default function Home() {
 
   const getProjectImage = (project: Project) => {
     return (
+      project.card_image ||
       categoryImages[project.category as keyof typeof categoryImages] ||
       categoryImages.Default
     );
@@ -867,6 +876,21 @@ export default function Home() {
                   </div>
 
                   <div>
+                    <Label htmlFor="card_image">Card Image URL</Label>
+                    <Input
+                      id="card_image"
+                      {...register("card_image")}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                    {errors.card_image && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.card_image.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
                     <Label htmlFor="industry">Industry (comma-separated)</Label>
                     <Input
                       id="industry"
@@ -1010,11 +1034,14 @@ export default function Home() {
               ) : selectedProject ? (
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                   <div>
-                    {selectedProject.image && (
+                    {(selectedProject.card_image || selectedProject.image) && (
                       <Image
                         src={
-                          selectedProject.image ||
-                          "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=500"
+                          selectedProject.card_image &&
+                          selectedProject.card_image.trim() !== ""
+                            ? selectedProject.card_image
+                            : selectedProject.image ||
+                              "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=500"
                         }
                         alt={selectedProject.title}
                         width={400}

@@ -25,6 +25,7 @@ export async function GET() {
       category: row.vars.category || "Uncategorized",
       timeUpdated: row.time_updated,
       rowId: row.id, // Add the actual row ID from Telerivet
+      card_image: row.vars.card_image || "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
       applicableRoutes: row.vars.applicable_route
         ? row.vars.applicable_route
             .split(",")
