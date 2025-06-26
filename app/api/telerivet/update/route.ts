@@ -7,7 +7,7 @@ const API_KEY = process.env.TELERIVET_API_KEY;
 const PROJECT_ID = process.env.TELERIVET_PROJECT_ID;
 const TABLE_ID = process.env.TELERIVET_TABLE_ID;
 
-export async function PUT(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { rowId, vars } = body;
@@ -32,11 +32,10 @@ export async function PUT(req: NextRequest) {
 
     console.log("Making request to:", telerivetUrl);
 
-    const response = await axios.put(
+    const response = await axios.post(
+      // Changed to POST
       telerivetUrl,
-      {
-        vars: vars,
-      },
+      { vars },
       {
         auth: {
           username: API_KEY,
@@ -44,6 +43,7 @@ export async function PUT(req: NextRequest) {
         },
         headers: {
           "Content-Type": "application/json",
+          "User-Agent": "Next.js Server", // Recommended header
         },
       },
     );
@@ -73,9 +73,4 @@ export async function PUT(req: NextRequest) {
       { status: 500 },
     );
   }
-}
-
-// Also handle POST method as fallback
-export async function POST(req: NextRequest) {
-  return PUT(req);
 }
