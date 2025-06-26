@@ -22,6 +22,8 @@ import {
   X,
   Pencil,
   Trash,
+  Save,
+  AlertCircle,
 } from "lucide-react";
 
 // UI components
@@ -49,13 +51,13 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 // Assets
 import Logo from "./TR-white-logo.png";
 import "keen-slider/keen-slider.min.css";
 
 // Communication channels with their icons
-// CONSTANTS
 const channels = [
   { name: "SMS", icon: <MessageSquare className="h-4 w-4" /> },
   {
@@ -94,21 +96,29 @@ const heroSlides = [
   },
 ];
 
+// Category-based stock images
+const categoryImages = {
+  "SMS Marketing":
+    "https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
+  "Customer Support":
+    "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
+  "E-commerce":
+    "https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
+  Healthcare:
+    "https://images.pexels.com/photos/263402/pexels-photo-263402.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
+  Education:
+    "https://images.pexels.com/photos/289737/pexels-photo-289737.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
+  Finance:
+    "https://images.pexels.com/photos/259027/pexels-photo-259027.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
+  Logistics:
+    "https://images.pexels.com/photos/906494/pexels-photo-906494.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
+  Default:
+    "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
+};
+
 // View modes for the application
 type ViewMode = "internal" | "customer";
 
-/**
- * Type definition for a Project
- * @typedef {Object} Project
- * @property {string} title - The title of the project
- * @property {string} description - Short description of the project
- * @property {string[]} industry - Industries this project applies to
- * @property {string} serialNo - Unique identifier for the project
- * @property {string} category - Category of the project
- * @property {number} timeUpdated - Timestamp of last update
- * @property {string[]} applicableRoutes - Communication channels supported
- * @property {Array<{name: string, url: string, description: string, icon: string}>} links - Related links
- */
 type Project = {
   title: string;
   description: string;
@@ -117,6 +127,7 @@ type Project = {
   category: string;
   timeUpdated: number;
   applicableRoutes: string[];
+  rowId?: string; // Add rowId for API operations
   links: {
     name: string;
     url: string;
@@ -125,21 +136,6 @@ type Project = {
   }[];
 };
 
-/**
- * Type definition for detailed Project information
- * @typedef {Object} ProjectDetails
- * @property {string} title - Project title
- * @property {string} description - Detailed description
- * @property {string} serialNo - Unique identifier
- * @property {string} usecase - Use case description
- * @property {string[]} benefits - List of benefits
- * @property {string} image - URL to project image
- * @property {string[]} implementation - Implementation steps
- * @property {string} overview - High-level overview
- * @property {string[]} roiMetrics - ROI metrics
- * @property {string[]} applicableRoutes - Supported channels
- * @property {string} industry - Primary industry
- */
 type ProjectDetails = {
   title: string;
   description: string;
@@ -150,16 +146,25 @@ type ProjectDetails = {
   implementation: string[];
   overview: string;
   roiMetrics: string[];
-  applicableRoutes: string[];
+  applicableRoutes: string[]; // Ensure this is string[]
   industry: string;
 };
 
-/**
- * Main component for the Telerivet Solutions Marketplace
- * @returns {JSX.Element} The rendered component
- */
+// Form validation schema
+const editFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  industry: z.string().min(1, "Industry is required"),
+  telerivetUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  canvaUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  hubspotUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  liveUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  applicableRoutes: z.array(z.string()),
+});
+
 export default function Home() {
-  // State management for various features
+  // State management
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
@@ -177,21 +182,49 @@ export default function Home() {
     [key: string]: boolean;
   }>({});
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editProject, setEditProject] = useState(null);
 
-  // Form state for project editing
-  const [formState, setFormState] = useState({
-    title: "",
-    description: "",
-    industry: "",
-    image: "",
-    overview: "",
-    benefits: [""],
-    applicableRoutes: [],
+  // Edit functionality state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Form handling
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<{
+    title: string;
+    description: string;
+    category: string;
+    industry: string;
+    telerivetUrl: string;
+    canvaUrl: string;
+    hubspotUrl: string;
+    liveUrl: string;
+    applicableRoutes: string[];
+  }>({
+    resolver: zodResolver(editFormSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      category: "",
+      industry: "",
+      telerivetUrl: "",
+      canvaUrl: "",
+      hubspotUrl: "",
+      liveUrl: "",
+      applicableRoutes: [],
+    },
   });
 
-  // Keen Slider configuration for the hero carousel
+  const watchedRoutes = watch("applicableRoutes");
+
+  // Keen Slider configuration
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     initial: 0,
     slideChanged(slider) {
@@ -202,49 +235,18 @@ export default function Home() {
     slides: { perView: 1 },
   });
 
-  const [editingProject, setEditingProject] = useState(null);
-  const [formValues, setFormValues] = useState({
-    title: "",
-    description: "",
-    industry: [],
-    category: "",
-    telerivetDescription: "",
-    telerivetUrl: "",
-    applicableRoutes: [],
-  });
-
-  const handleUpdate = (project) => {
-    setEditingProject(project);
-    setFormValues({
-      title: project.title,
-      description: project.description,
-      industry: project.industry,
-      category: project.category,
-      telerivetDescription: project.telerivetDescription,
-      telerivetUrl: project.telerivetUrl,
-      applicableRoutes: project.applicableRoutes || [],
-    });
-  };
-
-  // Auto-advance slides every 5 seconds
+  // Auto-advance slides
   useEffect(() => {
     const interval = setInterval(() => {
       if (instanceRef.current) {
         instanceRef.current.next();
       }
     }, 5000);
-
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [instanceRef]);
 
-  // Fetch projects on component mount
+  // Fetch projects
   useEffect(() => {
-    /**
-     * Fetches projects from the API and updates state
-     * @async
-     */
     const fetchProjects = async () => {
       try {
         const response = await axios.get("/api/telerivet");
@@ -261,14 +263,10 @@ export default function Home() {
         setLoading(false);
       }
     };
-
     fetchProjects();
   }, []);
 
-  /**
-   * Fetches detailed information for a specific project
-   * @param {string} serialNo - The unique identifier of the project
-   */
+  // Fetch project details
   const fetchProjectDetails = async (serialNo: string) => {
     setLoadingDetails(true);
     try {
@@ -283,10 +281,156 @@ export default function Home() {
     }
   };
 
-  /**
-   * Toggles an industry in the filter selection
-   * @param {string} industry - The industry to toggle
-   */
+  // Handle edit project
+  const handleEditProject = (project: Project) => {
+    setEditingProject(project);
+
+    // Populate form with project data
+    reset({
+      title: project.title,
+      description: project.description,
+      category: project.category,
+      industry: project.industry.join(", "),
+      telerivetUrl:
+        project.links.find((l) => l.name === "Telerivet Project")?.url || "",
+      canvaUrl: project.links.find((l) => l.name === "Canva Decks")?.url || "",
+      hubspotUrl:
+        project.links.find((l) => l.name === "HubSpot Article")?.url || "",
+      liveUrl: project.links.find((l) => l.name === "Live Project")?.url || "",
+      applicableRoutes: project.applicableRoutes || [],
+    });
+
+    setEditDialogOpen(true);
+  };
+
+  // Handle save project
+  const handleSaveProject = async (data: any) => {
+    if (!editingProject) return;
+
+    setIsUpdating(true);
+    try {
+      const updateData = {
+        rowId: editingProject.rowId || editingProject.serialNo,
+        vars: {
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          industry: data.industry,
+          telerivet_url: data.telerivetUrl,
+          canva_url: data.canvaUrl,
+          hubspot_url: data.hubspotUrl,
+          live_url: data.liveUrl,
+          applicable_route: data.applicableRoutes.join(","),
+        },
+      };
+
+      console.log("Sending update data:", updateData);
+
+      // Use POST method as fallback since PUT might not be working
+      const response = await axios.post("/api/telerivet/update", updateData);
+
+      console.log("Update response:", response.data);
+
+      // Update local state
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.serialNo === editingProject.serialNo
+            ? {
+                ...p,
+                title: data.title,
+                description: data.description,
+                category: data.category,
+                industry: data.industry.split(",").map((i: string) => i.trim()),
+                applicableRoutes: data.applicableRoutes,
+                links: [
+                  ...(data.telerivetUrl
+                    ? [
+                        {
+                          name: "Telerivet Project",
+                          url: data.telerivetUrl,
+                          description: "Campaign automation and tracking",
+                          icon: "📱",
+                        },
+                      ]
+                    : []),
+                  ...(data.canvaUrl
+                    ? [
+                        {
+                          name: "Canva Decks",
+                          url: data.canvaUrl,
+                          description: "Brand-aligned visual assets",
+                          icon: "🎨",
+                        },
+                      ]
+                    : []),
+                  ...(data.hubspotUrl
+                    ? [
+                        {
+                          name: "HubSpot Article",
+                          url: data.hubspotUrl,
+                          description: "Performance metrics and leads",
+                          icon: "📊",
+                        },
+                      ]
+                    : []),
+                  ...(data.liveUrl
+                    ? [
+                        {
+                          name: "Live Project",
+                          url: data.liveUrl,
+                          description: "View the live project",
+                          icon: "🌐",
+                        },
+                      ]
+                    : []),
+                ],
+              }
+            : p,
+        ),
+      );
+
+      setEditDialogOpen(false);
+      setEditingProject(null);
+      setError(null);
+    } catch (err: any) {
+      console.error("Error updating project:", err);
+      setError(
+        `Failed to update project: ${err.response?.data?.error || err.message}`,
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Handle delete project
+  const handleDeleteProject = async (project: Project) => {
+    if (!confirm("Are you sure you want to delete this project?")) return;
+
+    setIsDeleting(true);
+    try {
+      console.log("Deleting project with rowId:", project.rowId);
+
+      // Use POST method as fallback
+      await axios.post("/api/telerivet/delete", {
+        rowId: project.rowId || project.serialNo,
+      });
+
+      // Remove from local state
+      setProjects((prev) =>
+        prev.filter((p) => p.serialNo !== project.serialNo),
+      );
+      setError(null);
+    } catch (err: any) {
+      console.error("Error deleting project:", err);
+      setError(
+        `Failed to delete project: ${err.response?.data?.error || err.message}`,
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Toggle functions
   const toggleIndustry = (industry: string) => {
     setSelectedIndustries((prev) =>
       prev.includes(industry)
@@ -295,10 +439,6 @@ export default function Home() {
     );
   };
 
-  /**
-   * Toggles a communication channel in the filter selection
-   * @param {string} channel - The channel to toggle
-   */
   const toggleChannel = (channel: string) => {
     setSelectedChannels((prev) =>
       prev.includes(channel)
@@ -307,17 +447,10 @@ export default function Home() {
     );
   };
 
-  /**
-   * Switches between internal and customer view modes
-   */
   const toggleViewMode = () => {
     setViewMode((prev) => (prev === "internal" ? "customer" : "internal"));
   };
 
-  /**
-   * Expands or collapses the industries list for a project
-   * @param {string} serialNo - The project's unique identifier
-   */
   const toggleIndustryExpand = (serialNo: string) => {
     setExpandedIndustries((prev) => ({
       ...prev,
@@ -325,53 +458,38 @@ export default function Home() {
     }));
   };
 
-  /**
-   * Checks if a project was recently updated (within 3 days)
-   * @param {number} timeUpdated - Timestamp of last update
-   * @returns {boolean} True if the project is considered "new"
-   */
   const isNewService = (timeUpdated: number) => {
     const threeDaysAgo = Date.now() / 1000 - 3 * 24 * 60 * 60;
     return timeUpdated > threeDaysAgo;
   };
 
-  /**
-   * Handles project update action
-   * @param {Project} project - The project to update
-   */
+  const getProjectImage = (project: Project) => {
+    return (
+      categoryImages[project.category as keyof typeof categoryImages] ||
+      categoryImages.Default
+    );
+  };
 
-  /**
-   * Filters and sorts projects based on current filters and search query
-   * @type {Project[]}
-   */
+  // Filter and group projects
   const filteredProjects = projects
     .filter((project) => {
-      // Check if project matches search query
       const matchesSearch =
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.links.some(
-          (link) =>
-            link.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            link.description.toLowerCase().includes(searchQuery.toLowerCase()),
-        ) ||
         project.industry.some((ind) =>
           ind.toLowerCase().includes(searchQuery.toLowerCase()),
         );
 
-      // Check if project matches selected industries
       const matchesIndustry =
         selectedIndustries.length === 0 ||
         project.industry.some((ind) => selectedIndustries.includes(ind));
 
-      // Check if project matches selected channels
       const matchesChannels =
         selectedChannels.length === 0 ||
         project.applicableRoutes.some((route) =>
           selectedChannels.includes(route),
         );
 
-      // Check if project matches "new only" filter
       const matchesNewOnly = !showNewOnly || isNewService(project.timeUpdated);
 
       return (
@@ -385,7 +503,6 @@ export default function Home() {
       return 0;
     });
 
-  // Group projects by category for display
   const groupedProjects = filteredProjects.reduce(
     (acc, project) => {
       const category = project.category || "Uncategorized";
@@ -398,10 +515,8 @@ export default function Home() {
     {} as Record<string, Project[]>,
   );
 
-  // Sort categories alphabetically
   const sortedCategories = Object.keys(groupedProjects).sort();
 
-  // Loading state
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
@@ -410,11 +525,13 @@ export default function Home() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="text-2xl text-red-600">{error}</div>
+        <div className="text-center">
+          <div className="mb-4 text-2xl text-red-600">{error}</div>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
       </div>
     );
   }
@@ -423,12 +540,9 @@ export default function Home() {
     <>
       <header className="sticky top-0 z-50 border-b border-blue-500/20 bg-black/80 backdrop-blur-sm">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          {/* Left section: Toggle + Logo */}
           <div className="flex items-center gap-4">
             <Image src={Logo} alt="Telerivet Logo" width={200} height={200} />
           </div>
-
-          {/* Right section: Get Started Button */}
           <div className="flex items-center gap-6">
             <Link
               href="#solutions"
@@ -438,7 +552,6 @@ export default function Home() {
             >
               Get Started
             </Link>
-
             <button
               onClick={toggleViewMode}
               className="flex h-12 w-12 items-center justify-center rounded-full border border-blue-500/30 bg-white shadow transition hover:border-blue-500 hover:bg-blue-500/10"
@@ -454,6 +567,7 @@ export default function Home() {
       </header>
 
       <main className="min-h-screen bg-gradient-to-r from-blue-100 to-white pb-12">
+        {/* Hero Slider */}
         <div className="relative h-full w-full">
           <div
             ref={sliderRef}
@@ -462,7 +576,7 @@ export default function Home() {
             {heroSlides.map((slide, index) => (
               <div
                 key={index}
-                className="keen-slider__slide relative flex min-h-[1000px] items-center overflow-hidden"
+                className="keen-slider__slide relative flex min-h-[500px] items-center overflow-hidden"
               >
                 <Image
                   src={slide.image}
@@ -470,26 +584,23 @@ export default function Home() {
                   fill
                   className="object-cover opacity-20"
                 />
-                <div className="relative z-10 mx-auto h-[50vh] max-w-3xl p-12 text-center">
-                  <div className="flex h-full flex-col items-center justify-center">
-                    <h1 className="mb-6 text-4xl font-bold text-gray-900">
-                      {slide.title}
-                    </h1>
-                    <p className="text-lg text-gray-600">{slide.description}</p>
-                  </div>
+                <div className="relative z-10 mx-auto max-w-3xl p-12 text-center">
+                  <h1 className="mb-6 text-4xl font-bold text-gray-900">
+                    {slide.title}
+                  </h1>
+                  <p className="text-lg text-gray-600">{slide.description}</p>
                 </div>
               </div>
             ))}
           </div>
 
+          {/* Slider controls */}
           {instanceRef.current && (
             <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
               {[...Array(heroSlides.length)].map((_, idx) => (
                 <button
                   key={idx}
-                  onClick={() => {
-                    instanceRef.current?.moveToIdx(idx);
-                  }}
+                  onClick={() => instanceRef.current?.moveToIdx(idx)}
                   className={`h-2 w-2 rounded-full transition-all ${
                     currentSlide === idx ? "w-6 bg-blue-600" : "bg-blue-300"
                   }`}
@@ -513,8 +624,8 @@ export default function Home() {
           </button>
         </div>
 
-        {/* SEARCH FEILD  */}
-        <div className="mx-auto mt-4 max-w-6xl px-4 py-4">
+        {/* Search and Filters */}
+        <div className="mx-auto mt-8 max-w-6xl px-4 py-4">
           <div className="mx-auto mb-8 max-w-2xl">
             <div className="relative mb-4">
               <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
@@ -529,7 +640,6 @@ export default function Home() {
               />
             </div>
 
-            {/* BADGES AND FILTERS */}
             <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
               <Badge
                 variant={showNewOnly ? "default" : "outline"}
@@ -565,69 +675,9 @@ export default function Home() {
                 </Badge>
               ))}
             </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {/* {mainIndustries.map((industry) => (
-                <Badge
-                  key={industry}
-                  variant={
-                    selectedIndustries.includes(industry)
-                      ? "default"
-                      : "outline"
-                  }
-                  className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
-                    selectedIndustries.includes(industry)
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
-                      : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
-                  }`}
-                  onClick={() => toggleIndustry(industry)}
-                >
-                  {industry}
-                </Badge>
-              ))} */}
-
-              {/* <Popover>
-                <PopoverTrigger>
-                  <Button
-                    variant="outline"
-                    className="flex h-auto items-center gap-2 rounded-3xl border-blue-500/30 px-6 py-2.5 text-sm text-blue-600 transition-all duration-200 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
-                  >
-                    <Filter className="h-4 w-4" />
-                    More Industries
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 border-blue-500/20 bg-white p-4">
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-medium text-gray-900">
-                      Select Industries
-                    </h4>
-                    <div className="space-y-2">
-                      {otherIndustries.map((industry) => (
-                        <div
-                          key={industry}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={industry}
-                            checked={selectedIndustries.includes(industry)}
-                            onCheckedChange={() => toggleIndustry(industry)}
-                            className="border-blue-500/30 text-blue-600"
-                          />
-                          <label
-                            htmlFor={industry}
-                            className="text-sm font-medium text-gray-700"
-                          >
-                            {industry}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover> */}
-            </div>
           </div>
 
+          {/* Projects Grid */}
           {sortedCategories.map((category) => (
             <div key={category} className="mb-12 w-full">
               <h2 className="mb-6 bg-gradient-to-r from-black via-blue-800 to-blue-500 bg-clip-text text-3xl font-bold text-transparent drop-shadow-sm">
@@ -640,64 +690,63 @@ export default function Home() {
                     className="group relative cursor-pointer overflow-hidden border-0 bg-white shadow-lg transition-all duration-200 hover:shadow-xl"
                     onClick={() => fetchProjectDetails(project.serialNo)}
                   >
-                    {/* Project image (if present) */}
-                    {project.links[0]?.url && (
-                      <div className="relative h-48 w-full overflow-hidden">
-                        <Image
-                          src="https://picsum.photos/200/300"
-                          alt={project.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
+                    {/* Project Image */}
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <Image
+                        src={getProjectImage(project)}
+                        alt={project.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
 
-                        {/* Overlay for better text/icon visibility */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
 
-                        {/* "New" Badge */}
-                        {isNewService(project.timeUpdated) && (
-                          <div className="absolute left-3 top-3 z-20">
-                            <Badge className="bg-green-500 text-white shadow">
-                              New
-                            </Badge>
+                      {/* New Badge */}
+                      {isNewService(project.timeUpdated) && (
+                        <div className="absolute left-3 top-3 z-20">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white">
+                            N
                           </div>
-                        )}
+                        </div>
+                      )}
 
-                        {/* Edit/Delete Icons */}
+                      {/* Edit/Delete Icons */}
+                      {viewMode === "internal" && (
                         <div className="absolute right-3 top-3 z-20 flex gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleUpdate(project);
+                              handleEditProject(project);
                             }}
                             className="rounded-full bg-white/80 p-2 text-blue-600 hover:bg-white"
                             title="Edit"
-                            aria-label="Edit project"
                           >
                             <Pencil className="h-4 w-4" />
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // handleDelete(project.serialNo);
+                              handleDeleteProject(project);
                             }}
                             className="rounded-full bg-white/80 p-2 text-red-600 hover:bg-white"
                             title="Delete"
-                            aria-label="Delete project"
+                            disabled={isDeleting}
                           >
                             <Trash className="h-4 w-4" />
                           </button>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
-                    {/* Card content */}
+                    {/* Card Content */}
                     <CardHeader className="space-y-4 p-4">
                       <div className="space-y-2">
                         <CardTitle className="text-xl font-semibold text-gray-900">
                           {project.title}
                         </CardTitle>
                         <div className="flex flex-wrap gap-2">
-                          {project.industry.slice(0, 3).map((ind) => (
+                          {project.industry.slice(0, 2).map((ind) => (
                             <Badge
                               key={ind}
                               variant="secondary"
@@ -706,15 +755,34 @@ export default function Home() {
                               {ind}
                             </Badge>
                           ))}
-                          {project.industry.length > 3 && (
+                          {project.industry.length > 2 && (
                             <Badge
                               variant="secondary"
-                              className="bg-gray-50 text-gray-600"
+                              className="cursor-pointer bg-gray-50 text-gray-600 hover:bg-gray-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleIndustryExpand(project.serialNo);
+                              }}
                             >
-                              +{project.industry.length - 3}
+                              +{project.industry.length - 2}
                             </Badge>
                           )}
                         </div>
+
+                        {/* Expanded Industries */}
+                        {expandedIndustries[project.serialNo] && (
+                          <div className="flex flex-wrap gap-2 pt-2">
+                            {project.industry.slice(2).map((ind) => (
+                              <Badge
+                                key={ind}
+                                variant="secondary"
+                                className="bg-blue-50 text-blue-700"
+                              >
+                                {ind}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       <CardDescription className="text-gray-600">
@@ -730,6 +798,7 @@ export default function Home() {
                               <div
                                 key={channel.name}
                                 className="rounded-full bg-gray-50 p-2"
+                                title={channel.name}
                               >
                                 {channel.icon}
                               </div>
@@ -743,114 +812,193 @@ export default function Home() {
             </div>
           ))}
 
-          {/* Edit Form  */}
-          {editingProject && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-              <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg">
-                <h3 className="mb-4 text-xl font-bold">Edit Project</h3>
+          {/* Edit Dialog */}
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Edit Project</DialogTitle>
+                <DialogDescription>
+                  Update the project information below.
+                </DialogDescription>
+              </DialogHeader>
 
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    value={formValues.title}
-                    onChange={(e) =>
-                      setFormValues({ ...formValues, title: e.target.value })
-                    }
-                    placeholder="Title"
-                    className="w-full rounded border px-3 py-2"
-                  />
-
-                  <textarea
-                    value={formValues.description}
-                    onChange={(e) =>
-                      setFormValues({
-                        ...formValues,
-                        description: e.target.value,
-                      })
-                    }
-                    placeholder="Description"
-                    className="w-full rounded border px-3 py-2"
-                    rows={3}
-                  />
-
-                  <input
-                    type="text"
-                    value={formValues.industry}
-                    onChange={(e) =>
-                      setFormValues({ ...formValues, industry: e.target.value })
-                    }
-                    placeholder="Industry"
-                    className="w-full rounded border px-3 py-2"
-                  />
-
-                  <input
-                    type="text"
-                    value={formValues.category}
-                    onChange={(e) =>
-                      setFormValues({ ...formValues, category: e.target.value })
-                    }
-                    placeholder="Category"
-                    className="w-full rounded border px-3 py-2"
-                  />
-
-                  <textarea
-                    value={formValues.telerivetDescription}
-                    onChange={(e) =>
-                      setFormValues({
-                        ...formValues,
-                        telerivetDescription: e.target.value,
-                      })
-                    }
-                    placeholder="Telerivet Description"
-                    className="w-full rounded border px-3 py-2"
-                    rows={3}
-                  />
-
-                  <input
-                    type="url"
-                    value={formValues.telerivetUrl}
-                    onChange={(e) =>
-                      setFormValues({
-                        ...formValues,
-                        telerivetUrl: e.target.value,
-                      })
-                    }
-                    placeholder="Telerivet URL"
-                    className="w-full rounded border px-3 py-2"
-                  />
-
-                  <input
-                    type="text"
-                    value={formValues.applicableRoutes}
-                    onChange={(e) =>
-                      setFormValues({
-                        ...formValues,
-                        applicableRoutes: e.target.value,
-                      })
-                    }
-                    placeholder="Applicable Routes"
-                    className="w-full rounded border px-3 py-2"
-                  />
+              <form
+                onSubmit={handleSubmit(handleSaveProject)}
+                className="space-y-4"
+              >
+                <div>
+                  <Label htmlFor="title">Title</Label>
+                  <Input id="title" {...register("title")} className="mt-1" />
+                  {errors.title && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.title.message}
+                    </p>
+                  )}
                 </div>
 
-                <div className="mt-6 flex justify-end gap-2">
-                  <button
-                    onClick={() => setEditingProject(null)}
-                    className="rounded bg-gray-100 px-4 py-2 text-sm text-gray-700"
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    {...register("description")}
+                    className="mt-1"
+                    rows={3}
+                  />
+                  {errors.description && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.description.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Input
+                      id="category"
+                      {...register("category")}
+                      className="mt-1"
+                    />
+                    {errors.category && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.category.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="industry">Industry (comma-separated)</Label>
+                    <Input
+                      id="industry"
+                      {...register("industry")}
+                      className="mt-1"
+                      placeholder="Healthcare, Finance, Education"
+                    />
+                    {errors.industry && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.industry.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Label>Project Links</Label>
+
+                  <div>
+                    <Label htmlFor="telerivetUrl" className="text-sm">
+                      Telerivet URL
+                    </Label>
+                    <Input
+                      id="telerivetUrl"
+                      {...register("telerivetUrl")}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="canvaUrl" className="text-sm">
+                      Canva URL
+                    </Label>
+                    <Input
+                      id="canvaUrl"
+                      {...register("canvaUrl")}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="hubspotUrl" className="text-sm">
+                      HubSpot URL
+                    </Label>
+                    <Input
+                      id="hubspotUrl"
+                      {...register("hubspotUrl")}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="liveUrl" className="text-sm">
+                      Live Project URL
+                    </Label>
+                    <Input
+                      id="liveUrl"
+                      {...register("liveUrl")}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Applicable Routes</Label>
+                  <div className="mt-2 space-y-2">
+                    {channels.map((channel) => (
+                      <div
+                        key={channel.name}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={channel.name}
+                          checked={watchedRoutes?.includes(channel.name)}
+                          onCheckedChange={(checked) => {
+                            const current = watchedRoutes || [];
+                            if (checked) {
+                              setValue("applicableRoutes", [
+                                ...current,
+                                channel.name,
+                              ]);
+                            } else {
+                              setValue(
+                                "applicableRoutes",
+                                current.filter((r) => r !== channel.name),
+                              );
+                            }
+                          }}
+                        />
+                        <Label
+                          htmlFor={channel.name}
+                          className="flex items-center gap-2"
+                        >
+                          {channel.icon}
+                          {channel.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditDialogOpen(false)}
                   >
                     Cancel
-                  </button>
-                  <button
-                    // onClick={handleSave}
-                    className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-                  >
-                    Save
-                  </button>
+                  </Button>
+                  <Button type="submit" disabled={isUpdating}>
+                    {isUpdating ? (
+                      <>
+                        <AlertCircle className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
                 </div>
-              </div>
-            </div>
-          )}
+              </form>
+            </DialogContent>
+          </Dialog>
 
+          {/* Project Details Dialog */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
               {loadingDetails ? (
@@ -860,130 +1008,96 @@ export default function Home() {
                   </div>
                 </div>
               ) : selectedProject ? (
-                (() => {
-                  console.log("Selected Project Data:", selectedProject);
-                  return (
-                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                      {/* LEFT SIDE: IMAGE + HEADER */}
-                      <div>
-                        {selectedProject.image && (
-                          <Image
-                            src={
-                              selectedProject.image
-                                ? "https://picsum.photos/400/500 "
-                                : selectedProject.image // need to be added as image url
-                            }
-                            alt={selectedProject.title}
-                            width={400}
-                            height={500}
-                            className="rounded-lg object-cover"
-                          />
-                        )}
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                  <div>
+                    {selectedProject.image && (
+                      <Image
+                        src={
+                          selectedProject.image ||
+                          "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=500"
+                        }
+                        alt={selectedProject.title}
+                        width={400}
+                        height={500}
+                        className="rounded-lg object-cover"
+                      />
+                    )}
+                  </div>
+
+                  <div className="space-y-6">
+                    <DialogHeader className="space-y-4">
+                      <DialogTitle className="text-2xl font-bold text-gray-900">
+                        {selectedProject.title}
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-600">
+                        {selectedProject.description}
+                      </DialogDescription>
+                      <div className="flex flex-wrap gap-2">
+                        {(selectedProject.industry?.split(", ") || [])
+                          .slice(0, 3)
+                          .map((ind) => (
+                            <Badge
+                              key={ind}
+                              variant="secondary"
+                              className="bg-blue-50 text-blue-700"
+                            >
+                              {ind}
+                            </Badge>
+                          ))}
                       </div>
+                    </DialogHeader>
 
-                      {/* RIGHT SIDE: DETAILS */}
-                      <div className="space-y-6">
-                        {/* Header Section */}
-                        <DialogHeader className="mt-6 space-y-4">
-                          <DialogTitle className="text-2xl font-bold text-gray-900">
-                            {selectedProject.title}
-                          </DialogTitle>
+                    <section>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Overview
+                      </h3>
+                      <p className="mt-2 text-gray-600">
+                        {selectedProject.overview}
+                      </p>
+                    </section>
 
-                          <DialogDescription className="gap-8 text-gray-600">
-                            {selectedProject.description}
-                          </DialogDescription>
+                    <section>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Key Benefits
+                      </h3>
+                      <ul className="mt-2 space-y-2">
+                        {selectedProject.benefits?.map((benefit, index) => (
+                          <li
+                            key={index}
+                            className="flex items-start gap-2 text-gray-600"
+                          >
+                            <span className="text-blue-500">•</span>
+                            {benefit}
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
 
-                          {/* Industry Tags */}
-                          <div className="flex flex-wrap gap-4">
-                            {(selectedProject.industry?.split(", ") || [])
-                              .slice(0, 3)
-                              .map((ind) => (
-                                <Badge
-                                  key={ind}
-                                  variant="secondary"
-                                  className="bg-blue-50 text-blue-700"
+                    {selectedProject.applicableRoutes?.length > 0 && (
+                      <section>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Channels
+                        </h3>
+                        <div className="mt-2 flex flex-wrap gap-3">
+                          {channels.map(
+                            (channel) =>
+                              selectedProject.applicableRoutes.includes(
+                                channel.name,
+                              ) && (
+                                <div
+                                  key={channel.name}
+                                  className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-800"
                                 >
-                                  {ind}
-                                </Badge>
-                              ))}
-                            {selectedProject.industry?.split(", ").length >
-                              3 && (
-                              <Badge
-                                variant="secondary"
-                                className="bg-gray-50 text-gray-600"
-                              >
-                                +
-                                {selectedProject.industry.split(", ").length -
-                                  3}
-                              </Badge>
-                            )}
-                          </div>
-                        </DialogHeader>
-
-                        {/* Overview Section */}
-                        <section>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            Overview
-                          </h3>
-                          <p className="mt-2 text-gray-600">
-                            {selectedProject.overview}
-                          </p>
-                        </section>
-
-                        {/* Key Benefits */}
-                        <section>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            Key Benefits
-                          </h3>
-                          <ul className="mt-2 space-y-2">
-                            {selectedProject.benefits?.map((benefit, index) => (
-                              <li
-                                key={index}
-                                className="flex items-start gap-2 text-gray-600"
-                              >
-                                <span className="text-blue-500">•</span>
-                                {benefit}
-                              </li>
-                            ))}
-                          </ul>
-                        </section>
-
-                        {/* Applicable Channels */}
-                        {selectedProject.applicableRoutes?.length > 0 && (
-                          <section>
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              Channels
-                            </h3>
-                            <div className="mt-2 flex flex-wrap gap-3">
-                              {channels.map(
-                                (channel) =>
-                                  selectedProject.applicableRoutes.includes(
-                                    channel.name,
-                                  ) && (
-                                    <div
-                                      key={channel.name}
-                                      className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-800"
-                                    >
-                                      {channel.icon}
-                                      <span>{channel.name}</span>
-                                    </div>
-                                  ),
-                              )}
-                            </div>
-                          </section>
-                        )}
-
-                        {/* Call To Action */}
-                        {/* <Button
-                          className="w-full"
-                          onClick={() => setIsDialogOpen(false)}
-                        >
-                          Get Started
-                        </Button> */}
-                      </div>
-                    </div>
-                  );
-                })()
+                                  {channel.icon}
+                                  <span>{channel.name}</span>
+                                </div>
+                              ),
+                          )}
+                        </div>
+                      </section>
+                    )}
+                  </div>
+                </div>
               ) : null}
             </DialogContent>
           </Dialog>

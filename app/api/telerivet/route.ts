@@ -24,6 +24,7 @@ export async function GET() {
       serialNo: row.vars.s_n || "000",
       category: row.vars.category || "Uncategorized",
       timeUpdated: row.time_updated,
+      rowId: row.id, // Add the actual row ID from Telerivet
       applicableRoutes: row.vars.applicable_route
         ? row.vars.applicable_route
             .split(",")
