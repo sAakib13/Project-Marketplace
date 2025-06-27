@@ -24,6 +24,7 @@ import {
   Trash,
   Save,
   AlertCircle,
+  Plus,
 } from "lucide-react";
 
 // UI components
@@ -127,8 +128,8 @@ type Project = {
   category: string;
   timeUpdated: number;
   applicableRoutes: string[];
-  card_image: string; // Use card_image for displaying images
-  rowId?: string; // Add rowId for API operations
+  rowId?: string;
+  cardImage?: string; // Add cardImage field
   links: {
     name: string;
     url: string;
@@ -144,15 +145,14 @@ type ProjectDetails = {
   usecase: string;
   benefits: string[];
   image: string;
-  card_image?: string;
   implementation: string[];
   overview: string;
   roiMetrics: string[];
-  applicableRoutes: string[]; // Ensure this is string[]
+  applicableRoutes: string[];
   industry: string;
 };
 
-// Form validation schema
+// Form validation schemas
 const editFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -162,8 +162,22 @@ const editFormSchema = z.object({
   canvaUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   hubspotUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
   liveUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  cardImage: z.string().url("Invalid URL").optional().or(z.literal("")),
   applicableRoutes: z.array(z.string()),
-  card_image: z.string().url("Invalid image URL").optional().or(z.literal("")),
+});
+
+const addFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  industry: z.string().min(1, "Industry is required"),
+  serialNo: z.string().min(1, "Serial number is required"),
+  telerivetUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  canvaUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  hubspotUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  liveUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  cardImage: z.string().url("Invalid URL").optional().or(z.literal("")),
+  applicableRoutes: z.array(z.string()),
 });
 
 export default function Home() {
@@ -185,33 +199,26 @@ export default function Home() {
     [key: string]: boolean;
   }>({});
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+
   // Edit functionality state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Form handling
+  // Add functionality state
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+
+  // Form handling for edit
   const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<{
-    title: string;
-    description: string;
-    category: string;
-    industry: string;
-    telerivetUrl: string;
-    canvaUrl: string;
-    hubspotUrl: string;
-    liveUrl: string;
-    applicableRoutes: string[];
-    card_image: string;
-  }>({
+    register: registerEdit,
+    handleSubmit: handleSubmitEdit,
+    reset: resetEdit,
+    setValue: setValueEdit,
+    watch: watchEdit,
+    formState: { errors: errorsEdit },
+  } = useForm<z.infer<typeof editFormSchema>>({
     resolver: zodResolver(editFormSchema),
     defaultValues: {
       title: "",
@@ -222,12 +229,38 @@ export default function Home() {
       canvaUrl: "",
       hubspotUrl: "",
       liveUrl: "",
+      cardImage: "",
       applicableRoutes: [],
-      card_image: "",
     },
   });
 
-  const watchedRoutes = watch("applicableRoutes");
+  // Form handling for add
+  const {
+    register: registerAdd,
+    handleSubmit: handleSubmitAdd,
+    reset: resetAdd,
+    setValue: setValueAdd,
+    watch: watchAdd,
+    formState: { errors: errorsAdd },
+  } = useForm<z.infer<typeof addFormSchema>>({
+    resolver: zodResolver(addFormSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      category: "",
+      industry: "",
+      serialNo: "",
+      telerivetUrl: "",
+      canvaUrl: "",
+      hubspotUrl: "",
+      liveUrl: "",
+      cardImage: "",
+      applicableRoutes: [],
+    },
+  });
+
+  const watchedRoutesEdit = watchEdit("applicableRoutes");
+  const watchedRoutesAdd = watchAdd("applicableRoutes");
 
   // Keen Slider configuration
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
@@ -291,7 +324,7 @@ export default function Home() {
     setEditingProject(project);
 
     // Populate form with project data
-    reset({
+    resetEdit({
       title: project.title,
       description: project.description,
       category: project.category,
@@ -302,8 +335,8 @@ export default function Home() {
       hubspotUrl:
         project.links.find((l) => l.name === "HubSpot Article")?.url || "",
       liveUrl: project.links.find((l) => l.name === "Live Project")?.url || "",
+      cardImage: project.cardImage || "",
       applicableRoutes: project.applicableRoutes || [],
-      card_image: project.card_image || "",
     });
 
     setEditDialogOpen(true);
@@ -326,14 +359,13 @@ export default function Home() {
           canva_url: data.canvaUrl,
           hubspot_url: data.hubspotUrl,
           live_url: data.liveUrl,
+          card_image: data.cardImage,
           applicable_route: data.applicableRoutes.join(","),
-          card_image: data.card_image,
         },
       };
 
       console.log("Sending update data:", updateData);
 
-      // Use POST method as fallback since PUT might not be working
       const response = await axios.post("/api/telerivet/update", updateData);
 
       console.log("Update response:", response.data);
@@ -349,7 +381,7 @@ export default function Home() {
                 category: data.category,
                 industry: data.industry.split(",").map((i: string) => i.trim()),
                 applicableRoutes: data.applicableRoutes,
-                card_image: data.card_image,
+                cardImage: data.cardImage,
                 links: [
                   ...(data.telerivetUrl
                     ? [
@@ -410,6 +442,99 @@ export default function Home() {
     }
   };
 
+  // Handle add project
+  const handleAddProject = async (data: any) => {
+    setIsAdding(true);
+    try {
+      const addData = {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        industry: data.industry,
+        serialNo: data.serialNo,
+        telerivetUrl: data.telerivetUrl,
+        canvaUrl: data.canvaUrl,
+        hubspotUrl: data.hubspotUrl,
+        liveUrl: data.liveUrl,
+        cardImage: data.cardImage,
+        applicableRoutes: data.applicableRoutes,
+      };
+
+      console.log("Sending add data:", addData);
+
+      const response = await axios.post("/api/telerivet/create", addData);
+
+      console.log("Add response:", response.data);
+
+      // Add to local state
+      const newProject: Project = {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        industry: data.industry.split(",").map((i: string) => i.trim()),
+        serialNo: data.serialNo,
+        applicableRoutes: data.applicableRoutes,
+        cardImage: data.cardImage,
+        timeUpdated: Date.now() / 1000,
+        rowId: response.data.data?.id,
+        links: [
+          ...(data.telerivetUrl
+            ? [
+                {
+                  name: "Telerivet Project",
+                  url: data.telerivetUrl,
+                  description: "Campaign automation and tracking",
+                  icon: "📱",
+                },
+              ]
+            : []),
+          ...(data.canvaUrl
+            ? [
+                {
+                  name: "Canva Decks",
+                  url: data.canvaUrl,
+                  description: "Brand-aligned visual assets",
+                  icon: "🎨",
+                },
+              ]
+            : []),
+          ...(data.hubspotUrl
+            ? [
+                {
+                  name: "HubSpot Article",
+                  url: data.hubspotUrl,
+                  description: "Performance metrics and leads",
+                  icon: "📊",
+                },
+              ]
+            : []),
+          ...(data.liveUrl
+            ? [
+                {
+                  name: "Live Project",
+                  url: data.liveUrl,
+                  description: "View the live project",
+                  icon: "🌐",
+                },
+              ]
+            : []),
+        ],
+      };
+
+      setProjects((prev) => [newProject, ...prev]);
+      setAddDialogOpen(false);
+      resetAdd();
+      setError(null);
+    } catch (err: any) {
+      console.error("Error adding project:", err);
+      setError(
+        `Failed to add project: ${err.response?.data?.error || err.message}`,
+      );
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   // Handle delete project
   const handleDeleteProject = async (project: Project) => {
     if (!confirm("Are you sure you want to delete this project?")) return;
@@ -418,7 +543,6 @@ export default function Home() {
     try {
       console.log("Deleting project with rowId:", project.rowId);
 
-      // Use POST method as fallback
       await axios.post("/api/telerivet/delete", {
         rowId: project.rowId || project.serialNo,
       });
@@ -472,8 +596,11 @@ export default function Home() {
   };
 
   const getProjectImage = (project: Project) => {
+    // Use dynamic card image if available, otherwise fall back to category images
+    if (project.cardImage) {
+      return project.cardImage;
+    }
     return (
-      project.card_image ||
       categoryImages[project.category as keyof typeof categoryImages] ||
       categoryImages.Default
     );
@@ -524,40 +651,6 @@ export default function Home() {
     {} as Record<string, Project[]>,
   );
 
-  const handleAddProject = async (data: any) => {
-    try {
-      // Replace with your actual PROJECT_ID and TABLE_ID
-      const PROJECT_ID = "PJe0a2cdbfbfb12bbb";
-      const TABLE_ID = "DTf8461322dc6c8d00";
-      const endpoint = `https://api.telerivet.com/v1/projects/${PROJECT_ID}/tables/${TABLE_ID}/rows`;
-
-      // Prepare the body as needed by your API
-      const body = {
-        title: data.title,
-        description: data.description,
-        category: data.category,
-        industry: data.industry,
-        telerivet_url: data.telerivetUrl,
-        canva_url: data.canvaUrl,
-        hubspot_url: data.hubspotUrl,
-        live_url: data.liveUrl,
-        applicable_route: data.applicableRoutes.join(","),
-        card_image: data.card_image,
-      };
-
-      await axios.post(endpoint, body);
-
-      // Optionally, refresh projects list
-      window.location.reload();
-    } catch (err: any) {
-      setError(
-        `Failed to add project: ${err.response?.data?.error || err.message}`,
-      );
-    } finally {
-      setAddDialogOpen(false);
-    }
-  };
-
   const sortedCategories = Object.keys(groupedProjects).sort();
 
   if (loading) {
@@ -595,6 +688,15 @@ export default function Home() {
             >
               Get Started
             </Link>
+            {viewMode === "internal" && (
+              <button
+                onClick={() => setAddDialogOpen(true)}
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-green-500/30 bg-white shadow transition hover:border-green-500 hover:bg-green-500/10"
+                title="Add New Service"
+              >
+                <Plus className="h-6 w-6 text-green-600" />
+              </button>
+            )}
             <button
               onClick={toggleViewMode}
               className="flex h-12 w-12 items-center justify-center rounded-full border border-blue-500/30 bg-white shadow transition hover:border-blue-500 hover:bg-blue-500/10"
@@ -606,31 +708,6 @@ export default function Home() {
               )}
             </button>
           </div>
-
-          {viewMode === "internal" && (
-            <div className="flex justify-end">
-              <Button
-                onClick={() => {
-                  reset({
-                    title: "",
-                    description: "",
-                    category: "",
-                    industry: "",
-                    telerivetUrl: "",
-                    canvaUrl: "",
-                    hubspotUrl: "",
-                    liveUrl: "",
-                    applicableRoutes: [],
-                    card_image: "",
-                  });
-                  setAddDialogOpen(true);
-                }}
-                className="bg-green-600 text-white hover:bg-green-700"
-              >
-                + Add New Service
-              </Button>
-            </div>
-          )}
         </nav>
       </header>
 
@@ -880,137 +957,160 @@ export default function Home() {
             </div>
           ))}
 
-          {/* Edit Dialog */}
-          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          {/* Add Dialog */}
+          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Edit Project</DialogTitle>
+                <DialogTitle>Add New Service</DialogTitle>
                 <DialogDescription>
-                  Update the project information below.
+                  Create a new service in the marketplace.
                 </DialogDescription>
               </DialogHeader>
 
               <form
-                onSubmit={handleSubmit(handleSaveProject)}
+                onSubmit={handleSubmitAdd(handleAddProject)}
                 className="space-y-4"
               >
-                <div>
-                  <Label htmlFor="title">Title</Label>
-                  <Input id="title" {...register("title")} className="mt-1" />
-                  {errors.title && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.title.message}
-                    </p>
-                  )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="add-title">Title</Label>
+                    <Input
+                      id="add-title"
+                      {...registerAdd("title")}
+                      className="mt-1"
+                    />
+                    {errorsAdd.title && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errorsAdd.title.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="add-serialNo">Serial Number</Label>
+                    <Input
+                      id="add-serialNo"
+                      {...registerAdd("serialNo")}
+                      className="mt-1"
+                      placeholder="SN001"
+                    />
+                    {errorsAdd.serialNo && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errorsAdd.serialNo.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="add-description">Description</Label>
                   <Textarea
-                    id="description"
-                    {...register("description")}
+                    id="add-description"
+                    {...registerAdd("description")}
                     className="mt-1"
                     rows={3}
                   />
-                  {errors.description && (
+                  {errorsAdd.description && (
                     <p className="mt-1 text-sm text-red-600">
-                      {errors.description.message}
+                      {errorsAdd.description.message}
                     </p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="add-category">Category</Label>
                     <Input
-                      id="category"
-                      {...register("category")}
+                      id="add-category"
+                      {...registerAdd("category")}
                       className="mt-1"
                     />
-                    {errors.category && (
+                    {errorsAdd.category && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.category.message}
+                        {errorsAdd.category.message}
                       </p>
                     )}
                   </div>
 
                   <div>
-                    <Label htmlFor="card_image">Card Image URL</Label>
+                    <Label htmlFor="add-industry">
+                      Industry (comma-separated)
+                    </Label>
                     <Input
-                      id="card_image"
-                      {...register("card_image")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                    {errors.card_image && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.card_image.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="industry">Industry (comma-separated)</Label>
-                    <Input
-                      id="industry"
-                      {...register("industry")}
+                      id="add-industry"
+                      {...registerAdd("industry")}
                       className="mt-1"
                       placeholder="Healthcare, Finance, Education"
                     />
-                    {errors.industry && (
+                    {errorsAdd.industry && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.industry.message}
+                        {errorsAdd.industry.message}
                       </p>
                     )}
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="add-cardImage">Card Image URL</Label>
+                  <Input
+                    id="add-cardImage"
+                    {...registerAdd("cardImage")}
+                    className="mt-1"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {errorsAdd.cardImage && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errorsAdd.cardImage.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-3">
                   <Label>Project Links</Label>
 
                   <div>
-                    <Label htmlFor="telerivetUrl" className="text-sm">
+                    <Label htmlFor="add-telerivetUrl" className="text-sm">
                       Telerivet URL
                     </Label>
                     <Input
-                      id="telerivetUrl"
-                      {...register("telerivetUrl")}
+                      id="add-telerivetUrl"
+                      {...registerAdd("telerivetUrl")}
                       className="mt-1"
                       placeholder="https://..."
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="canvaUrl" className="text-sm">
+                    <Label htmlFor="add-canvaUrl" className="text-sm">
                       Canva URL
                     </Label>
                     <Input
-                      id="canvaUrl"
-                      {...register("canvaUrl")}
+                      id="add-canvaUrl"
+                      {...registerAdd("canvaUrl")}
                       className="mt-1"
                       placeholder="https://..."
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="hubspotUrl" className="text-sm">
+                    <Label htmlFor="add-hubspotUrl" className="text-sm">
                       HubSpot URL
                     </Label>
                     <Input
-                      id="hubspotUrl"
-                      {...register("hubspotUrl")}
+                      id="add-hubspotUrl"
+                      {...registerAdd("hubspotUrl")}
                       className="mt-1"
                       placeholder="https://..."
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="liveUrl" className="text-sm">
+                    <Label htmlFor="add-liveUrl" className="text-sm">
                       Live Project URL
                     </Label>
                     <Input
-                      id="liveUrl"
-                      {...register("liveUrl")}
+                      id="add-liveUrl"
+                      {...registerAdd("liveUrl")}
                       className="mt-1"
                       placeholder="https://..."
                     />
@@ -1026,17 +1126,17 @@ export default function Home() {
                         className="flex items-center space-x-2"
                       >
                         <Checkbox
-                          id={channel.name}
-                          checked={watchedRoutes?.includes(channel.name)}
+                          id={`add-${channel.name}`}
+                          checked={watchedRoutesAdd?.includes(channel.name)}
                           onCheckedChange={(checked) => {
-                            const current = watchedRoutes || [];
+                            const current = watchedRoutesAdd || [];
                             if (checked) {
-                              setValue("applicableRoutes", [
+                              setValueAdd("applicableRoutes", [
                                 ...current,
                                 channel.name,
                               ]);
                             } else {
-                              setValue(
+                              setValueAdd(
                                 "applicableRoutes",
                                 current.filter((r) => r !== channel.name),
                               );
@@ -1044,7 +1144,214 @@ export default function Home() {
                           }}
                         />
                         <Label
-                          htmlFor={channel.name}
+                          htmlFor={`add-${channel.name}`}
+                          className="flex items-center gap-2"
+                        >
+                          {channel.icon}
+                          {channel.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setAddDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isAdding}>
+                    {isAdding ? (
+                      <>
+                        <AlertCircle className="mr-2 h-4 w-4 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Service
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Edit Dialog */}
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Edit Project</DialogTitle>
+                <DialogDescription>
+                  Update the project information below.
+                </DialogDescription>
+              </DialogHeader>
+
+              <form
+                onSubmit={handleSubmitEdit(handleSaveProject)}
+                className="space-y-4"
+              >
+                <div>
+                  <Label htmlFor="edit-title">Title</Label>
+                  <Input
+                    id="edit-title"
+                    {...registerEdit("title")}
+                    className="mt-1"
+                  />
+                  {errorsEdit.title && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errorsEdit.title.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    {...registerEdit("description")}
+                    className="mt-1"
+                    rows={3}
+                  />
+                  {errorsEdit.description && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errorsEdit.description.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-category">Category</Label>
+                    <Input
+                      id="edit-category"
+                      {...registerEdit("category")}
+                      className="mt-1"
+                    />
+                    {errorsEdit.category && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errorsEdit.category.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-industry">
+                      Industry (comma-separated)
+                    </Label>
+                    <Input
+                      id="edit-industry"
+                      {...registerEdit("industry")}
+                      className="mt-1"
+                      placeholder="Healthcare, Finance, Education"
+                    />
+                    {errorsEdit.industry && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errorsEdit.industry.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-cardImage">Card Image URL</Label>
+                  <Input
+                    id="edit-cardImage"
+                    {...registerEdit("cardImage")}
+                    className="mt-1"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {errorsEdit.cardImage && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errorsEdit.cardImage.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <Label>Project Links</Label>
+
+                  <div>
+                    <Label htmlFor="edit-telerivetUrl" className="text-sm">
+                      Telerivet URL
+                    </Label>
+                    <Input
+                      id="edit-telerivetUrl"
+                      {...registerEdit("telerivetUrl")}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-canvaUrl" className="text-sm">
+                      Canva URL
+                    </Label>
+                    <Input
+                      id="edit-canvaUrl"
+                      {...registerEdit("canvaUrl")}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-hubspotUrl" className="text-sm">
+                      HubSpot URL
+                    </Label>
+                    <Input
+                      id="edit-hubspotUrl"
+                      {...registerEdit("hubspotUrl")}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-liveUrl" className="text-sm">
+                      Live Project URL
+                    </Label>
+                    <Input
+                      id="edit-liveUrl"
+                      {...registerEdit("liveUrl")}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Applicable Routes</Label>
+                  <div className="mt-2 space-y-2">
+                    {channels.map((channel) => (
+                      <div
+                        key={channel.name}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={`edit-${channel.name}`}
+                          checked={watchedRoutesEdit?.includes(channel.name)}
+                          onCheckedChange={(checked) => {
+                            const current = watchedRoutesEdit || [];
+                            if (checked) {
+                              setValueEdit("applicableRoutes", [
+                                ...current,
+                                channel.name,
+                              ]);
+                            } else {
+                              setValueEdit(
+                                "applicableRoutes",
+                                current.filter((r) => r !== channel.name),
+                              );
+                            }
+                          }}
+                        />
+                        <Label
+                          htmlFor={`edit-${channel.name}`}
                           className="flex items-center gap-2"
                         >
                           {channel.icon}
@@ -1093,14 +1400,11 @@ export default function Home() {
               ) : selectedProject ? (
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                   <div>
-                    {(selectedProject.card_image || selectedProject.image) && (
+                    {selectedProject.image && (
                       <Image
                         src={
-                          selectedProject.card_image &&
-                          selectedProject.card_image.trim() !== ""
-                            ? selectedProject.card_image
-                            : selectedProject.image ||
-                              "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=500"
+                          selectedProject.image ||
+                          "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=500"
                         }
                         alt={selectedProject.title}
                         width={400}
@@ -1133,16 +1437,16 @@ export default function Home() {
                       </div>
                     </DialogHeader>
 
-                    {/* <section>
+                    <section>
                       <h3 className="text-lg font-semibold text-gray-900">
                         Overview
                       </h3>
                       <p className="mt-2 text-gray-600">
                         {selectedProject.overview}
                       </p>
-                    </section> */}
+                    </section>
 
-                    {/* <section>
+                    <section>
                       <h3 className="text-lg font-semibold text-gray-900">
                         Key Benefits
                       </h3>
@@ -1157,7 +1461,7 @@ export default function Home() {
                           </li>
                         ))}
                       </ul>
-                    </section> */}
+                    </section>
 
                     {selectedProject.applicableRoutes?.length > 0 && (
                       <section>
@@ -1185,195 +1489,6 @@ export default function Home() {
                   </div>
                 </div>
               ) : null}
-            </DialogContent>
-          </Dialog>
-
-          {/* New Service Dialog  */}
-          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Add New Service</DialogTitle>
-                <DialogDescription>
-                  Fill in the details for the new service.
-                </DialogDescription>
-              </DialogHeader>
-              <form
-                onSubmit={handleSubmit(async (data) => {
-                  await handleAddProject(data);
-                })}
-                className="space-y-4"
-              >
-                {/* ...same form fields as edit... */}
-                {/* Title */}
-                <div>
-                  <Label htmlFor="title">Title</Label>
-                  <Input id="title" {...register("title")} className="mt-1" />
-                  {errors.title && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.title.message}
-                    </p>
-                  )}
-                </div>
-                {/* Description */}
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    {...register("description")}
-                    className="mt-1"
-                    rows={3}
-                  />
-                  {errors.description && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.description.message}
-                    </p>
-                  )}
-                </div>
-                {/* Category, Card Image, Industry */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Input
-                      id="category"
-                      {...register("category")}
-                      className="mt-1"
-                    />
-                    {errors.category && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.category.message}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="card_image">Card Image URL</Label>
-                    <Input
-                      id="card_image"
-                      {...register("card_image")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                    {errors.card_image && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.card_image.message}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="industry">Industry (comma-separated)</Label>
-                    <Input
-                      id="industry"
-                      {...register("industry")}
-                      className="mt-1"
-                      placeholder="Healthcare, Finance, Education"
-                    />
-                    {errors.industry && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.industry.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {/* Project Links */}
-                <div className="space-y-3">
-                  <Label>Project Links</Label>
-                  <div>
-                    <Label htmlFor="telerivetUrl" className="text-sm">
-                      Telerivet URL
-                    </Label>
-                    <Input
-                      id="telerivetUrl"
-                      {...register("telerivetUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="canvaUrl" className="text-sm">
-                      Canva URL
-                    </Label>
-                    <Input
-                      id="canvaUrl"
-                      {...register("canvaUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="hubspotUrl" className="text-sm">
-                      HubSpot URL
-                    </Label>
-                    <Input
-                      id="hubspotUrl"
-                      {...register("hubspotUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="liveUrl" className="text-sm">
-                      Live Project URL
-                    </Label>
-                    <Input
-                      id="liveUrl"
-                      {...register("liveUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-                </div>
-                {/* Applicable Routes */}
-                <div>
-                  <Label>Applicable Routes</Label>
-                  <div className="mt-2 space-y-2">
-                    {channels.map((channel) => (
-                      <div
-                        key={channel.name}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={channel.name}
-                          checked={watchedRoutes?.includes(channel.name)}
-                          onCheckedChange={(checked) => {
-                            const current = watchedRoutes || [];
-                            if (checked) {
-                              setValue("applicableRoutes", [
-                                ...current,
-                                channel.name,
-                              ]);
-                            } else {
-                              setValue(
-                                "applicableRoutes",
-                                current.filter((r) => r !== channel.name),
-                              );
-                            }
-                          }}
-                        />
-                        <Label
-                          htmlFor={channel.name}
-                          className="flex items-center gap-2"
-                        >
-                          {channel.icon}
-                          {channel.name}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {/* Actions */}
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setAddDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit">
-                    <Save className="mr-2 h-4 w-4" />
-                    Add Service
-                  </Button>
-                </div>
-              </form>
             </DialogContent>
           </Dialog>
 
