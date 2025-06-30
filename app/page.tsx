@@ -144,7 +144,7 @@ type ProjectDetails = {
   serialNo: string;
   usecase: string;
   benefits: string[];
-  image: string;
+  card_image: string;
   implementation: string[];
   overview: string;
   roiMetrics: string[];
@@ -1400,10 +1400,10 @@ export default function Home() {
               ) : selectedProject ? (
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                   <div>
-                    {selectedProject.image && (
+                    {selectedProject.card_image && (
                       <Image
                         src={
-                          selectedProject.image ||
+                          selectedProject.card_image ||
                           "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=500"
                         }
                         alt={selectedProject.title}
