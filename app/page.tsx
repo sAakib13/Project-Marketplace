@@ -1,549 +1,477 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useKeenSlider } from "keen-slider/react";
-import { useForm } from "react-hook-form";
-import axios from "axios";
-import Link from "next/link";
+
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// Icons
-import {
-  Search,
-  ExternalLink,
-  Filter,
-  Users,
-  User,
-  MessageSquare,
-  Phone,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  Pencil,
-  Trash,
-  Save,
-  AlertCircle,
-  Plus,
-} from "lucide-react";
-
-// UI components
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-// Assets
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import axios from "axios";
 import Logo from "./TR-white-logo.png";
+import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
+import {
+  Eye,
+  Edit,
+  Trash2,
+  Plus,
+  ExternalLink,
+  Building2,
+  Tag,
+  Calendar,
+  Hash,
+  Globe,
+  Palette,
+  BarChart3,
+  Smartphone,
+  Loader2,
+  X,
+  AlertCircle,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Users,
+  User,
+  MessageSquare,
+  Mail,
+  Phone,
+  Bell,
+  ShoppingCart,
+  Heart,
+  Star,
+  TrendingUp,
+  Filter,
+  ChevronDown,
+} from "lucide-react";
 
-// Communication channels with their icons
-const channels = [
-  { name: "SMS", icon: <MessageSquare className="h-4 w-4" /> },
-  {
-    name: "WhatsApp",
-    icon: <MessageSquare className="h-4 w-4 text-green-600" />,
-  },
-  {
-    name: "Viber",
-    icon: <MessageSquare className="h-4 w-4 text-purple-600" />,
-  },
-  { name: "Voice", icon: <Phone className="h-4 w-4" /> },
-];
-
-// Hero slides for the carousel
-const heroSlides = [
-  {
-    title: "Telerivet Solutions Marketplace",
-    description:
-      "The Telerivet Solutions Marketplace is a comprehensive platform designed to empower organizations with cutting-edge communication tools and solutions.",
-    image:
-      "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-  {
-    title: "Enterprise Communication Solutions",
-    description:
-      "Streamline customer engagement, automate interactions, and scale your operations with versatile tools, from retail to logistics.",
-    image:
-      "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-  {
-    title: "Global Impact Through Innovation",
-    description:
-      "Whether you're enhancing support, launching marketing campaigns, or deploying mobile solutions — unlock endless possibilities to drive global impact.",
-    image:
-      "https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-];
-
-// Category-based stock images
-const categoryImages = {
-  "SMS Marketing":
-    "https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
-  "Customer Support":
-    "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
-  "E-commerce":
-    "https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
-  Healthcare:
-    "https://images.pexels.com/photos/263402/pexels-photo-263402.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
-  Education:
-    "https://images.pexels.com/photos/289737/pexels-photo-289737.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
-  Finance:
-    "https://images.pexels.com/photos/259027/pexels-photo-259027.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
-  Logistics:
-    "https://images.pexels.com/photos/906494/pexels-photo-906494.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
-  Default:
-    "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=300",
-};
-
-// View modes for the application
-type ViewMode = "internal" | "customer";
-
-type Project = {
+// Types
+interface Project {
   title: string;
   description: string;
-  industry: string[];
   serialNo: string;
   category: string;
   timeUpdated: number;
+  rowId: string;
+  cardImage?: string;
   applicableRoutes: string[];
-  rowId?: string;
-  cardImage?: string; // Add cardImage field
+  industry: string[];
   links: {
     name: string;
     url: string;
     description: string;
     icon: string;
   }[];
-};
+}
 
-type ProjectDetails = {
+interface ProjectArticle {
   title: string;
   description: string;
   serialNo: string;
   usecase: string;
   benefits: string[];
-  card_image: string;
   implementation: string[];
-  overview: string;
   roiMetrics: string[];
-  applicableRoutes: string[];
-  industry: string;
+  image: string;
+}
+
+// Form schemas
+const editProjectSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  industry: z.array(z.string()).min(1, "At least one industry is required"),
+  applicableRoutes: z
+    .array(z.string())
+    .min(1, "At least one route is required"),
+  cardImage: z.string().optional(),
+});
+
+const addProjectSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  industry: z.array(z.string()).min(1, "At least one industry is required"),
+  telerivetUrl: z.string().optional(),
+  canvaUrl: z.string().optional(),
+  hubspotUrl: z.string().optional(),
+  liveUrl: z.string().optional(),
+  applicableRoutes: z
+    .array(z.string())
+    .min(1, "At least one route is required"),
+  cardImage: z.string().optional(),
+  serialNo: z.string().optional(),
+});
+
+type EditProjectForm = z.infer<typeof editProjectSchema>;
+type AddProjectForm = z.infer<typeof addProjectSchema>;
+
+const categories = [
+  "SMS Marketing",
+  "E-commerce",
+  "Healthcare",
+  "Education",
+  "Finance",
+  "Real Estate",
+  "Retail",
+  "Hospitality",
+  "Logistics",
+  "Entertainment",
+];
+
+const industries = [
+  "Technology",
+  "Healthcare",
+  "Finance",
+  "Education",
+  "Retail",
+  "Manufacturing",
+  "Real Estate",
+  "Hospitality",
+  "Logistics",
+  "Entertainment",
+  "Government",
+  "Non-profit",
+  "FMCG",
+  "Telecom",
+  "Banking",
+  "Insurance",
+  "Automotive",
+  "Media",
+  "Travel",
+  "Food & Beverage",
+];
+
+// Updated routes - only SMS, WhatsApp, Viber, Voice
+const routes = ["SMS", "WhatsApp", "Viber", "Voice"];
+
+// Hero slides data
+const heroSlides = [
+  {
+    title: "Transform Your Business Communication",
+    description:
+      "Powerful SMS solutions that drive engagement and deliver results across all industries.",
+    image:
+      "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=600&fit=crop",
+  },
+  {
+    title: "Reach Customers Instantly",
+    description:
+      "Connect with your audience through reliable, scalable SMS campaigns that convert.",
+    image:
+      "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=1200&h=600&fit=crop",
+  },
+  {
+    title: "Automate Your Success",
+    description:
+      "Streamline workflows with intelligent automation that saves time and increases efficiency.",
+    image:
+      "https://images.unsplash.com/photo-1551434678-e076c223a692?w=1200&h=600&fit=crop",
+  },
+];
+
+// Utility functions
+const getProjectImage = (project: Project): string => {
+  // First priority: dynamic card image from Telerivet
+  if (project.cardImage && project.cardImage.trim() !== "") {
+    return project.cardImage;
+  }
+
+  // Fallback to category-based stock images
+  const categoryImages: { [key: string]: string } = {
+    "SMS Marketing":
+      "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=250&fit=crop",
+    "E-commerce":
+      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop",
+    Healthcare:
+      "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop",
+    Education:
+      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=250&fit=crop",
+    Finance:
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=250&fit=crop",
+    "Real Estate":
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop",
+    Retail:
+      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=250&fit=crop",
+    Hospitality:
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=250&fit=crop",
+    Logistics:
+      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&h=250&fit=crop",
+    Entertainment:
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=250&fit=crop",
+  };
+
+  return (
+    categoryImages[project.category] ||
+    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop"
+  );
 };
 
-// Form validation schemas
-const editFormSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  category: z.string().min(1, "Category is required"),
-  industry: z.string().min(1, "Industry is required"),
-  telerivetUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  canvaUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  hubspotUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  liveUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  cardImage: z.string().url("Invalid URL").optional().or(z.literal("")),
-  applicableRoutes: z.array(z.string()),
-});
+const formatDate = (timestamp: number): string => {
+  return new Date(timestamp * 1000).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
-const addFormSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  category: z.string().min(1, "Category is required"),
-  industry: z.string().min(1, "Industry is required"),
-  serialNo: z.string().min(1, "Serial number is required"),
-  telerivetUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  canvaUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  hubspotUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  liveUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  cardImage: z.string().url("Invalid URL").optional().or(z.literal("")),
-  applicableRoutes: z.array(z.string()),
-});
+const getLinkIcon = (iconString: string) => {
+  const iconMap: { [key: string]: React.ReactNode } = {
+    "📱": <Smartphone className="h-4 w-4" />,
+    "🎨": <Palette className="h-4 w-4" />,
+    "📊": <BarChart3 className="h-4 w-4" />,
+    "🌐": <Globe className="h-4 w-4" />,
+  };
+  return iconMap[iconString] || <ExternalLink className="h-4 w-4" />;
+};
 
-export default function Home() {
-  // State management
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
-  const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
-  const [showNewOnly, setShowNewOnly] = useState(false);
+export default function ProjectHub() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedProject, setSelectedProject] = useState<ProjectDetails | null>(
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projectArticle, setProjectArticle] = useState<ProjectArticle | null>(
     null,
   );
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [loadingDetails, setLoadingDetails] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("customer");
-  const [expandedIndustries, setExpandedIndustries] = useState<{
-    [key: string]: boolean;
-  }>({});
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedIndustry, setSelectedIndustry] = useState("All");
+  const [viewMode, setViewMode] = useState<"internal" | "external">("external");
+  const [maxSerialNo, setMaxSerialNo] = useState<string>("");
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Edit functionality state
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // Add functionality state
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
-  const [maxSerialNo, setMaxSerialNo] = useState<string>("");
-
-  // Form handling for edit
-  const {
-    register: registerEdit,
-    handleSubmit: handleSubmitEdit,
-    reset: resetEdit,
-    setValue: setValueEdit,
-    watch: watchEdit,
-    formState: { errors: errorsEdit },
-  } = useForm<z.infer<typeof editFormSchema>>({
-    resolver: zodResolver(editFormSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      category: "",
-      industry: "",
-      telerivetUrl: "",
-      canvaUrl: "",
-      hubspotUrl: "",
-      liveUrl: "",
-      cardImage: "",
-      applicableRoutes: [],
+  // Keen Slider setup
+  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>(
+    {
+      loop: true,
+      duration: 1000,
+      slides: {
+        perView: 1,
+      },
+      slideChanged(slider) {
+        setCurrentSlide(slider.track.details.rel);
+      },
     },
-  });
-
-  // Form handling for add
-  const {
-    register: registerAdd,
-    handleSubmit: handleSubmitAdd,
-    reset: resetAdd,
-    setValue: setValueAdd,
-    watch: watchAdd,
-    formState: { errors: errorsAdd },
-  } = useForm<z.infer<typeof addFormSchema>>({
-    resolver: zodResolver(addFormSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      category: "",
-      industry: "",
-      serialNo: "",
-      telerivetUrl: "",
-      canvaUrl: "",
-      hubspotUrl: "",
-      liveUrl: "",
-      cardImage: "",
-      applicableRoutes: [],
-    },
-  });
-
-  const watchedRoutesEdit = watchEdit("applicableRoutes");
-  const watchedRoutesAdd = watchAdd("applicableRoutes");
-
-  // Keen Slider configuration
-  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
-    initial: 0,
-    slideChanged(slider) {
-      setCurrentSlide(slider.track.details.rel);
-    },
-    loop: true,
-    mode: "snap",
-    slides: { perView: 1 },
-  });
-
-  // Auto-advance slides
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (instanceRef.current) {
-        instanceRef.current.next();
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [instanceRef]);
-
-  // Fetch projects
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get("/api/telerivet");
-        const projectsWithTime = response.data.map((project: any) => ({
-          ...project,
-          timeUpdated: project.timeUpdated || Date.now() / 1000,
-        }));
-        setProjects(projectsWithTime);
-        setError(null);
-        const projectsData = response.data;
-        // Find max serial number
-        if (projectsData.length > 0) {
-          const serialNumbers = projectsData
-            .map((p: Project) => p.serialNo)
-            .filter((sn: string) => sn && !isNaN(parseInt(sn)))
-            .map((sn: string) => parseInt(sn))
-            .sort((a: number, b: number) => b - a);
-
-          if (serialNumbers.length > 0) {
-            setMaxSerialNo(serialNumbers[0].toString());
-          }
+    [
+      (slider) => {
+        let timeout: ReturnType<typeof setTimeout>;
+        let mouseOver = false;
+        function clearNextTimeout() {
+          clearTimeout(timeout);
         }
-      } catch (err) {
-        setError("Failed to load projects");
-        console.error("Error fetching projects:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
+        function nextTimeout() {
+          clearTimeout(timeout);
+          if (mouseOver) return;
+          timeout = setTimeout(() => {
+            slider.next();
+          }, 4000);
+        }
+        slider.on("created", () => {
+          slider.container.addEventListener("mouseover", () => {
+            mouseOver = true;
+            clearNextTimeout();
+          });
+          slider.container.addEventListener("mouseout", () => {
+            mouseOver = false;
+            nextTimeout();
+          });
+          nextTimeout();
+        });
+        slider.on("dragStarted", clearNextTimeout);
+        slider.on("animationEnded", nextTimeout);
+        slider.on("updated", nextTimeout);
+      },
+    ],
+  );
 
-  // Fetch project details
-  const fetchProjectDetails = async (serialNo: string) => {
-    setLoadingDetails(true);
+  // Form hooks
+  const editForm = useForm<EditProjectForm>({
+    resolver: zodResolver(editProjectSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      category: "",
+      industry: [],
+      applicableRoutes: [],
+      cardImage: "",
+    },
+  });
+
+  const addForm = useForm<AddProjectForm>({
+    resolver: zodResolver(addProjectSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      category: "",
+      industry: [],
+      telerivetUrl: "",
+      canvaUrl: "",
+      hubspotUrl: "",
+      liveUrl: "",
+      applicableRoutes: [],
+      cardImage: "",
+      serialNo: "",
+    },
+  });
+
+  // Toggle functions
+  const toggleViewMode = () => {
+    setViewMode(viewMode === "internal" ? "external" : "internal");
+  };
+
+  // Fetch projects and max serial number
+  const fetchProjects = async () => {
     try {
-      const response = await axios.post("/api/telerivet/id", { serialNo });
-      setSelectedProject(response.data[0]);
-      setIsDialogOpen(true);
-    } catch (err) {
-      console.error("Error fetching project details:", err);
-      setError("Failed to load project details");
+      setIsLoading(true);
+      const response = await axios.get("/api/telerivet");
+      const projectsData = response.data;
+      setProjects(projectsData);
+      setFilteredProjects(projectsData);
+
+      // Find max serial number
+      if (projectsData.length > 0) {
+        const serialNumbers = projectsData
+          .map((p: Project) => p.serialNo)
+          .filter((sn: string) => sn && !isNaN(parseInt(sn)))
+          .map((sn: string) => parseInt(sn))
+          .sort((a: number, b: number) => b - a);
+
+        if (serialNumbers.length > 0) {
+          setMaxSerialNo(serialNumbers[0].toString());
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      toast.error("Failed to fetch projects");
     } finally {
-      setLoadingDetails(false);
+      setIsLoading(false);
     }
+  };
+
+  // Fetch project article details
+  const fetchProjectArticle = async (serialNo: string) => {
+    try {
+      const response = await axios.post(`/api/telerivet/${serialNo}`, {
+        serialNo: serialNo,
+      });
+      if (response.data && response.data.length > 0) {
+        setProjectArticle(response.data[0]);
+      } else {
+        setProjectArticle(null);
+      }
+    } catch (error) {
+      console.error("Error fetching project article:", error);
+      setProjectArticle(null);
+    }
+  };
+
+  // Handle view project
+  const handleViewProject = async (project: Project) => {
+    setSelectedProject(project);
+    await fetchProjectArticle(project.serialNo);
+    setIsViewDialogOpen(true);
   };
 
   // Handle edit project
   const handleEditProject = (project: Project) => {
-    setEditingProject(project);
-
-    // Populate form with project data
-    resetEdit({
+    setSelectedProject(project);
+    editForm.reset({
       title: project.title,
       description: project.description,
       category: project.category,
-      industry: project.industry.join(", "),
-      telerivetUrl:
-        project.links.find((l) => l.name === "Telerivet Project")?.url || "",
-      canvaUrl: project.links.find((l) => l.name === "Canva Decks")?.url || "",
-      hubspotUrl:
-        project.links.find((l) => l.name === "HubSpot Article")?.url || "",
-      liveUrl: project.links.find((l) => l.name === "Live Project")?.url || "",
+      industry: Array.isArray(project.industry)
+        ? project.industry
+        : [project.industry],
+      applicableRoutes: project.applicableRoutes,
       cardImage: project.cardImage || "",
-      applicableRoutes: project.applicableRoutes || [],
     });
-
-    setEditDialogOpen(true);
+    setIsEditDialogOpen(true);
   };
 
-  // Handle save project
-  const handleSaveProject = async (data: any) => {
-    if (!editingProject) return;
+  // Handle save project (edit)
+  const handleSaveProject = async (data: EditProjectForm) => {
+    if (!selectedProject) return;
 
-    setIsUpdating(true);
     try {
+      setIsUpdating(true);
       const updateData = {
-        rowId: editingProject.rowId || editingProject.serialNo,
+        rowId: selectedProject.rowId,
         vars: {
           title: data.title,
           description: data.description,
           category: data.category,
-          industry: data.industry,
-          telerivet_url: data.telerivetUrl,
-          canva_url: data.canvaUrl,
-          hubspot_url: data.hubspotUrl,
-          live_url: data.liveUrl,
-          card_image: data.cardImage,
+          industry: data.industry.join(","),
           applicable_route: data.applicableRoutes.join(","),
+          card_image: data.cardImage || "",
         },
       };
 
-      console.log("Sending update data:", updateData);
-
-      const response = await axios.post("/api/telerivet/update", updateData);
-
-      console.log("Update response:", response.data);
-
-      // Update local state
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.serialNo === editingProject.serialNo
-            ? {
-                ...p,
-                title: data.title,
-                description: data.description,
-                category: data.category,
-                industry: data.industry.split(",").map((i: string) => i.trim()),
-                applicableRoutes: data.applicableRoutes,
-                cardImage: data.cardImage,
-                links: [
-                  ...(data.telerivetUrl
-                    ? [
-                        {
-                          name: "Telerivet Project",
-                          url: data.telerivetUrl,
-                          description: "Campaign automation and tracking",
-                          icon: "📱",
-                        },
-                      ]
-                    : []),
-                  ...(data.canvaUrl
-                    ? [
-                        {
-                          name: "Canva Decks",
-                          url: data.canvaUrl,
-                          description: "Brand-aligned visual assets",
-                          icon: "🎨",
-                        },
-                      ]
-                    : []),
-                  ...(data.hubspotUrl
-                    ? [
-                        {
-                          name: "HubSpot Article",
-                          url: data.hubspotUrl,
-                          description: "Performance metrics and leads",
-                          icon: "📊",
-                        },
-                      ]
-                    : []),
-                  ...(data.liveUrl
-                    ? [
-                        {
-                          name: "Live Project",
-                          url: data.liveUrl,
-                          description: "View the live project",
-                          icon: "🌐",
-                        },
-                      ]
-                    : []),
-                ],
-              }
-            : p,
-        ),
-      );
-
-      setEditDialogOpen(false);
-      setEditingProject(null);
-      setError(null);
-    } catch (err: any) {
-      console.error("Error updating project:", err);
-      setError(
-        `Failed to update project: ${err.response?.data?.error || err.message}`,
-      );
+      await axios.post("/api/telerivet/update", updateData);
+      toast.success("Project updated successfully!");
+      setIsEditDialogOpen(false);
+      await fetchProjects();
+    } catch (error) {
+      console.error("Error updating project:", error);
+      toast.error("Failed to update project");
     } finally {
       setIsUpdating(false);
     }
   };
 
   // Handle add project
-  const handleAddProject = async (data: any) => {
-    setIsAdding(true);
+  const handleAddProject = async (data: AddProjectForm) => {
     try {
-      const addData = {
+      setIsAdding(true);
+      const createData = {
         title: data.title,
         description: data.description,
         category: data.category,
-        industry: data.industry,
-        serialNo: data.serialNo,
+        industry: data.industry.join(","),
         telerivetUrl: data.telerivetUrl,
         canvaUrl: data.canvaUrl,
         hubspotUrl: data.hubspotUrl,
         liveUrl: data.liveUrl,
-        cardImage: data.cardImage,
         applicableRoutes: data.applicableRoutes,
-      };
-
-      console.log("Sending add data:", addData);
-
-      const response = await axios.post("/api/telerivet/create", addData);
-
-      console.log("Add response:", response.data);
-
-      // Add to local state
-      const newProject: Project = {
-        title: data.title,
-        description: data.description,
-        category: data.category,
-        industry: data.industry.split(",").map((i: string) => i.trim()),
+        cardImage: data.cardImage,
         serialNo: data.serialNo,
-        applicableRoutes: data.applicableRoutes,
-        cardImage: data.cardImage,
-        timeUpdated: Date.now() / 1000,
-        rowId: response.data.data?.id,
-        links: [
-          ...(data.telerivetUrl
-            ? [
-                {
-                  name: "Telerivet Project",
-                  url: data.telerivetUrl,
-                  description: "Campaign automation and tracking",
-                  icon: "📱",
-                },
-              ]
-            : []),
-          ...(data.canvaUrl
-            ? [
-                {
-                  name: "Canva Decks",
-                  url: data.canvaUrl,
-                  description: "Brand-aligned visual assets",
-                  icon: "🎨",
-                },
-              ]
-            : []),
-          ...(data.hubspotUrl
-            ? [
-                {
-                  name: "HubSpot Article",
-                  url: data.hubspotUrl,
-                  description: "Performance metrics and leads",
-                  icon: "📊",
-                },
-              ]
-            : []),
-          ...(data.liveUrl
-            ? [
-                {
-                  name: "Live Project",
-                  url: data.liveUrl,
-                  description: "View the live project",
-                  icon: "🌐",
-                },
-              ]
-            : []),
-        ],
       };
 
-      setProjects((prev) => [newProject, ...prev]);
-      setAddDialogOpen(false);
-      resetAdd();
-      setError(null);
-    } catch (err: any) {
-      console.error("Error adding project:", err);
-      setError(
-        `Failed to add project: ${err.response?.data?.error || err.message}`,
-      );
+      await axios.post("/api/telerivet/create", createData);
+      toast.success("Project created successfully!");
+      setIsAddDialogOpen(false);
+      addForm.reset();
+      await fetchProjects();
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast.error("Failed to create project");
     } finally {
       setIsAdding(false);
     }
@@ -553,147 +481,89 @@ export default function Home() {
   const handleDeleteProject = async (project: Project) => {
     if (!confirm("Are you sure you want to delete this project?")) return;
 
-    setIsDeleting(true);
     try {
-      console.log("Deleting project with rowId:", project.rowId);
-
-      await axios.post("/api/telerivet/delete", {
-        rowId: project.rowId || project.serialNo,
+      setIsDeleting(project.rowId);
+      await axios.delete("/api/telerivet/delete", {
+        data: { rowId: project.rowId },
       });
-
-      // Remove from local state
-      setProjects((prev) =>
-        prev.filter((p) => p.serialNo !== project.serialNo),
-      );
-      setError(null);
-    } catch (err: any) {
-      console.error("Error deleting project:", err);
-      setError(
-        `Failed to delete project: ${err.response?.data?.error || err.message}`,
-      );
+      toast.success("Project deleted successfully!");
+      await fetchProjects();
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error("Failed to delete project");
     } finally {
-      setIsDeleting(false);
+      setIsDeleting(null);
     }
   };
 
-  // Toggle functions
-  const toggleIndustry = (industry: string) => {
-    setSelectedIndustries((prev) =>
-      prev.includes(industry)
-        ? prev.filter((i) => i !== industry)
-        : [...prev, industry],
-    );
-  };
+  // Filter projects
+  useEffect(() => {
+    let filtered = projects;
 
-  const toggleChannel = (channel: string) => {
-    setSelectedChannels((prev) =>
-      prev.includes(channel)
-        ? prev.filter((c) => c !== channel)
-        : [...prev, channel],
-    );
-  };
-
-  const toggleViewMode = () => {
-    setViewMode((prev) => (prev === "internal" ? "customer" : "internal"));
-  };
-
-  const toggleIndustryExpand = (serialNo: string) => {
-    setExpandedIndustries((prev) => ({
-      ...prev,
-      [serialNo]: !prev[serialNo],
-    }));
-  };
-
-  const isNewService = (timeUpdated: number) => {
-    const threeDaysAgo = Date.now() / 1000 - 3 * 24 * 60 * 60;
-    return timeUpdated > threeDaysAgo;
-  };
-
-  const getProjectImage = (project: Project) => {
-    // Use dynamic card image if available, otherwise fall back to category images
-    if (project.cardImage) {
-      return project.cardImage;
-    }
-    return (
-      categoryImages[project.category as keyof typeof categoryImages] ||
-      categoryImages.Default
-    );
-  };
-
-  // Filter and group projects
-  const filteredProjects = projects
-    .filter((project) => {
-      const matchesSearch =
-        project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.industry.some((ind) =>
-          ind.toLowerCase().includes(searchQuery.toLowerCase()),
-        );
-
-      const matchesIndustry =
-        selectedIndustries.length === 0 ||
-        project.industry.some((ind) => selectedIndustries.includes(ind));
-
-      const matchesChannels =
-        selectedChannels.length === 0 ||
-        project.applicableRoutes.some((route) =>
-          selectedChannels.includes(route),
-        );
-
-      const matchesNewOnly = !showNewOnly || isNewService(project.timeUpdated);
-
-      return (
-        matchesSearch && matchesIndustry && matchesChannels && matchesNewOnly
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (project) =>
+          project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          project.description.toLowerCase().includes(searchQuery.toLowerCase()),
       );
-    })
-    .sort((a, b) => {
-      if (showNewOnly) {
-        return b.timeUpdated - a.timeUpdated;
-      }
-      return 0;
-    });
+    }
 
-  const groupedProjects = filteredProjects.reduce(
-    (acc, project) => {
-      const category = project.category || "Uncategorized";
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(project);
-      return acc;
-    },
-    {} as Record<string, Project[]>,
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter(
+        (project) => project.category === selectedCategory,
+      );
+    }
+
+    if (selectedIndustry !== "All") {
+      filtered = filtered.filter((project) =>
+        Array.isArray(project.industry)
+          ? project.industry.includes(selectedIndustry)
+          : project.industry === selectedIndustry,
+      );
+    }
+
+    setFilteredProjects(filtered);
+  }, [projects, searchQuery, selectedCategory, selectedIndustry]);
+
+  // Load projects on mount
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  // Get unique categories and industries
+  const uniqueCategories = Array.from(new Set(projects.map((p) => p.category)));
+  const uniqueIndustries = Array.from(
+    new Set(
+      projects.flatMap((p) =>
+        Array.isArray(p.industry) ? p.industry : [p.industry],
+      ),
+    ),
   );
 
-  const sortedCategories = Object.keys(groupedProjects).sort();
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="text-2xl text-blue-600">Loading projects...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-100 to-white">
         <div className="text-center">
-          <div className="mb-4 text-2xl text-red-600">{error}</div>
-          <Button onClick={() => window.location.reload()}>Retry</Button>
+          <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-blue-600" />
+          <p className="text-blue-800">Loading services...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <>
-      <header className="sticky top-0 z-50 border-b border-blue-500/20 bg-black/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-blue-500/20 bg-white/80 backdrop-blur-sm">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
-            <Image src={Logo} alt="Telerivet Logo" width={200} height={200} />
+            <Image src={Logo} alt="Telerivet Logo" width={200} height={50} />
           </div>
           <div className="flex items-center gap-6">
+            <div className="text-sm font-medium text-blue-600">
+              {maxSerialNo && `Latest S.N: ${maxSerialNo} • `}
+              {filteredProjects.length} services available
+            </div>
             <Link
               href="#solutions"
               target="_blank"
@@ -704,7 +574,7 @@ export default function Home() {
             </Link>
             {viewMode === "internal" && (
               <button
-                onClick={() => setAddDialogOpen(true)}
+                onClick={() => setIsAddDialogOpen(true)}
                 className="flex h-12 w-12 items-center justify-center rounded-full border border-green-500/30 bg-white shadow transition hover:border-green-500 hover:bg-green-500/10"
                 title="Add New Service"
               >
@@ -714,6 +584,11 @@ export default function Home() {
             <button
               onClick={toggleViewMode}
               className="flex h-12 w-12 items-center justify-center rounded-full border border-blue-500/30 bg-white shadow transition hover:border-blue-500 hover:bg-blue-500/10"
+              title={
+                viewMode === "internal"
+                  ? "Switch to External View"
+                  : "Switch to Internal View"
+              }
             >
               {viewMode === "internal" ? (
                 <Users className="h-6 w-6 text-blue-600" />
@@ -727,10 +602,10 @@ export default function Home() {
 
       <main className="min-h-screen bg-gradient-to-r from-blue-100 to-white pb-12">
         {/* Hero Slider */}
-        <div className="relative h-full w-full">
+        <div className="relative mx-auto max-w-6xl px-4 py-8">
           <div
             ref={sliderRef}
-            className="keen-slider rounded-2xl bg-white shadow-xl"
+            className="keen-slider overflow-hidden rounded-2xl bg-white shadow-xl"
           >
             {heroSlides.map((slide, index) => (
               <div
@@ -785,750 +660,742 @@ export default function Home() {
 
         {/* Search and Filters */}
         <div className="mx-auto mt-8 max-w-6xl px-4 py-4">
-          <div className="mx-auto mb-8 max-w-2xl">
-            <div className="relative mb-4">
-              <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-                <Search className="h-5 w-5 text-blue-600" />
+          <div className="mb-8 rounded-xl bg-white p-6 shadow-lg">
+            <div className="flex flex-col items-center gap-4 lg:flex-row">
+              {/* Search Bar */}
+              <div className="relative min-w-0 flex-1">
+                <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                  <Search className="h-5 w-5 text-blue-600" />
+                </div>
+                <Input
+                  type="search"
+                  placeholder="Search services or descriptions..."
+                  className="h-12 border-blue-500/20 bg-white pl-10 text-lg focus-visible:ring-blue-500/50"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-              <Input
-                type="search"
-                placeholder="Search services or descriptions..."
-                className="h-12 border-blue-500/20 bg-white pl-10 text-lg focus-visible:ring-blue-500/50"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
 
-            <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
-              <Badge
-                variant={showNewOnly ? "default" : "outline"}
-                className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
-                  showNewOnly
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
-                    : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
-                }`}
-                onClick={() => setShowNewOnly(!showNewOnly)}
-              >
-                New Services
-              </Badge>
-
-              {channels.map((channel) => (
-                <Badge
-                  key={channel.name}
-                  variant={
-                    selectedChannels.includes(channel.name)
-                      ? "default"
-                      : "outline"
-                  }
-                  className={`cursor-pointer px-6 py-2.5 text-sm transition-all duration-200 ${
-                    selectedChannels.includes(channel.name)
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:translate-y-[-2px] hover:bg-blue-700"
-                      : "border-blue-500/30 text-blue-600 hover:translate-y-[-2px] hover:border-blue-500 hover:bg-blue-500/10"
-                  }`}
-                  onClick={() => toggleChannel(channel.name)}
+              {/* Category Filter */}
+              <div className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-blue-600" />
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
                 >
-                  <div className="flex items-center gap-2">
-                    {channel.icon}
-                    {channel.name}
-                  </div>
-                </Badge>
-              ))}
-            </div>
-          </div>
+                  <SelectTrigger className="h-12 w-48 border-blue-500/20 bg-white">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Categories</SelectItem>
+                    {uniqueCategories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="animate-fade-in my-10 rounded-xl p-4 shadow-xl">
-            <p className="text-sm font-medium uppercase tracking-wider text-gray-300">
-              {maxSerialNo && (
-                <span className="text-emerald-400">
-                  Latest S.N: {maxSerialNo}
-                </span>
-              )}
-              {maxSerialNo && <span className="mx-1 text-gray-500">•</span>}
-              <span className="text-white">
-                {filteredProjects.length} services available
-              </span>
-            </p>
+              {/* Industry Filter */}
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-blue-600" />
+                <Select
+                  value={selectedIndustry}
+                  onValueChange={setSelectedIndustry}
+                >
+                  <SelectTrigger className="h-12 w-48 border-blue-500/20 bg-white">
+                    <SelectValue placeholder="All Industries" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Industries</SelectItem>
+                    {uniqueIndustries.map((industry) => (
+                      <SelectItem key={industry} value={industry}>
+                        {industry}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
 
           {/* Projects Grid */}
-          {sortedCategories.map((category) => (
-            <div key={category} className="mb-12 w-full">
-              <h2 className="mb-6 bg-gradient-to-r from-black via-blue-800 to-blue-500 bg-clip-text text-3xl font-bold text-transparent drop-shadow-sm">
-                {category}
-              </h2>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {groupedProjects[category].map((project) => (
-                  <Card
-                    key={project.serialNo}
-                    className="group relative cursor-pointer overflow-hidden border-0 bg-white shadow-lg transition-all duration-200 hover:shadow-xl"
-                    onClick={() => fetchProjectDetails(project.serialNo)}
-                  >
-                    {/* Project Image */}
-                    <div className="relative h-48 w-full overflow-hidden">
-                      <Image
-                        src={getProjectImage(project)}
-                        alt={project.title}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-
-                      {/* Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-
-                      {/* New Badge */}
-                      {isNewService(project.timeUpdated) && (
-                        <div className="absolute left-3 top-3 z-20">
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white">
-                            N
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Edit/Delete Icons */}
-                      {viewMode === "internal" && (
-                        <div className="absolute right-3 top-3 z-20 flex gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditProject(project);
-                            }}
-                            className="rounded-full bg-white/80 p-2 text-blue-600 hover:bg-white"
-                            title="Edit"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteProject(project);
-                            }}
-                            className="rounded-full bg-white/80 p-2 text-red-600 hover:bg-white"
-                            title="Delete"
-                            disabled={isDeleting}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Card Content */}
-                    <CardHeader className="space-y-4 p-4">
-                      <div className="space-y-2">
-                        <CardTitle className="text-xl font-semibold text-gray-900">
-                          {project.title}
-                        </CardTitle>
-                        <div className="flex flex-wrap gap-2">
-                          {project.industry.slice(0, 2).map((ind) => (
-                            <Badge
-                              key={ind}
-                              variant="secondary"
-                              className="bg-blue-50 text-blue-700"
-                            >
-                              {ind}
-                            </Badge>
-                          ))}
-                          {project.industry.length > 2 && (
-                            <Badge
-                              variant="secondary"
-                              className="cursor-pointer bg-gray-50 text-gray-600 hover:bg-gray-100"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleIndustryExpand(project.serialNo);
-                              }}
-                            >
-                              +{project.industry.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Expanded Industries */}
-                        {expandedIndustries[project.serialNo] && (
-                          <div className="flex flex-wrap gap-2 pt-2">
-                            {project.industry.slice(2).map((ind) => (
-                              <Badge
-                                key={ind}
-                                variant="secondary"
-                                className="bg-blue-50 text-blue-700"
-                              >
-                                {ind}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <CardDescription className="text-gray-600">
-                        {project.description}
-                      </CardDescription>
-
-                      <div className="flex gap-2">
-                        {channels.map(
-                          (channel) =>
-                            project.applicableRoutes?.includes(
-                              channel.name,
-                            ) && (
-                              <div
-                                key={channel.name}
-                                className="rounded-full bg-gray-50 p-2"
-                                title={channel.name}
-                              >
-                                {channel.icon}
-                              </div>
-                            ),
-                        )}
-                      </div>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {/* Add Dialog */}
-          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Add New Service</DialogTitle>
-                <DialogDescription>
-                  Create a new service in the marketplace.
-                </DialogDescription>
-              </DialogHeader>
-
-              <form
-                onSubmit={handleSubmitAdd(handleAddProject)}
-                className="space-y-4"
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredProjects.map((project) => (
+              <Card
+                key={project.rowId}
+                className="border-blue-200 bg-white transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-blue-500/10"
               >
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="add-title">Title</Label>
-                    <Input
-                      id="add-title"
-                      {...registerAdd("title")}
-                      className="mt-1"
-                    />
-                    {errorsAdd.title && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errorsAdd.title.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="add-serialNo">Serial Number</Label>
-                    <Input
-                      id="add-serialNo"
-                      {...registerAdd("serialNo")}
-                      className="mt-1"
-                      placeholder="SN001"
-                    />
-                    {errorsAdd.serialNo && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errorsAdd.serialNo.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="add-description">Description</Label>
-                  <Textarea
-                    id="add-description"
-                    {...registerAdd("description")}
-                    className="mt-1"
-                    rows={3}
+                <div className="relative">
+                  <img
+                    src={getProjectImage(project)}
+                    alt={project.title}
+                    className="h-48 w-full rounded-t-lg object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src =
+                        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop";
+                    }}
                   />
-                  {errorsAdd.description && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errorsAdd.description.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="add-category">Category</Label>
-                    <Input
-                      id="add-category"
-                      {...registerAdd("category")}
-                      className="mt-1"
-                    />
-                    {errorsAdd.category && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errorsAdd.category.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="add-industry">
-                      Industry (comma-separated)
-                    </Label>
-                    <Input
-                      id="add-industry"
-                      {...registerAdd("industry")}
-                      className="mt-1"
-                      placeholder="Healthcare, Finance, Education"
-                    />
-                    {errorsAdd.industry && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errorsAdd.industry.message}
-                      </p>
-                    )}
+                  <div className="absolute right-2 top-2">
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-600 text-white"
+                    >
+                      #{project.serialNo}
+                    </Badge>
                   </div>
                 </div>
-
-                <div>
-                  <Label htmlFor="add-cardImage">Card Image URL</Label>
-                  <Input
-                    id="add-cardImage"
-                    {...registerAdd("cardImage")}
-                    className="mt-1"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                  {errorsAdd.cardImage && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errorsAdd.cardImage.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <Label>Project Links</Label>
-
-                  <div>
-                    <Label htmlFor="add-telerivetUrl" className="text-sm">
-                      Telerivet URL
-                    </Label>
-                    <Input
-                      id="add-telerivetUrl"
-                      {...registerAdd("telerivetUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg text-gray-900">
+                      {project.title}
+                    </CardTitle>
                   </div>
-
-                  <div>
-                    <Label htmlFor="add-canvaUrl" className="text-sm">
-                      Canva URL
-                    </Label>
-                    <Input
-                      id="add-canvaUrl"
-                      {...registerAdd("canvaUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="add-hubspotUrl" className="text-sm">
-                      HubSpot URL
-                    </Label>
-                    <Input
-                      id="add-hubspotUrl"
-                      {...registerAdd("hubspotUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="add-liveUrl" className="text-sm">
-                      Live Project URL
-                    </Label>
-                    <Input
-                      id="add-liveUrl"
-                      {...registerAdd("liveUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Applicable Routes</Label>
-                  <div className="mt-2 space-y-2">
-                    {channels.map((channel) => (
-                      <div
-                        key={channel.name}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={`add-${channel.name}`}
-                          checked={watchedRoutesAdd?.includes(channel.name)}
-                          onCheckedChange={(checked) => {
-                            const current = watchedRoutesAdd || [];
-                            if (checked) {
-                              setValueAdd("applicableRoutes", [
-                                ...current,
-                                channel.name,
-                              ]);
-                            } else {
-                              setValueAdd(
-                                "applicableRoutes",
-                                current.filter((r) => r !== channel.name),
-                              );
-                            }
-                          }}
-                        />
-                        <Label
-                          htmlFor={`add-${channel.name}`}
-                          className="flex items-center gap-2"
+                  <p className="line-clamp-2 text-sm text-gray-600">
+                    {project.description}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    <Badge
+                      variant="outline"
+                      className="border-blue-400 text-blue-600"
+                    >
+                      <Tag className="mr-1 h-3 w-3" />
+                      {project.category}
+                    </Badge>
+                    {Array.isArray(project.industry) ? (
+                      project.industry.slice(0, 2).map((ind, idx) => (
+                        <Badge
+                          key={idx}
+                          variant="outline"
+                          className="border-green-400 text-green-600"
                         >
-                          {channel.icon}
-                          {channel.name}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setAddDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isAdding}>
-                    {isAdding ? (
-                      <>
-                        <AlertCircle className="mr-2 h-4 w-4 animate-spin" />
-                        Adding...
-                      </>
+                          <Building2 className="mr-1 h-3 w-3" />
+                          {ind}
+                        </Badge>
+                      ))
                     ) : (
-                      <>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Service
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          {/* Edit Dialog */}
-          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Edit Project</DialogTitle>
-                <DialogDescription>
-                  Update the project information below.
-                </DialogDescription>
-              </DialogHeader>
-
-              <form
-                onSubmit={handleSubmitEdit(handleSaveProject)}
-                className="space-y-4"
-              >
-                <div>
-                  <Label htmlFor="edit-title">Title</Label>
-                  <Input
-                    id="edit-title"
-                    {...registerEdit("title")}
-                    className="mt-1"
-                  />
-                  {errorsEdit.title && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errorsEdit.title.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="edit-description">Description</Label>
-                  <Textarea
-                    id="edit-description"
-                    {...registerEdit("description")}
-                    className="mt-1"
-                    rows={3}
-                  />
-                  {errorsEdit.description && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errorsEdit.description.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="edit-category">Category</Label>
-                    <Input
-                      id="edit-category"
-                      {...registerEdit("category")}
-                      className="mt-1"
-                    />
-                    {errorsEdit.category && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errorsEdit.category.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="edit-industry">
-                      Industry (comma-separated)
-                    </Label>
-                    <Input
-                      id="edit-industry"
-                      {...registerEdit("industry")}
-                      className="mt-1"
-                      placeholder="Healthcare, Finance, Education"
-                    />
-                    {errorsEdit.industry && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errorsEdit.industry.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="edit-cardImage">Card Image URL</Label>
-                  <Input
-                    id="edit-cardImage"
-                    {...registerEdit("cardImage")}
-                    className="mt-1"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                  {errorsEdit.cardImage && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errorsEdit.cardImage.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <Label>Project Links</Label>
-
-                  <div>
-                    <Label htmlFor="edit-telerivetUrl" className="text-sm">
-                      Telerivet URL
-                    </Label>
-                    <Input
-                      id="edit-telerivetUrl"
-                      {...registerEdit("telerivetUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="edit-canvaUrl" className="text-sm">
-                      Canva URL
-                    </Label>
-                    <Input
-                      id="edit-canvaUrl"
-                      {...registerEdit("canvaUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="edit-hubspotUrl" className="text-sm">
-                      HubSpot URL
-                    </Label>
-                    <Input
-                      id="edit-hubspotUrl"
-                      {...registerEdit("hubspotUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="edit-liveUrl" className="text-sm">
-                      Live Project URL
-                    </Label>
-                    <Input
-                      id="edit-liveUrl"
-                      {...registerEdit("liveUrl")}
-                      className="mt-1"
-                      placeholder="https://..."
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Applicable Routes</Label>
-                  <div className="mt-2 space-y-2">
-                    {channels.map((channel) => (
-                      <div
-                        key={channel.name}
-                        className="flex items-center space-x-2"
+                      <Badge
+                        variant="outline"
+                        className="border-green-400 text-green-600"
                       >
-                        <Checkbox
-                          id={`edit-${channel.name}`}
-                          checked={watchedRoutesEdit?.includes(channel.name)}
-                          onCheckedChange={(checked) => {
-                            const current = watchedRoutesEdit || [];
-                            if (checked) {
-                              setValueEdit("applicableRoutes", [
-                                ...current,
-                                channel.name,
-                              ]);
-                            } else {
-                              setValueEdit(
-                                "applicableRoutes",
-                                current.filter((r) => r !== channel.name),
-                              );
-                            }
-                          }}
-                        />
-                        <Label
-                          htmlFor={`edit-${channel.name}`}
-                          className="flex items-center gap-2"
+                        <Building2 className="mr-1 h-3 w-3" />
+                        {project.industry}
+                      </Badge>
+                    )}
+                    {Array.isArray(project.industry) &&
+                      project.industry.length > 2 && (
+                        <Badge
+                          variant="outline"
+                          className="border-gray-400 text-gray-600"
                         >
-                          {channel.icon}
-                          {channel.name}
-                        </Label>
-                      </div>
-                    ))}
+                          +{project.industry.length - 2} more
+                        </Badge>
+                      )}
                   </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setEditDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isUpdating}>
-                    {isUpdating ? (
+                  <div className="mb-4 flex items-center justify-between text-sm text-gray-500">
+                    <span className="flex items-center">
+                      <Calendar className="mr-1 h-4 w-4" />
+                      {formatDate(project.timeUpdated)}
+                    </span>
+                    <span className="flex items-center">
+                      <Hash className="mr-1 h-4 w-4" />
+                      {project.applicableRoutes.length} routes
+                    </span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleViewProject(project)}
+                      className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      View
+                    </Button>
+                    {viewMode === "internal" && (
                       <>
-                        <AlertCircle className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save Changes
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          {/* Project Details Dialog */}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
-              {loadingDetails ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-xl text-blue-600">
-                    Loading details...
-                  </div>
-                </div>
-              ) : selectedProject ? (
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                  <div>
-                    {selectedProject.card_image && (
-                      <Image
-                        src={
-                          selectedProject.card_image ||
-                          "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=500"
-                        }
-                        alt={selectedProject.title}
-                        width={400}
-                        height={500}
-                        className="rounded-lg object-cover"
-                      />
-                    )}
-                  </div>
-
-                  <div className="space-y-6">
-                    <DialogHeader className="space-y-4">
-                      <DialogTitle className="text-2xl font-bold text-gray-900">
-                        {selectedProject.title}
-                      </DialogTitle>
-                      <DialogDescription className="text-gray-600">
-                        {selectedProject.description}
-                      </DialogDescription>
-                      <div className="flex flex-wrap gap-2">
-                        {(selectedProject.industry?.split(", ") || [])
-                          .slice(0, 3)
-                          .map((ind) => (
-                            <Badge
-                              key={ind}
-                              variant="secondary"
-                              className="bg-blue-50 text-blue-700"
-                            >
-                              {ind}
-                            </Badge>
-                          ))}
-                      </div>
-                    </DialogHeader>
-
-                    <section>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Overview
-                      </h3>
-                      <p className="mt-2 text-gray-600">
-                        {selectedProject.overview}
-                      </p>
-                    </section>
-
-                    <section>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Key Benefits
-                      </h3>
-                      <ul className="mt-2 space-y-2">
-                        {selectedProject.benefits?.map((benefit, index) => (
-                          <li
-                            key={index}
-                            className="flex items-start gap-2 text-gray-600"
-                          >
-                            <span className="text-blue-500">•</span>
-                            {benefit}
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-
-                    {selectedProject.applicableRoutes?.length > 0 && (
-                      <section>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Channels
-                        </h3>
-                        <div className="mt-2 flex flex-wrap gap-3">
-                          {channels.map(
-                            (channel) =>
-                              selectedProject.applicableRoutes.includes(
-                                channel.name,
-                              ) && (
-                                <div
-                                  key={channel.name}
-                                  className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-800"
-                                >
-                                  {channel.icon}
-                                  <span>{channel.name}</span>
-                                </div>
-                              ),
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditProject(project)}
+                          className="border-blue-400 text-blue-600 hover:bg-blue-50"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteProject(project)}
+                          disabled={isDeleting === project.rowId}
+                          className="border-red-400 text-red-600 hover:bg-red-50"
+                        >
+                          {isDeleting === project.rowId ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
                           )}
-                        </div>
-                      </section>
+                        </Button>
+                      </>
                     )}
                   </div>
-                </div>
-              ) : null}
-            </DialogContent>
-          </Dialog>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
           {filteredProjects.length === 0 && (
-            <div className="mt-12 text-center">
-              <p className="text-xl text-gray-600">
-                No projects found matching your search.
+            <div className="py-12 text-center">
+              <AlertCircle className="mx-auto mb-4 h-12 w-12 text-blue-400" />
+              <h3 className="mb-2 text-xl font-semibold text-gray-900">
+                No services found
+              </h3>
+              <p className="text-gray-600">
+                Try adjusting your search or filter criteria.
               </p>
             </div>
           )}
         </div>
       </main>
-    </>
+
+      {/* View Project Dialog - Simplified without use case/benefits/implementation/ROI */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+          {selectedProject && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="text-2xl">
+                    {selectedProject.title}
+                  </DialogTitle>
+                  <Badge variant="secondary" className="bg-blue-600 text-white">
+                    #{selectedProject.serialNo}
+                  </Badge>
+                </div>
+              </DialogHeader>
+
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="links">Resources</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="space-y-4">
+                  <div className="relative">
+                    <img
+                      src={getProjectImage(selectedProject)}
+                      alt={selectedProject.title}
+                      className="h-64 w-full rounded-lg object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src =
+                          "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop";
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="mb-2 text-lg font-semibold">
+                        Description
+                      </h3>
+                      <p className="text-gray-600">
+                        {selectedProject.description}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="mb-2 font-medium">Category</h4>
+                        <Badge
+                          variant="outline"
+                          className="border-blue-400 text-blue-600"
+                        >
+                          {selectedProject.category}
+                        </Badge>
+                      </div>
+                      <div>
+                        <h4 className="mb-2 font-medium">Industries</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {Array.isArray(selectedProject.industry) ? (
+                            selectedProject.industry.map((ind, idx) => (
+                              <Badge
+                                key={idx}
+                                variant="outline"
+                                className="border-green-400 text-green-600"
+                              >
+                                {ind}
+                              </Badge>
+                            ))
+                          ) : (
+                            <Badge
+                              variant="outline"
+                              className="border-green-400 text-green-600"
+                            >
+                              {selectedProject.industry}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="mb-2 font-medium">
+                        Communication Channels
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProject.applicableRoutes.map((route, idx) => (
+                          <Badge
+                            key={idx}
+                            variant="secondary"
+                            className="bg-blue-100 text-blue-800"
+                          >
+                            {route}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="links" className="space-y-4">
+                  {selectedProject.links && selectedProject.links.length > 0 ? (
+                    <div className="grid gap-4">
+                      {selectedProject.links.map((link, idx) => (
+                        <Card key={idx} className="border-blue-200 p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              {getLinkIcon(link.icon)}
+                              <div>
+                                <h4 className="font-medium">{link.name}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {link.description}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(link.url, "_blank")}
+                              className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                            >
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Open
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center">
+                      <Globe className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                      <p className="text-gray-500">
+                        No resource links available for this project.
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Project Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Project</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={editForm.handleSubmit(handleSaveProject)}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="edit-title">Title *</Label>
+              <Input
+                id="edit-title"
+                {...editForm.register("title")}
+                placeholder="Project title"
+              />
+              {editForm.formState.errors.title && (
+                <p className="mt-1 text-sm text-red-500">
+                  {editForm.formState.errors.title.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="edit-description">Description *</Label>
+              <Textarea
+                id="edit-description"
+                {...editForm.register("description")}
+                placeholder="Project description"
+                rows={3}
+              />
+              {editForm.formState.errors.description && (
+                <p className="mt-1 text-sm text-red-500">
+                  {editForm.formState.errors.description.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="edit-category">Category *</Label>
+              <Select
+                onValueChange={(value) => editForm.setValue("category", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {editForm.formState.errors.category && (
+                <p className="mt-1 text-sm text-red-500">
+                  {editForm.formState.errors.category.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label>Industries * (Select multiple)</Label>
+              <div className="mt-2 grid max-h-40 grid-cols-3 gap-2 overflow-y-auto rounded border p-2">
+                {industries.map((industry) => (
+                  <label key={industry} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      value={industry}
+                      defaultChecked={selectedProject?.industry.includes(
+                        industry,
+                      )}
+                      onChange={(e) => {
+                        const currentIndustries =
+                          editForm.getValues("industry");
+                        if (e.target.checked) {
+                          editForm.setValue("industry", [
+                            ...currentIndustries,
+                            industry,
+                          ]);
+                        } else {
+                          editForm.setValue(
+                            "industry",
+                            currentIndustries.filter((ind) => ind !== industry),
+                          );
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{industry}</span>
+                  </label>
+                ))}
+              </div>
+              {editForm.formState.errors.industry && (
+                <p className="mt-1 text-sm text-red-500">
+                  {editForm.formState.errors.industry.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label>Communication Channels *</Label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {routes.map((route) => (
+                  <label key={route} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      value={route}
+                      defaultChecked={selectedProject?.applicableRoutes.includes(
+                        route,
+                      )}
+                      onChange={(e) => {
+                        const currentRoutes =
+                          editForm.getValues("applicableRoutes");
+                        if (e.target.checked) {
+                          editForm.setValue("applicableRoutes", [
+                            ...currentRoutes,
+                            route,
+                          ]);
+                        } else {
+                          editForm.setValue(
+                            "applicableRoutes",
+                            currentRoutes.filter((r) => r !== route),
+                          );
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{route}</span>
+                  </label>
+                ))}
+              </div>
+              {editForm.formState.errors.applicableRoutes && (
+                <p className="mt-1 text-sm text-red-500">
+                  {editForm.formState.errors.applicableRoutes.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="edit-cardImage">Card Image URL</Label>
+              <Input
+                id="edit-cardImage"
+                {...editForm.register("cardImage")}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isUpdating}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Project"
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Project Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Service</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={addForm.handleSubmit(handleAddProject)}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="add-title">Title *</Label>
+                <Input
+                  id="add-title"
+                  {...addForm.register("title")}
+                  placeholder="Service title"
+                />
+                {addForm.formState.errors.title && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {addForm.formState.errors.title.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="add-serialNo">Serial Number</Label>
+                <Input
+                  id="add-serialNo"
+                  {...addForm.register("serialNo")}
+                  placeholder="Auto-generated if empty"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="add-description">Description *</Label>
+              <Textarea
+                id="add-description"
+                {...addForm.register("description")}
+                placeholder="Service description"
+                rows={3}
+              />
+              {addForm.formState.errors.description && (
+                <p className="mt-1 text-sm text-red-500">
+                  {addForm.formState.errors.description.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="add-category">Category *</Label>
+              <Select
+                onValueChange={(value) => addForm.setValue("category", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {addForm.formState.errors.category && (
+                <p className="mt-1 text-sm text-red-500">
+                  {addForm.formState.errors.category.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label>Industries * (Select multiple)</Label>
+              <div className="mt-2 grid max-h-40 grid-cols-3 gap-2 overflow-y-auto rounded border p-2">
+                {industries.map((industry) => (
+                  <label key={industry} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      value={industry}
+                      onChange={(e) => {
+                        const currentIndustries = addForm.getValues("industry");
+                        if (e.target.checked) {
+                          addForm.setValue("industry", [
+                            ...currentIndustries,
+                            industry,
+                          ]);
+                        } else {
+                          addForm.setValue(
+                            "industry",
+                            currentIndustries.filter((ind) => ind !== industry),
+                          );
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{industry}</span>
+                  </label>
+                ))}
+              </div>
+              {addForm.formState.errors.industry && (
+                <p className="mt-1 text-sm text-red-500">
+                  {addForm.formState.errors.industry.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label>Communication Channels *</Label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {routes.map((route) => (
+                  <label key={route} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      value={route}
+                      onChange={(e) => {
+                        const currentRoutes =
+                          addForm.getValues("applicableRoutes");
+                        if (e.target.checked) {
+                          addForm.setValue("applicableRoutes", [
+                            ...currentRoutes,
+                            route,
+                          ]);
+                        } else {
+                          addForm.setValue(
+                            "applicableRoutes",
+                            currentRoutes.filter((r) => r !== route),
+                          );
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{route}</span>
+                  </label>
+                ))}
+              </div>
+              {addForm.formState.errors.applicableRoutes && (
+                <p className="mt-1 text-sm text-red-500">
+                  {addForm.formState.errors.applicableRoutes.message}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="add-telerivetUrl">Telerivet URL</Label>
+                <Input
+                  id="add-telerivetUrl"
+                  {...addForm.register("telerivetUrl")}
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <Label htmlFor="add-canvaUrl">Canva URL</Label>
+                <Input
+                  id="add-canvaUrl"
+                  {...addForm.register("canvaUrl")}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="add-hubspotUrl">HubSpot URL</Label>
+                <Input
+                  id="add-hubspotUrl"
+                  {...addForm.register("hubspotUrl")}
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <Label htmlFor="add-liveUrl">Live URL</Label>
+                <Input
+                  id="add-liveUrl"
+                  {...addForm.register("liveUrl")}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="add-cardImage">Card Image URL</Label>
+              <Input
+                id="add-cardImage"
+                {...addForm.register("cardImage")}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isAdding}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isAdding ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Service"
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
