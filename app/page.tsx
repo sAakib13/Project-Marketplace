@@ -272,7 +272,6 @@ export default function ProjectHub() {
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>(
     {
       loop: true,
-      duration: 1000,
       slides: {
         perView: 1,
       },
