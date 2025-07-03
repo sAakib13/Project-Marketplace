@@ -209,6 +209,7 @@ export default function Home() {
   // Add functionality state
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [maxSerialNo, setMaxSerialNo] = useState<string>("");
 
   // Form handling for edit
   const {
@@ -294,6 +295,19 @@ export default function Home() {
         }));
         setProjects(projectsWithTime);
         setError(null);
+        const projectsData = response.data;
+        // Find max serial number
+        if (projectsData.length > 0) {
+          const serialNumbers = projectsData
+            .map((p: Project) => p.serialNo)
+            .filter((sn: string) => sn && !isNaN(parseInt(sn)))
+            .map((sn: string) => parseInt(sn))
+            .sort((a: number, b: number) => b - a);
+
+          if (serialNumbers.length > 0) {
+            setMaxSerialNo(serialNumbers[0].toString());
+          }
+        }
       } catch (err) {
         setError("Failed to load projects");
         console.error("Error fetching projects:", err);
@@ -820,6 +834,20 @@ export default function Home() {
                 </Badge>
               ))}
             </div>
+          </div>
+
+          <div className="animate-fade-in my-10 rounded-xl p-4 shadow-xl">
+            <p className="text-sm font-medium uppercase tracking-wider text-gray-300">
+              {maxSerialNo && (
+                <span className="text-emerald-400">
+                  Latest S.N: {maxSerialNo}
+                </span>
+              )}
+              {maxSerialNo && <span className="mx-1 text-gray-500">•</span>}
+              <span className="text-white">
+                {filteredProjects.length} services available
+              </span>
+            </p>
           </div>
 
           {/* Projects Grid */}
