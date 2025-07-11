@@ -249,6 +249,51 @@ const getLinkIcon = (iconString: string) => {
   return iconMap[iconString] || <ExternalLink className="h-4 w-4" />;
 };
 
+// Utility function to format descriptions with numbered lists
+const formatDescription = (description: string) => {
+  // Check if description contains numbered items (1. 2. 3. etc.)
+  const numberedPattern = /(\d+\.\s)/g;
+  const hasNumberedItems = numberedPattern.test(description);
+
+  if (!hasNumberedItems) {
+    return <p className="text-sm text-gray-600">{description}</p>;
+  }
+
+  // Split by numbered items and process
+  const parts = description.split(/(\d+\.\s)/);
+  const introText = parts[0].trim();
+  const listItems = [];
+
+  // Group numbered items
+  for (let i = 1; i < parts.length; i += 2) {
+    if (parts[i] && parts[i + 1]) {
+      const number = parts[i].trim();
+      const text = parts[i + 1].trim();
+      if (text) {
+        listItems.push({ number, text });
+      }
+    }
+  }
+
+  return (
+    <div className="text-sm">
+      {introText && <p className="mb-2 text-gray-600">{introText}</p>}
+      {listItems.length > 0 && (
+        <ol className="ml-4 space-y-1 text-gray-600">
+          {listItems.map((item, index) => (
+            <li key={index} className="flex items-start">
+              <span className="mr-2 flex-shrink-0 font-medium text-blue-600">
+                {item.number}
+              </span>
+              <span>{item.text}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+};
+
 export default function ProjectHub() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
@@ -771,9 +816,9 @@ export default function ProjectHub() {
                       {project.title}
                     </CardTitle>
                   </div>
-                  <p className="line-clamp-2 text-sm text-gray-600">
-                    {project.description}
-                  </p>
+                  <div className="line-clamp-3">
+                    {formatDescription(project.description)}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="mb-4 flex flex-wrap gap-2">
@@ -920,9 +965,9 @@ export default function ProjectHub() {
                       <h3 className="mb-2 text-lg font-semibold">
                         Description
                       </h3>
-                      <p className="text-gray-600">
-                        {selectedProject.description}
-                      </p>
+                      <div className="text-gray-600">
+                        {formatDescription(selectedProject.description)}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
