@@ -107,6 +107,10 @@ const editProjectSchema = z.object({
     .array(z.string())
     .min(1, "At least one route is required"),
   cardImage: z.string().optional(),
+  telerivetUrl: z.string().optional(),
+  canvaUrl: z.string().optional(),
+  hubspotUrl: z.string().optional(),
+  liveUrl: z.string().optional(),
 });
 
 const addProjectSchema = z.object({
@@ -129,16 +133,10 @@ type EditProjectForm = z.infer<typeof editProjectSchema>;
 type AddProjectForm = z.infer<typeof addProjectSchema>;
 
 const categories = [
-  "SMS Marketing",
-  "E-commerce",
-  "Healthcare",
-  "Education",
-  "Finance",
-  "Real Estate",
-  "Retail",
-  "Hospitality",
-  "Logistics",
-  "Entertainment",
+  "Marketing & Communications",
+  "Security & Authentication",
+  "Polls & Feedback",
+  "Communications & Customer Interactions",
 ];
 
 const industries = [
@@ -201,8 +199,12 @@ const getProjectImage = (project: Project): string => {
 
   // Fallback to category-based stock images
   const categoryImages: { [key: string]: string } = {
-    "SMS Marketing":
+    "Marketing & Communications":
       "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=250&fit=crop",
+    "Security & Authentication":
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&h=250&fit=crop",
+    "Polls & Feedback":
+      "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=250&fit=crop",
     "E-commerce":
       "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop",
     Healthcare:
@@ -411,6 +413,16 @@ export default function ProjectHub() {
         : [project.industry],
       applicableRoutes: project.applicableRoutes,
       cardImage: project.cardImage || "",
+      telerivetUrl:
+        project.links.find((link) => link.name === "Telerivet Project")?.url ||
+        "",
+      canvaUrl:
+        project.links.find((link) => link.name === "Canva Decks")?.url || "",
+      hubspotUrl:
+        project.links.find((link) => link.name === "HubSpot Article")?.url ||
+        "",
+      liveUrl:
+        project.links.find((link) => link.name === "Live Project")?.url || "",
     });
     setIsEditDialogOpen(true);
   };
@@ -430,12 +442,17 @@ export default function ProjectHub() {
           industry: data.industry.join(","),
           applicable_route: data.applicableRoutes.join(","),
           card_image: data.cardImage || "",
+          telerivet_url: data.telerivetUrl || "",
+          canva_url: data.canvaUrl || "",
+          hubspot_url: data.hubspotUrl || "",
+          live_url: data.liveUrl || "",
         },
       };
 
       await axios.post("/api/telerivet/update", updateData);
       toast.success("Project updated successfully!");
       setIsEditDialogOpen(false);
+      // Automatically refresh the project list
       await fetchProjects();
     } catch (error) {
       console.error("Error updating project:", error);
@@ -467,6 +484,7 @@ export default function ProjectHub() {
       toast.success("Project created successfully!");
       setIsAddDialogOpen(false);
       addForm.reset();
+      // Automatically refresh the project list
       await fetchProjects();
     } catch (error) {
       console.error("Error creating project:", error);
@@ -486,6 +504,7 @@ export default function ProjectHub() {
         data: { rowId: project.rowId },
       });
       toast.success("Project deleted successfully!");
+      // Automatically refresh the project list
       await fetchProjects();
     } catch (error) {
       console.error("Error deleting project:", error);
@@ -1150,6 +1169,44 @@ export default function ProjectHub() {
                 {...editForm.register("cardImage")}
                 placeholder="https://..."
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-telerivetUrl">Telerivet URL</Label>
+                <Input
+                  id="edit-telerivetUrl"
+                  {...editForm.register("telerivetUrl")}
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-canvaUrl">Canva URL</Label>
+                <Input
+                  id="edit-canvaUrl"
+                  {...editForm.register("canvaUrl")}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-hubspotUrl">HubSpot URL</Label>
+                <Input
+                  id="edit-hubspotUrl"
+                  {...editForm.register("hubspotUrl")}
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-liveUrl">Live URL</Label>
+                <Input
+                  id="edit-liveUrl"
+                  {...editForm.register("liveUrl")}
+                  placeholder="https://..."
+                />
+              </div>
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">
