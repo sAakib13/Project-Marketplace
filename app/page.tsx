@@ -386,10 +386,12 @@ const parseListItems = (text: string): string[] => {
   }
 
   // Check for bullet points with * or #
-  const bulletMatches = text.match(/[*#]\s*[^*#]*?(?=[*#]|$)/g);
+  // Check for bullet points with *, #, or &
+  const bulletMatches = text.match(/[*#&]\s*[^*#&]*?(?=[*#&]|$)/g);
+
   if (bulletMatches && bulletMatches.length > 1) {
     return bulletMatches
-      .map((item) => item.replace(/^[*#]\s*/, "").trim())
+      .map((item) => item.replace(/^[*#&]\s*/, "").trim())
       .filter(Boolean);
   }
 
@@ -426,6 +428,25 @@ const FormattedDescription = ({ description }: { description: string }) => {
           </ul>
         </div>
       ))}
+    </div>
+  );
+};
+
+const CardDescription = ({ description }: { description: string }) => {
+  const { intro, sections } = parseDescriptionWithSections(description);
+  const usecaseItems = sections["Usecase"] || [];
+
+  return (
+    <div className="space-y-2 text-sm text-gray-600">
+      {intro && <p>{intro}</p>}
+
+      {usecaseItems.length > 0 && (
+        <ul className="list-inside list-decimal pl-4">
+          {usecaseItems.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
@@ -956,10 +977,7 @@ export default function ProjectHub() {
                       {project.title}
                     </CardTitle>
                   </div>
-                  <div className="line-clamp-3">
-                    USECASE
-                    {formatDescription(project.description)}
-                  </div>
+                  <CardDescription description={project.description} />
                 </CardHeader>
                 <CardContent>
                   <div className="mb-4 flex flex-wrap gap-2">
