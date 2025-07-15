@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
       canvaUrl,
       hubspotUrl,
       liveUrl,
+      videoUrl,
       applicableRoutes,
       cardImage,
       serialNo,
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
         canva_url: canvaUrl || "",
         hubspot_url: hubspotUrl || "",
         live_url: liveUrl || "",
+        video_url: videoUrl || "",
         applicable_route: Array.isArray(applicableRoutes)
           ? applicableRoutes.join(",")
           : applicableRoutes || "",

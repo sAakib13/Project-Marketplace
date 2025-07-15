@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 
-export const dynamic = "force-dynamic";
-
 const API_KEY = process.env.TELERIVET_API_KEY;
 const PROJECT_ID = process.env.TELERIVET_PROJECT_ID;
 const TABLE_ID = process.env.TELERIVET_TABLE_ID;
@@ -84,6 +82,18 @@ export async function GET() {
                 description:
                   row.vars.live_description || "View the live project",
                 icon: "🌐",
+              },
+            ]
+          : []),
+        // Only include Video link if URL exists
+        ...(row.vars.video_url
+          ? [
+              {
+                name: "Video",
+                url: row.vars.video_url,
+                description:
+                  row.vars.video_description || "Video demonstration",
+                icon: "🎥",
               },
             ]
           : []),

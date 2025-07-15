@@ -111,6 +111,7 @@ const editProjectSchema = z.object({
   canvaUrl: z.string().optional(),
   hubspotUrl: z.string().optional(),
   liveUrl: z.string().optional(),
+  videoUrl: z.string().optional(),
 });
 
 const addProjectSchema = z.object({
@@ -122,6 +123,7 @@ const addProjectSchema = z.object({
   canvaUrl: z.string().optional(),
   hubspotUrl: z.string().optional(),
   liveUrl: z.string().optional(),
+  videoUrl: z.string().optional(),
   applicableRoutes: z
     .array(z.string())
     .min(1, "At least one route is required"),
@@ -163,7 +165,7 @@ const industries = [
 ];
 
 // Updated routes - only SMS, WhatsApp, Viber, Voice
-const routes = ["SMS", "WhatsApp", "Viber", "Voice"];
+const routes = ["SMS", "WhatsApp", "Viber", "Voice", "Messenger"];
 
 // Hero slides data
 const heroSlides = [
@@ -294,6 +296,140 @@ const formatDescription = (description: string) => {
   );
 };
 
+// Enhanced function to parse description with multiple sections
+const parseDescriptionWithSections = (description: string) => {
+  if (!description) return { intro: "", sections: {} };
+
+  // Define section keywords
+  const sectionKeywords = [
+    "Key Features",
+    "Benefits",
+    "When to Use",
+    "Usecase",
+  ];
+
+  // Create regex pattern to match any section keyword followed by colon or content
+  const sectionPattern = new RegExp(
+    `(${sectionKeywords.join("|")})\\s*:?\\s*`,
+    "gi",
+  );
+
+  // Split by section keywords
+  const parts = description.split(sectionPattern);
+
+  let intro = "";
+  const sections: { [key: string]: string[] } = {};
+  let currentSection = "";
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i]?.trim();
+    if (!part) continue;
+
+    // Check if this part is a section keyword
+    const isKeyword = sectionKeywords.some(
+      (keyword) => part.toLowerCase() === keyword.toLowerCase(),
+    );
+
+    if (isKeyword) {
+      currentSection = part;
+    } else if (currentSection) {
+      // This is content for the current section
+      sections[currentSection] = parseListItems(part);
+    } else {
+      // This is intro content (before any sections)
+      intro += part + " ";
+    }
+  }
+
+  // If no sections found but has numbered/bullet lists, treat as Usecase
+  if (Object.keys(sections).length === 0) {
+    const listResult = parseListItems(description);
+    if (
+      listResult.length > 1 ||
+      (listResult.length === 1 && listResult[0] !== description.trim())
+    ) {
+      // Has list items, separate intro from list
+      const hasNumberedList = /\d+\./.test(description);
+      const hasBulletList = /[*#]/.test(description);
+
+      if (hasNumberedList || hasBulletList) {
+        const beforeList =
+          description.split(/(?=\d+\.)|(?=[*#])/)[0]?.trim() || "";
+        const listPart = description.replace(beforeList, "").trim();
+
+        return {
+          intro: beforeList,
+          sections: {
+            Usecase: parseListItems(listPart),
+          },
+        };
+      }
+    }
+  }
+
+  return {
+    intro: intro.trim(),
+    sections,
+  };
+};
+
+// Function to parse list items from text
+const parseListItems = (text: string): string[] => {
+  if (!text) return [];
+
+  // Check for numbered lists (1., 2., 3., etc.)
+  const numberedMatches = text.match(/\d+\.\s*[^0-9]*?(?=\d+\.|$)/g);
+  if (numberedMatches && numberedMatches.length > 1) {
+    return numberedMatches
+      .map((item) => item.replace(/^\d+\.\s*/, "").trim())
+      .filter(Boolean);
+  }
+
+  // Check for bullet points with * or #
+  const bulletMatches = text.match(/[*#]\s*[^*#]*?(?=[*#]|$)/g);
+  if (bulletMatches && bulletMatches.length > 1) {
+    return bulletMatches
+      .map((item) => item.replace(/^[*#]\s*/, "").trim())
+      .filter(Boolean);
+  }
+
+  // If no list pattern found, return as single item
+  return [text.trim()];
+};
+
+// Component to render formatted sections
+const FormattedDescription = ({ description }: { description: string }) => {
+  const { intro, sections } = parseDescriptionWithSections(description);
+
+  return (
+    <div className="space-y-4">
+      {intro && <p className="leading-relaxed text-gray-600">{intro}</p>}
+
+      {Object.entries(sections).map(([sectionTitle, items]) => (
+        <div key={sectionTitle} className="space-y-2">
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+            {sectionTitle}:
+          </h4>
+          <ul className="ml-4 space-y-1">
+            {items.map((item, index) => (
+              <li key={index} className="flex items-start space-x-2">
+                <span className="mt-0.5 text-sm font-bold text-blue-500">
+                  {sectionTitle.toLowerCase() === "usecase"
+                    ? `${index + 1}.`
+                    : "•"}
+                </span>
+                <span className="text-sm leading-relaxed text-gray-600">
+                  {item}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export default function ProjectHub() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
@@ -312,7 +448,7 @@ export default function ProjectHub() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedIndustry, setSelectedIndustry] = useState("All");
   const [viewMode, setViewMode] = useState<"internal" | "external">("external");
-  const [maxSerialNo, setMaxSerialNo] = useState<string>("");
+  const [maxSerialNo, setMaxSerialNo] = useState<string>("0");
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Keen Slider setup
@@ -382,6 +518,7 @@ export default function ProjectHub() {
       canvaUrl: "",
       hubspotUrl: "",
       liveUrl: "",
+      videoUrl: "",
       applicableRoutes: [],
       cardImage: "",
       serialNo: "",
@@ -468,6 +605,7 @@ export default function ProjectHub() {
         "",
       liveUrl:
         project.links.find((link) => link.name === "Live Project")?.url || "",
+      videoUrl: project.links.find((link) => link.name === "Video")?.url || "",
     });
     setIsEditDialogOpen(true);
   };
@@ -491,6 +629,7 @@ export default function ProjectHub() {
           canva_url: data.canvaUrl || "",
           hubspot_url: data.hubspotUrl || "",
           live_url: data.liveUrl || "",
+          video_url: data.videoUrl || "",
         },
       };
 
@@ -520,9 +659,10 @@ export default function ProjectHub() {
         canvaUrl: data.canvaUrl,
         hubspotUrl: data.hubspotUrl,
         liveUrl: data.liveUrl,
+        videoUrl: data.videoUrl,
         applicableRoutes: data.applicableRoutes,
         cardImage: data.cardImage,
-        serialNo: data.serialNo,
+        serialNo: data.serialNo || (parseInt(maxSerialNo) + 1).toString(),
       };
 
       await axios.post("/api/telerivet/create", createData);
@@ -817,6 +957,7 @@ export default function ProjectHub() {
                     </CardTitle>
                   </div>
                   <div className="line-clamp-3">
+                    USECASE
                     {formatDescription(project.description)}
                   </div>
                 </CardHeader>
@@ -962,12 +1103,12 @@ export default function ProjectHub() {
 
                   <div className="space-y-4">
                     <div>
-                      <h3 className="mb-2 text-lg font-semibold">
+                      <h3 className="mb-2 font-semibold text-gray-900">
                         Description
                       </h3>
-                      <div className="text-gray-600">
-                        {formatDescription(selectedProject.description)}
-                      </div>
+                      <FormattedDescription
+                        description={selectedProject.description}
+                      />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -1254,6 +1395,15 @@ export default function ProjectHub() {
               </div>
             </div>
 
+            <div>
+              <Label htmlFor="edit-videoUrl">Video URL</Label>
+              <Input
+                id="edit-videoUrl"
+                {...editForm.register("videoUrl")}
+                placeholder="https://..."
+              />
+            </div>
+
             <div className="flex justify-end space-x-2 pt-4">
               <Button
                 type="button"
@@ -1460,6 +1610,15 @@ export default function ProjectHub() {
                   placeholder="https://..."
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="add-videoUrl">Video URL</Label>
+              <Input
+                id="add-videoUrl"
+                {...addForm.register("videoUrl")}
+                placeholder="https://..."
+              />
             </div>
 
             <div>
