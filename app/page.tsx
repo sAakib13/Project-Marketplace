@@ -552,10 +552,10 @@ export default function ProjectHub() {
   };
 
   // Fetch projects and max serial number
-  const fetchProjects = async () => {
+  const fetchProjects = async (serialNo: string) => {
     try {
       setIsLoading(true);
-      const response = await axios.get("/api/telerivet");
+      const response = await axios.get(`/api/telerivet/${serialNo}`);
       const projectsData = response.data;
       setProjects(projectsData);
       setFilteredProjects(projectsData);
@@ -583,9 +583,7 @@ export default function ProjectHub() {
   // Fetch project article details
   const fetchProjectArticle = async (serialNo: string) => {
     try {
-      const response = await axios.post(`/api/telerivet/${serialNo}`, {
-        serialNo: serialNo,
-      });
+      const response = await axios.get(`/api/telerivet/${serialNo}`);
       if (response.data && response.data.length > 0) {
         setProjectArticle(response.data[0]);
       } else {
@@ -658,7 +656,7 @@ export default function ProjectHub() {
       toast.success("Project updated successfully!");
       setIsEditDialogOpen(false);
       // Automatically refresh the project list
-      await fetchProjects();
+      await fetchProjects( selectedProject.serialNo);
     } catch (error) {
       console.error("Error updating project:", error);
       toast.error("Failed to update project");
@@ -691,7 +689,7 @@ export default function ProjectHub() {
       setIsAddDialogOpen(false);
       addForm.reset();
       // Automatically refresh the project list
-      await fetchProjects();
+      await fetchProjects(data.serialNo || (parseInt(maxSerialNo) + 1).toString());
     } catch (error) {
       console.error("Error creating project:", error);
       toast.error("Failed to create project");
@@ -711,7 +709,7 @@ export default function ProjectHub() {
       });
       toast.success("Project deleted successfully!");
       // Automatically refresh the project list
-      await fetchProjects();
+      await fetchProjects( project.serialNo);
     } catch (error) {
       console.error("Error deleting project:", error);
       toast.error("Failed to delete project");
@@ -751,7 +749,7 @@ export default function ProjectHub() {
 
   // Load projects on mount
   useEffect(() => {
-    fetchProjects();
+    fetchProjects( maxSerialNo);
   }, []);
 
   // Get unique categories and industries
@@ -1088,7 +1086,7 @@ export default function ProjectHub() {
         <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
           {selectedProject && (
             <>
-              <DialogHeader>
+              <DialogHeader aria-describedby="project-description">
                 <div className="flex items-center justify-between">
                   <DialogTitle className="text-2xl">
                     {selectedProject.title}
@@ -1229,7 +1227,7 @@ export default function ProjectHub() {
       {/* Edit Project Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-          <DialogHeader>
+          <DialogHeader aria-describedby="edit-project-form">
             <DialogTitle>Edit Project</DialogTitle>
           </DialogHeader>
           <form
@@ -1452,7 +1450,7 @@ export default function ProjectHub() {
       {/* Add Project Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-          <DialogHeader>
+          <DialogHeader aria-describedby="add-project-form">
             <DialogTitle>Add New Service</DialogTitle>
           </DialogHeader>
           <form
