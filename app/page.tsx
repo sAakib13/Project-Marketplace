@@ -281,7 +281,7 @@ const formatDescription = (description: string) => {
     <div className="text-sm">
       {introText && <p className="mb-2 text-gray-600">{introText}</p>}
       {listItems.length > 0 && (
-        <ol className="ml-4 space-y-1 text-gray-600">
+        <ul className="ml-4 space-y-1 text-gray-600">
           {listItems.map((item, index) => (
             <li key={index} className="flex items-start">
               <span className="mr-2 flex-shrink-0 font-medium text-blue-600">
@@ -290,7 +290,7 @@ const formatDescription = (description: string) => {
               <span>{item.text}</span>
             </li>
           ))}
-        </ol>
+        </ul>
       )}
     </div>
   );
@@ -305,7 +305,7 @@ const parseDescriptionWithSections = (description: string) => {
     "Key Features",
     "Benefits",
     "When to Use",
-    "Pain Points",
+    "Pain Points To Solve",
     "Usecase",
   ];
 
@@ -386,13 +386,11 @@ const parseListItems = (text: string): string[] => {
       .filter(Boolean);
   }
 
-  // Check for bullet points with * or #
-  // Check for bullet points with *, #, or &
-  const bulletMatches = text.match(/[*#&]\s*[^*#&]*?(?=[*#&]|$)/g);
-
+  // Check for bullet points with *, #, &, or @
+  const bulletMatches = text.match(/[*#&@]\s*[^*#&@]*?(?=[*#&@]|$)/g);
   if (bulletMatches && bulletMatches.length > 1) {
     return bulletMatches
-      .map((item) => item.replace(/^[*#&]\s*/, "").trim())
+      .map((item) => item.replace(/^[*#&@]\s*/, "").trim())
       .filter(Boolean);
   }
 
@@ -413,17 +411,10 @@ const FormattedDescription = ({ description }: { description: string }) => {
           <h4 className="text-sm font-semibold uppercase tracking-wide text-blue-600">
             {sectionTitle}:
           </h4>
-          <ul className="ml-4 space-y-1">
+          <ul className="ml-4 list-disc space-y-1">
             {items.map((item, index) => (
-              <li key={index} className="flex items-start space-x-2">
-                <span className="mt-0.5 text-sm font-bold text-blue-500">
-                  {sectionTitle.toLowerCase() === "usecase"
-                    ? `${index + 1}.`
-                    : "•"}
-                </span>
-                <span className="text-sm leading-relaxed text-gray-600">
-                  {item}
-                </span>
+              <li key={index} className="text-sm leading-relaxed text-gray-600">
+                {item}
               </li>
             ))}
           </ul>
@@ -438,15 +429,22 @@ const CardDescription = ({ description }: { description: string }) => {
   const usecaseItems = sections["Usecase"] || [];
 
   return (
-    <div className="space-y-2 text-sm text-gray-600">
-      {intro && <p>{intro}</p>}
+    <div className="space-y-4 text-sm text-gray-700">
+      {intro && <p className="leading-relaxed">{intro}</p>}
 
       {usecaseItems.length > 0 && (
-        <ul className="list-inside list-decimal pl-4">
-          {usecaseItems.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ul>
+        <div className="space-y-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-blue-600">
+            Usecase
+          </h4>
+          <ul className="list-inside list-disc space-y-1 pl-2">
+            {usecaseItems.map((item, index) => (
+              <li key={index} className="leading-snug text-gray-700">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
@@ -657,7 +655,7 @@ export default function ProjectHub() {
       toast.success("Project updated successfully!");
       setIsEditDialogOpen(false);
       // Automatically refresh the project list
-      await fetchProjects( selectedProject.serialNo);
+      await fetchProjects(selectedProject.serialNo);
     } catch (error) {
       console.error("Error updating project:", error);
       toast.error("Failed to update project");
@@ -690,7 +688,9 @@ export default function ProjectHub() {
       setIsAddDialogOpen(false);
       addForm.reset();
       // Automatically refresh the project list
-      await fetchProjects(data.serialNo || (parseInt(maxSerialNo) + 1).toString());
+      await fetchProjects(
+        data.serialNo || (parseInt(maxSerialNo) + 1).toString(),
+      );
     } catch (error) {
       console.error("Error creating project:", error);
       toast.error("Failed to create project");
@@ -710,7 +710,7 @@ export default function ProjectHub() {
       });
       toast.success("Project deleted successfully!");
       // Automatically refresh the project list
-      await fetchProjects( project.serialNo);
+      await fetchProjects(project.serialNo);
     } catch (error) {
       console.error("Error deleting project:", error);
       toast.error("Failed to delete project");
@@ -750,7 +750,7 @@ export default function ProjectHub() {
 
   // Load projects on mount
   useEffect(() => {
-    fetchProjects( maxSerialNo);
+    fetchProjects(maxSerialNo);
   }, []);
 
   // Get unique categories and industries
