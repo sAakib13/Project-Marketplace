@@ -20,87 +20,94 @@ export async function GET() {
     );
 
     // Transform the data to match our project structure
-    const projects = response.data.data.map((row: any) => ({
-      title: row.vars.title || "Untitled Project",
-      description: row.vars.description || "No description available",
-      serialNo: row.vars.s_n || "000",
-      category: row.vars.category || "Uncategorized",
-      timeUpdated: row.time_updated,
-      rowId: row.id, // Add the actual row ID from Telerivet
-      cardImage: row.vars.card_image || null, // Add dynamic card image
-      applicableRoutes: row.vars.applicable_route
-        ? row.vars.applicable_route
-            .split(",")
-            .map((route: string) => route.trim())
-        : [],
-      industry: row.vars.industry
-        ? row.vars.industry.split(",").map((ind: string) => ind.trim())
-        : ["Uncategorized"],
-      links: [
-        // Only include Telerivet link if URL exists
-        ...(row.vars.telerivet_url
-          ? [
-              {
-                name: "Telerivet Project",
-                url: row.vars.telerivet_url,
-                description:
-                  row.vars.telerivet_description ||
-                  "Campaign automation and tracking",
-                icon: "📱",
-              },
-            ]
-          : []),
-        // Only include Canva link if URL exists
-        ...(row.vars.canva_url
-          ? [
-              {
-                name: "Canva Decks",
-                url: row.vars.canva_url,
-                description:
-                  row.vars.canva_description || "Brand-aligned visual assets",
-                icon: "🎨",
-              },
-            ]
-          : []),
-        // Only include HubSpot link if URL exists
-        ...(row.vars.hubspot_url
-          ? [
-              {
-                name: "HubSpot Article",
-                url: row.vars.hubspot_url,
-                description:
-                  row.vars.hubspot_description ||
-                  "Performance metrics and leads",
-                icon: "📊",
-              },
-            ]
-          : []),
-        // Only include Live link if URL exists
-        ...(row.vars.live_url
-          ? [
-              {
-                name: "Live Project",
-                url: row.vars.live_url || "www.google.com",
-                description:
-                  row.vars.live_description || "View the live project",
-                icon: "🌐",
-              },
-            ]
-          : []),
-        // Only include Video link if URL exists
-        ...(row.vars.video_url
-          ? [
-              {
-                name: "Video",
-                url: row.vars.video_url,
-                description:
-                  row.vars.video_description || "Video demonstration",
-                icon: "🎥",
-              },
-            ]
-          : []),
-      ].filter(Boolean), // Remove any undefined entries
-    }));
+    const projects = response.data.data
+      .map((row: any) => ({
+        title: row.vars.title || "Untitled Project",
+        description: row.vars.description || "No description available",
+        serialNo: row.vars.s_n || "000",
+        category: row.vars.category || "Uncategorized",
+        timeUpdated: row.time_updated,
+        rowId: row.id, // Add the actual row ID from Telerivet
+        cardImage: row.vars.card_image || null, // Add dynamic card image
+        applicableRoutes: row.vars.applicable_route
+          ? row.vars.applicable_route
+              .split(",")
+              .map((route: string) => route.trim())
+          : [],
+        industry: row.vars.industry
+          ? row.vars.industry.split(",").map((ind: string) => ind.trim())
+          : ["Uncategorized"],
+        links: [
+          // Only include Telerivet link if URL exists
+          ...(row.vars.telerivet_url
+            ? [
+                {
+                  name: "Telerivet Project",
+                  url: row.vars.telerivet_url,
+                  description:
+                    row.vars.telerivet_description ||
+                    "Campaign automation and tracking",
+                  icon: "📱",
+                },
+              ]
+            : []),
+          // Only include Canva link if URL exists
+          ...(row.vars.canva_url
+            ? [
+                {
+                  name: "Canva Decks",
+                  url: row.vars.canva_url,
+                  description:
+                    row.vars.canva_description || "Brand-aligned visual assets",
+                  icon: "🎨",
+                },
+              ]
+            : []),
+          // Only include HubSpot link if URL exists
+          ...(row.vars.hubspot_url
+            ? [
+                {
+                  name: "HubSpot Article",
+                  url: row.vars.hubspot_url,
+                  description:
+                    row.vars.hubspot_description ||
+                    "Performance metrics and leads",
+                  icon: "📊",
+                },
+              ]
+            : []),
+          // Only include Live link if URL exists
+          ...(row.vars.live_url
+            ? [
+                {
+                  name: "Live Project",
+                  url: row.vars.live_url || "www.google.com",
+                  description:
+                    row.vars.live_description || "View the live project",
+                  icon: "🌐",
+                },
+              ]
+            : []),
+          // Only include Video link if URL exists
+          ...(row.vars.video_url
+            ? [
+                {
+                  name: "Video",
+                  url: row.vars.video_url,
+                  description:
+                    row.vars.video_description || "Video demonstration",
+                  icon: "🎥",
+                },
+              ]
+            : []),
+        ].filter(Boolean), // Remove any undefined entries
+      }))
+      // Sort projects by serial number (ascending order)
+      .sort((a, b) => {
+        const serialA = parseInt(a.serialNo) || 0;
+        const serialB = parseInt(b.serialNo) || 0;
+        return serialA - serialB;
+      });
 
     return NextResponse.json(projects);
   } catch (error) {
