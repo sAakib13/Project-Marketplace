@@ -103,7 +103,7 @@ export async function GET() {
         ].filter(Boolean), // Remove any undefined entries
       }))
       // Sort projects by serial number (ascending order)
-      .sort((a, b) => {
+      .sort((a: { serialNo: string }, b: { serialNo: string }) => {
         const serialA = parseInt(a.serialNo) || 0;
         const serialB = parseInt(b.serialNo) || 0;
         return serialA - serialB;
