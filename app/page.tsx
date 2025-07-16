@@ -556,7 +556,7 @@ export default function ProjectHub() {
   const fetchProjects = async (serialNo: string) => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`/api/telerivet/${serialNo}`);
+      const response = await axios.get(`/api/telerivet/`);
       const projectsData = response.data;
       setProjects(projectsData);
       setFilteredProjects(projectsData);
