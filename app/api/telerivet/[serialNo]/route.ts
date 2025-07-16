@@ -38,7 +38,10 @@ export async function GET() {
           ? row.vars.industry.split(",").map((ind: string) => ind.trim())
           : ["Uncategorized"],
         useCases: row.vars.use_cases
-          ? row.vars.use_cases.split("•").filter(Boolean).map((useCase: string) => useCase.trim())
+          ? row.vars.use_cases
+              .split("•")
+              .filter(Boolean)
+              .map((useCase: string) => useCase.trim())
           : [],
         links: [
           // Only include Telerivet link if URL exists
