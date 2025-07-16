@@ -305,6 +305,7 @@ const parseDescriptionWithSections = (description: string) => {
     "Key Features",
     "Benefits",
     "When to Use",
+    "Pain Points",
     "Usecase",
   ];
 
@@ -1254,7 +1255,7 @@ export default function ProjectHub() {
                 id="edit-description"
                 {...editForm.register("description")}
                 placeholder="Project description"
-                rows={3}
+                rows={10}
               />
               {editForm.formState.errors.description && (
                 <p className="mt-1 text-sm text-red-500">
@@ -1487,7 +1488,7 @@ export default function ProjectHub() {
                 id="add-description"
                 {...addForm.register("description")}
                 placeholder="Service description"
-                rows={3}
+                rows={10}
               />
               {addForm.formState.errors.description && (
                 <p className="mt-1 text-sm text-red-500">
