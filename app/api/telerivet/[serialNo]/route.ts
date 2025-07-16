@@ -100,7 +100,13 @@ export async function GET() {
             ]
           : []),
       ].filter(Boolean), // Remove any undefined entries
-    }));
+    }))
+    // Sort projects by serial number (ascending order)
+    .sort((a, b) => {
+      const serialA = parseInt(a.serialNo) || 0;
+      const serialB = parseInt(b.serialNo) || 0;
+      return serialA - serialB;
+    });
 
     return NextResponse.json(projects);
   } catch (error) {
