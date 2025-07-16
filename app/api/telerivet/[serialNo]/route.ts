@@ -37,6 +37,9 @@ export async function GET() {
         industry: row.vars.industry
           ? row.vars.industry.split(",").map((ind: string) => ind.trim())
           : ["Uncategorized"],
+        useCases: row.vars.use_cases
+          ? row.vars.use_cases.split("•").filter(Boolean).map((useCase: string) => useCase.trim())
+          : [],
         links: [
           // Only include Telerivet link if URL exists
           ...(row.vars.telerivet_url
