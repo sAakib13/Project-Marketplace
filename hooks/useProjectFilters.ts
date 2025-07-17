@@ -114,5 +114,3 @@ export function useProjectFilters({ projects }: UseProjectFiltersProps) {
     clearAllFilters,
   };
 }
-
-export { useProjectFilters }
