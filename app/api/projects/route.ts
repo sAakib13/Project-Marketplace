@@ -1,75 +1,53 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
 
-const mockProjects = {
-  projects: [
-    {
-      projectId: "proj_12345",
-      projectName: "Health Awareness Campaign",
-      useCase: "Sending health tips and reminders to registered patients",
-      description:
-        "A project designed to deliver automated health advice and appointment reminders via SMS.",
-      features: [
-        "Two-way SMS messaging",
-        "Scheduled messages",
-        "Automated response rules",
-        "Contact segmentation",
-      ],
-      organization: "Health Org",
-      timezone: "America/New_York",
-      metrics: {
-        messagesSent: 12500,
-        contactsManaged: 4500,
-        activeGroups: 5,
-      },
-      status: "active",
-      servicePlanLimit: {
-        monthlyMessageCap: 20000,
-        currentMonthUsage: 12500,
-      },
-      managementActions: {
-        switchProjectUrl: "/projects/proj_12345",
-        manageContactsUrl: "/projects/proj_12345/contacts",
-        configureRoutesUrl: "/projects/proj_12345/routes",
-        viewAnalyticsUrl: "/projects/proj_12345/analytics",
-      },
-    },
-    {
-      projectId: "proj_67890",
-      projectName: "Customer Support Hotline",
-      useCase: "Handling customer queries via voice and SMS channels",
-      description:
-        "A support system for managing incoming voice calls and SMS from customers using IVR and messaging features.",
-      features: [
-        "IVR voice menus",
-        "SMS ticket creation",
-        "Call forwarding",
-        "Multi-agent support",
-      ],
-      organization: "Retail Co",
-      timezone: "Europe/London",
-      metrics: {
-        messagesSent: 8700,
-        contactsManaged: 3200,
-        activeGroups: 3,
-      },
-      status: "active",
-      servicePlanLimit: {
-        monthlyMessageCap: 15000,
-        currentMonthUsage: 8700,
-      },
-      managementActions: {
-        switchProjectUrl: "/projects/proj_67890",
-        manageContactsUrl: "/projects/proj_67890/contacts",
-        configureRoutesUrl: "/projects/proj_67890/routes",
-        viewAnalyticsUrl: "/projects/proj_67890/analytics",
-      },
-    },
-  ],
-};
+export const dynamic = "force-dynamic";
+const API_KEY = process.env.TELERIVET_API_KEY;
+const PROJECT_ID = process.env.TELERIVET_PROJECT_ID;
+const DEMO_TELERIVET_TABLE_ID = process.env.DEMO_TELERIVET_TABLE_ID;
 
-export async function GET() {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 100));
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const { organizationName } = body;
 
-  return NextResponse.json(mockProjects);
+  if (!organizationName) {
+    return NextResponse.json(
+      { error: "Organization name is required" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const response = await axios.get(
+      `https://api.telerivet.com/v1/projects/${PROJECT_ID}/tables/${DEMO_TELERIVET_TABLE_ID}/rows,
+      )}`,
+      {
+        auth: {
+          username: API_KEY || "",
+          password: "",
+        },
+      },
+    );
+
+    const projectData = response.data.data.map((row: any) => ({
+      organizationName: row.vars.organization_name || "Unknown Organization",
+      projectName: row.vars.project_name || "Untitled Project",
+      projectDescription:
+        row.vars.project_description || "No description available",
+      status: typeof row.vars.status === "boolean" ? row.vars.status : false,
+      keyFeatures: row.vars.key_features || "No key features listed",
+      projectUrl: row.vars.project_url || "",
+      routesAvailable: row.vars.routes_available || "Not specified",
+      servicesAvailable:
+        row.vars.services_available || "No services information",
+    }));
+
+    return NextResponse.json(projectData);
+  } catch (error) {
+    console.error("Error fetching data from Telerivet:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch project details" },
+      { status: 500 },
+    );
+  }
 }
