@@ -1,46 +1,50 @@
-import Header from '../../components/Header';
-import ProjectsClient from '../../components/ProjectsClient';
+import Header from "../../components/Header";
+import ProjectsClient from "../../components/ProjectsClient";
 
 interface Project {
-  id: string;
-  title: string;
+  projectId: string;
+  projectName: string;
+  useCase: string;
   description: string;
-  longDescription: string;
-  image: string;
-  demoUrl: string;
-  githubUrl: string;
-  technologies: string[];
-  category: string;
-  useCases: string[];
   features: string[];
-  stats: {
-    stars: number;
-    forks: number;
-    contributors: number;
+  organization: string;
+  timezone: string;
+  metrics: {
+    messagesSent: number;
+    contactsManaged: number;
+    activeGroups: number;
   };
-  lastUpdated: string;
+  status: string;
+  servicePlanLimit: {
+    monthlyMessageCap: number;
+    currentMonthUsage: number;
+  };
+  managementActions: {
+    switchProjectUrl: string;
+    manageContactsUrl: string;
+    configureRoutesUrl: string;
+    viewAnalyticsUrl: string;
+  };
 }
 
 async function getProjects() {
   try {
     // In production, this would be an external API call
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const response = await fetch(`${baseUrl}/api/projects`, {
-      cache: 'no-store' // Ensure fresh data
+      cache: "no-store", // Ensure fresh data
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to fetch projects');
+      throw new Error("Failed to fetch projects");
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error fetching projects:', error);
+    console.error("Error fetching projects:", error);
     // Return fallback data
     return {
       projects: [],
-      total: 0,
-      categories: []
     };
   }
 }
