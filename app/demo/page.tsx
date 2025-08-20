@@ -53,9 +53,15 @@ export default async function Home() {
   const data = await getProjects();
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <Header />
-      <ProjectsClient />
+    <main className="relative min-h-screen bg-[url('/wallpaper.jpg')] bg-cover bg-center">
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* Content */}
+      <div className="relative z-10">
+        <Header />
+        <ProjectsClient />
+      </div>
     </main>
   );
 }

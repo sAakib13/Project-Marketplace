@@ -45,16 +45,16 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <div
-      className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:shadow-xl"
+      className="group overflow-hidden rounded-2xl border border-white/20 bg-white/20 shadow-md backdrop-blur-md transition-all duration-300 hover:shadow-xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Header */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+      <div className="relative p-6 text-white">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="mb-2 flex items-center space-x-2">
-              <MessageSquare className="h-5 w-5" />
+              <MessageSquare className="h-5 w-5 text-white/90" />
               <span className="text-sm font-medium opacity-90">
                 {project.organizationName}
               </span>
@@ -78,13 +78,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       {/* Content */}
       <div className="p-6">
         {/* Description */}
-        <p className="mb-4 text-sm leading-relaxed text-gray-600">
+        <p className="mb-4 text-sm leading-relaxed text-gray-200">
           {project.projectDescription}
         </p>
 
         {/* Key Features */}
         <div className="mb-6">
-          <h4 className="mb-3 text-sm font-medium text-gray-900">
+          <h4 className="mb-3 text-sm font-medium text-white/90">
             Key Features:
           </h4>
           {project.keyFeatures.length > 0 ? (
@@ -92,26 +92,26 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               {project.keyFeatures.map((feature, index) => (
                 <div
                   key={index}
-                  className="flex items-center text-xs text-gray-600"
+                  className="flex items-center text-xs text-gray-200"
                 >
-                  <span className="mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-600"></span>
+                  <span className="mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400"></span>
                   {feature}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-gray-500">No features listed</p>
+            <p className="text-xs text-gray-400">No features listed</p>
           )}
         </div>
 
         {/* Additional Info */}
-        <div className="mb-6 grid grid-cols-2 gap-4 text-xs text-gray-600">
+        <div className="mb-6 grid grid-cols-2 gap-4 text-xs text-gray-200">
           <div className="flex items-center space-x-2">
-            <Settings className="h-4 w-4 text-purple-600" />
+            <Settings className="h-4 w-4 text-purple-400" />
             <span>Routes: {project.routesAvailable || "N/A"}</span>
           </div>
           <div className="flex items-center space-x-2">
-            <Zap className="h-4 w-4 text-orange-600" />
+            <Zap className="h-4 w-4 text-orange-400" />
             <span>Services: {project.servicesAvailable || "N/A"}</span>
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             href={project.projectUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-center space-x-2 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-600 transition-colors duration-200 hover:bg-blue-100"
+            className="flex w-full items-center justify-center space-x-2 rounded-lg bg-blue-500/20 px-3 py-2 text-sm text-blue-200 transition-colors duration-200 hover:bg-blue-500/30"
           >
             <ExternalLink className="h-4 w-4" />
             <span>View Project</span>

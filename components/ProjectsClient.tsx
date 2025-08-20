@@ -125,7 +125,7 @@ export default function ProjectsClient() {
               Projects Dashboard
             </span>
           </h1>
-          <p className="mx-auto max-w-3xl text-xl text-gray-600">
+          <p className="mx-auto max-w-3xl text-xl text-gray-200">
             Manage and monitor your messaging and communication projects.
           </p>
 
@@ -134,15 +134,17 @@ export default function ProjectsClient() {
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="rounded-2xl bg-white p-6 text-center shadow-md transition hover:shadow-lg"
+                className="rounded-2xl border border-white/20 bg-white/20 p-6 text-center shadow-lg backdrop-blur-md transition hover:shadow-xl"
               >
                 <div
                   className={`inline-flex h-12 w-12 items-center justify-center bg-gradient-to-r ${stat.color} mb-4 rounded-lg`}
                 >
                   <stat.icon className="h-6 w-6 text-white" />
                 </div>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
+                <div className="text-2xl font-bold text-white">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-gray-200">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -152,30 +154,37 @@ export default function ProjectsClient() {
       {/* Projects Section */}
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <SearchAndFilter
-            onSearch={handleSearch}
-            onCategoryFilter={handleStatusFilter}
-            categories={statuses}
-            selectedCategory={selectedStatus}
-            filterLabel="Status"
-          />
+          <div className="rounded-3xl border border-white/20 bg-white/20 p-6 shadow-lg backdrop-blur-md">
+            <SearchAndFilter
+              onSearch={handleSearch}
+              onCategoryFilter={handleStatusFilter}
+              categories={statuses}
+              selectedCategory={selectedStatus}
+              filterLabel="Status"
+            />
 
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
-            </div>
-          ) : filteredProjects.length > 0 ? (
-            <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
-              {filteredProjects.map((project) => (
-                <ProjectCard key={project.projectId} project={project} />
-              ))}
-            </div>
-          ) : (
-            <div className="py-20 text-center">
-              <MessageSquare className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-              <h3 className="text-xl font-medium">No projects found</h3>
-            </div>
-          )}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-400" />
+              </div>
+            ) : filteredProjects.length > 0 ? (
+              <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+                {filteredProjects.map((project) => (
+                  <div
+                    key={project.projectId}
+                    className="rounded-2xl border border-white/20 bg-white/20 p-6 shadow-md backdrop-blur-md transition hover:shadow-xl"
+                  >
+                    <ProjectCard project={project} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-20 text-center text-white">
+                <MessageSquare className="mx-auto mb-4 h-16 w-16 text-gray-300" />
+                <h3 className="text-xl font-medium">No projects found</h3>
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </>
