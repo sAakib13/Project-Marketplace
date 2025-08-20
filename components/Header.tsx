@@ -60,12 +60,12 @@ export default function Header() {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden items-center space-x-4 md:flex">
+          {/* <div className="hidden items-center space-x-4 md:flex">
             <button className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-blue-400 to-blue-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg">
               <Plus className="h-4 w-4" />
               <span>New Project</span>
             </button>
-          </div>
+          </div> */}
 
           {/* Mobile menu button */}
           <div className="md:hidden">
@@ -96,12 +96,12 @@ export default function Header() {
                   {item.name}
                 </a>
               ))}
-              <div className="border-t border-gray-200 pt-2">
+              {/* <div className="border-t border-gray-200 pt-2">
                 <button className="flex w-full items-center justify-center space-x-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg">
                   <Plus className="h-4 w-4" />
                   <span>New Project</span>
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
