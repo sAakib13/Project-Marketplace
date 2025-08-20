@@ -35,11 +35,11 @@ export default function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <div className="rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-2">
+            <div className="rounded-lg bg-gradient-to-r from-blue-400 to-blue-600 p-2">
               <MessageSquare className="h-6 w-6 text-white" />
             </div>
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent">
-              CommHub
+              DemoHub
             </span>
           </div>
 
@@ -61,8 +61,8 @@ export default function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden items-center space-x-4 md:flex">
-           
-            <button className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg">
+
+            <button className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-blue-400 to-blue-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg">
               <Plus className="h-4 w-4" />
               <span>New Project</span>
             </button>

@@ -120,17 +120,17 @@ export default function ProjectsClient() {
       <section className="px-4 pb-16 pt-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl text-center">
           <h1 className="mb-6 text-4xl font-bold sm:text-5xl lg:text-6xl">
-            Communication{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Projects Dashboard
+            Demo{" "}
+            <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+              Projects Hub
             </span>
           </h1>
           <p className="mx-auto max-w-3xl text-xl text-gray-200">
-            Manage and monitor your messaging and communication projects.
+            Manage and monitor your demo projects.
           </p>
 
           {/* Stats */}
-          <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">
+          {/* <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">
             {stats.map((stat, index) => (
               <div
                 key={index}
@@ -147,7 +147,7 @@ export default function ProjectsClient() {
                 <div className="text-sm text-gray-200">{stat.label}</div>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -170,12 +170,7 @@ export default function ProjectsClient() {
             ) : filteredProjects.length > 0 ? (
               <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
                 {filteredProjects.map((project) => (
-                  <div
-                    key={project.projectId}
-                    className="rounded-2xl border border-white/20 bg-white/20 p-6 shadow-md backdrop-blur-md transition hover:shadow-xl"
-                  >
-                    <ProjectCard project={project} />
-                  </div>
+                  <ProjectCard project={project} />
                 ))}
               </div>
             ) : (
