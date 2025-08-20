@@ -54,8 +54,8 @@ export default async function Home() {
 
   return (
     <main className="relative min-h-screen bg-[url('/wallpaper.jpg')] bg-cover bg-center">
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/50" />
+      {/* Gradient overlay: dark to light, top-right to bottom-left */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/80 to-white/40" />
 
       {/* Content */}
       <div className="relative z-10">

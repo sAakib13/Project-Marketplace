@@ -119,14 +119,14 @@ export default function ProjectsClient() {
       {/* Hero Section */}
       <section className="px-4 pb-16 pt-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl text-center">
-          <h1 className="mb-6 text-4xl font-bold sm:text-5xl lg:text-6xl">
-            Demo{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="mb-6 text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
+            Telerivet{" "}
+            <span className="bg-gradient-to-r text-white bg-clip-text text-transparent">
               Projects Hub
             </span>
           </h1>
           <p className="mx-auto max-w-3xl text-xl text-gray-200">
-            Manage and monitor your demo projects.
+            Manage and monitor your Telerivet projects.
           </p>
 
           {/* Stats */}
@@ -154,7 +154,7 @@ export default function ProjectsClient() {
       {/* Projects Section */}
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="rounded-3xl border border-white/20 bg-white/20 p-6 shadow-lg backdrop-blur-md">
+          <div className="rounded-3xl border border-white/20 p-12 shadow-lg backdrop-blur-md">
             <SearchAndFilter
               onSearch={handleSearch}
               onCategoryFilter={handleStatusFilter}

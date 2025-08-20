@@ -5,7 +5,6 @@ import {
   ExternalLink,
   Users,
   MessageSquare,
-  Calendar,
   Settings,
   Zap,
   Globe,
@@ -45,14 +44,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <div
-      className="group overflow-hidden rounded-2xl border border-black/10 bg-white/40 shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105 hover:shadow-xl dark:border-white/10 dark:bg-white/10"
+      className="group overflow-hidden rounded-xl border font-serif tracking-wide text-4xl border-black/10 bg-white/40 p-6 shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105 hover:shadow-xl dark:border-white/10 dark:bg-white/10"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Header */}
       <div className="relative flex items-center justify-between border-b border-black/10 px-6 py-4 dark:border-white/10">
         <div className="flex items-center space-x-2">
-          <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-300" />
+          <Globe className="h-5 w-5 text-white dark:text-white" />
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {project.organizationName}
           </span>
