@@ -31,7 +31,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    switch (status) {
       case "active":
         return "bg-green-100 text-green-800";
       case "inactive":

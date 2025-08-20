@@ -25,32 +25,32 @@ export default function ProjectsClient() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch projects from API route
-useEffect(() => {
-  const fetchProjects = async () => {
-    try {
-      setIsLoading(true);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoading(true);
 
-      // Pass optional filters via query params
-      const res = await fetch(`/api/projects`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+        // Pass optional filters via query params
+        const res = await fetch(`/api/projects`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
 
-      if (!res.ok) throw new Error("Failed to fetch");
+        if (!res.ok) throw new Error("Failed to fetch");
 
-      const data = await res.json();
-      setProjects(data);
-      setFilteredProjects(data);
-    } catch (err) {
-      console.error("Error loading projects:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        const data = await res.json();
+        console.log("Fetched projects:", data);
+        setProjects(data);
+        setFilteredProjects(data);
+      } catch (err) {
+        console.error("Error loading projects:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  fetchProjects();
-}, []);
-
+    fetchProjects();
+  }, []);
 
   // Filter logic
   useEffect(() => {

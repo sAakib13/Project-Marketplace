@@ -61,9 +61,7 @@ export default function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden items-center space-x-4 md:flex">
-            <button className="p-2 text-gray-600 transition-colors duration-200 hover:text-blue-600">
-              <Github className="h-5 w-5" />
-            </button>
+           
             <button className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg">
               <Plus className="h-4 w-4" />
               <span>New Project</span>
