@@ -827,9 +827,9 @@ export default function ProjectHub() {
         <Image
           src="/background.jpg"
           alt="Background"
-          layout="fill"
-          objectFit="cover"
-          priority={false}
+          fill
+          className="object-cover object-center"
+          priority={true} // change to true if above-the-fold and critical
         />
         {/* Hero Slider */}
         <div className="relative mx-auto max-w-6xl px-4 py-8">
