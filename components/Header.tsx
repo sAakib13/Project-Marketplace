@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, MessageSquare, Github, Plus } from "lucide-react";
 import Image from "next/image";
-import Logo from "../app/TR-white-logo.png";
+import Logo from "../public/TR-white-logo.png";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
