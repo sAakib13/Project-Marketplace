@@ -430,16 +430,16 @@ const CardDescription = ({ description }: { description: string }) => {
 
   return (
     <div className="space-y-4 text-sm text-gray-700">
-      {intro && <p className="leading-relaxed">{intro}</p>}
+      {intro && <p className="leading-relaxed text-white">{intro}</p>}
 
       {usecaseItems.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-blue-600">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-white">
             Usecase
           </h4>
           <ul className="list-inside list-disc space-y-1 pl-2">
             {usecaseItems.map((item, index) => (
-              <li key={index} className="leading-snug text-gray-700">
+              <li key={index} className="leading-snug text-white">
                 {item}
               </li>
             ))}
@@ -777,13 +777,13 @@ export default function ProjectHub() {
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-blue-500/20 bg-white/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-blue-500/20 bg-black/80 backdrop-blur-sm">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Image src={Logo} alt="Telerivet Logo" width={200} height={50} />
           </div>
           <div className="flex items-center gap-6">
-            <div className="text-sm font-medium text-blue-600">
+            <div className="text-sm font-medium text-white">
               {maxSerialNo && `Latest S.N: ${maxSerialNo} • `}
               {filteredProjects.length} services available
             </div>
@@ -823,7 +823,7 @@ export default function ProjectHub() {
         </nav>
       </header>
 
-      <main className="min-h-screen bg-gradient-to-r from-blue-100 to-white pb-12">
+      <main className="min-h-screen bg-[url('/background.jpg')] bg-cover bg-center pb-12">
         {/* Hero Slider */}
         <div className="relative mx-auto max-w-6xl px-4 py-8">
           <div
@@ -948,13 +948,13 @@ export default function ProjectHub() {
             {filteredProjects.map((project) => (
               <Card
                 key={project.rowId}
-                className="border-blue-200 bg-white transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-blue-500/10"
+                className="rounded-2xl border text-white border-white/20 bg-black/30 shadow-lg shadow-blue-500/10 backdrop-blur-md transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/20"
               >
                 <div className="relative">
                   <img
                     src={getProjectImage(project)}
                     alt={project.title}
-                    className="h-48 w-full rounded-t-lg object-cover"
+                    className="h-48 w-full rounded-t-2xl object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src =
@@ -964,7 +964,7 @@ export default function ProjectHub() {
                   <div className="absolute right-2 top-2">
                     <Badge
                       variant="secondary"
-                      className="bg-blue-600 text-white"
+                      className="bg-blue-600/80 text-white backdrop-blur-sm"
                     >
                       #{project.serialNo}
                     </Badge>
@@ -972,7 +972,7 @@ export default function ProjectHub() {
                 </div>
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg text-gray-900">
+                    <CardTitle className="text-lg text-white drop-shadow">
                       {project.title}
                     </CardTitle>
                   </div>
@@ -982,7 +982,7 @@ export default function ProjectHub() {
                   <div className="mb-4 flex flex-wrap gap-2">
                     <Badge
                       variant="outline"
-                      className="border-blue-400 text-blue-600"
+                      className="border-blue-300/50 bg-blue-500/10 text-blue-100 backdrop-blur-sm"
                     >
                       <Tag className="mr-1 h-3 w-3" />
                       {project.category}
@@ -992,7 +992,7 @@ export default function ProjectHub() {
                         <Badge
                           key={idx}
                           variant="outline"
-                          className="border-green-400 text-green-600"
+                          className="border-green-300/50 bg-green-500/10 text-green-100 backdrop-blur-sm"
                         >
                           <Building2 className="mr-1 h-3 w-3" />
                           {ind}
@@ -1001,7 +1001,7 @@ export default function ProjectHub() {
                     ) : (
                       <Badge
                         variant="outline"
-                        className="border-green-400 text-green-600"
+                        className="border-green-300/50 bg-green-500/10 text-green-100 backdrop-blur-sm"
                       >
                         <Building2 className="mr-1 h-3 w-3" />
                         {project.industry}
@@ -1011,13 +1011,13 @@ export default function ProjectHub() {
                       project.industry.length > 2 && (
                         <Badge
                           variant="outline"
-                          className="border-gray-400 text-gray-600"
+                          className="border-gray-300/50 bg-gray-500/10 text-gray-100 backdrop-blur-sm"
                         >
                           +{project.industry.length - 2} more
                         </Badge>
                       )}
                   </div>
-                  <div className="mb-4 flex items-center justify-between text-sm text-gray-500">
+                  <div className="mb-4 flex items-center justify-between text-sm text-white/70">
                     <span className="flex items-center">
                       <Calendar className="mr-1 h-4 w-4" />
                       {formatDate(project.timeUpdated)}
@@ -1032,7 +1032,7 @@ export default function ProjectHub() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleViewProject(project)}
-                      className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50"
+                      className="flex-1 border-white/30 text-black backdrop-blur-sm hover:text-white hover:bg-black/20"
                     >
                       <Eye className="mr-2 h-4 w-4" />
                       View
@@ -1043,7 +1043,7 @@ export default function ProjectHub() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleEditProject(project)}
-                          className="border-blue-400 text-blue-600 hover:bg-blue-50"
+                          className="border-white/30 text-black backdrop-blur-sm hover:bg-black/20 hover:text-white"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -1052,7 +1052,7 @@ export default function ProjectHub() {
                           variant="outline"
                           onClick={() => handleDeleteProject(project)}
                           disabled={isDeleting === project.rowId}
-                          className="border-red-400 text-red-600 hover:bg-red-50"
+                          className="border-red-300/50 text-red-600 backdrop-blur-sm hover:bg-red-500 hover:text-white"
                         >
                           {isDeleting === project.rowId ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
