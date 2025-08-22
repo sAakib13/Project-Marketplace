@@ -883,17 +883,17 @@ export default function ProjectHub() {
 
         {/* Search and Filters */}
         <div className="mx-auto mt-8 max-w-6xl px-4 py-4">
-          <div className="mb-8 rounded-xl bg-white p-6 shadow-lg">
+          <div className="mb-8 rounded-2xl border border-white/20 bg-black/30 p-6 shadow-lg backdrop-blur-md">
             <div className="flex flex-col items-center gap-4 lg:flex-row">
               {/* Search Bar */}
               <div className="relative min-w-0 flex-1">
                 <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-                  <Search className="h-5 w-5 text-blue-600" />
+                  <Search className="h-5 w-5 text-white/80" />
                 </div>
                 <Input
                   type="search"
                   placeholder="Search services or descriptions..."
-                  className="h-12 border-blue-500/20 bg-white pl-10 text-lg focus-visible:ring-blue-500/50"
+                  className="h-12 rounded-xl border-white/20 bg-black/20 pl-10 text-lg text-white placeholder-white/60 backdrop-blur-sm focus-visible:ring-white/40"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -901,15 +901,15 @@ export default function ProjectHub() {
 
               {/* Category Filter */}
               <div className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-blue-600" />
+                <Filter className="h-5 w-5 text-white/80" />
                 <Select
                   value={selectedCategory}
                   onValueChange={setSelectedCategory}
                 >
-                  <SelectTrigger className="h-12 w-48 border-blue-500/20 bg-white">
+                  <SelectTrigger className="h-12 w-48 rounded-xl border-white/20 bg-black/20 text-white backdrop-blur-sm">
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl border-white/20 bg-black/30 text-white backdrop-blur-md">
                     <SelectItem value="All">All Categories</SelectItem>
                     {uniqueCategories.map((category) => (
                       <SelectItem key={category} value={category}>
@@ -922,15 +922,15 @@ export default function ProjectHub() {
 
               {/* Industry Filter */}
               <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-blue-600" />
+                <Building2 className="h-5 w-5 text-white/80" />
                 <Select
                   value={selectedIndustry}
                   onValueChange={setSelectedIndustry}
                 >
-                  <SelectTrigger className="h-12 w-48 border-blue-500/20 bg-white">
+                  <SelectTrigger className="h-12 w-48 rounded-xl border-white/20 bg-black/20 text-white backdrop-blur-sm">
                     <SelectValue placeholder="All Industries" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl border-white/20 bg-black/30 text-white backdrop-blur-md">
                     <SelectItem value="All">All Industries</SelectItem>
                     {uniqueIndustries.map((industry) => (
                       <SelectItem key={industry} value={industry}>
@@ -948,7 +948,7 @@ export default function ProjectHub() {
             {filteredProjects.map((project) => (
               <Card
                 key={project.rowId}
-                className="rounded-2xl border text-white border-white/20 bg-black/30 shadow-lg shadow-blue-500/10 backdrop-blur-md transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/20"
+                className="rounded-2xl border border-white/20 bg-black/30 text-white shadow-lg shadow-blue-500/10 backdrop-blur-md transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/20"
               >
                 <div className="relative">
                   <img
@@ -1032,7 +1032,7 @@ export default function ProjectHub() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleViewProject(project)}
-                      className="flex-1 border-white/30 text-black backdrop-blur-sm hover:text-white hover:bg-black/20"
+                      className="flex-1 border-white/30 text-black backdrop-blur-sm hover:bg-black/20 hover:text-white"
                     >
                       <Eye className="mr-2 h-4 w-4" />
                       View
