@@ -823,7 +823,14 @@ export default function ProjectHub() {
         </nav>
       </header>
 
-      <main className="min-h-screen bg-[url('/background.jpg')] bg-cover bg-center pb-12">
+      <main className="relative min-h-screen pb-12">
+        <Image
+          src="/background.jpg"
+          alt="Background"
+          layout="fill"
+          objectFit="cover"
+          priority={false}
+        />
         {/* Hero Slider */}
         <div className="relative mx-auto max-w-6xl px-4 py-8">
           <div
