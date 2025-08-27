@@ -19,7 +19,7 @@ interface Project {
   routesAvailable: string;
   servicesAvailable: string;
   projectUrl: string;
-  status: string;
+  status: boolean;
 }
 
 interface ProjectCardProps {
@@ -29,14 +29,12 @@ interface ProjectCardProps {
 export default function ProjectCard({ project }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: boolean) => {
     switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800";
-      case "inactive":
+      case true:
+        return "bg-green-500 text-green-800";
+      case false:
         return "bg-gray-100 text-gray-800";
-      case "paused":
-        return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -44,7 +42,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <div
-      className="group overflow-hidden rounded-xl border font-serif tracking-wide text-4xl border-black/10 bg-white/40 p-6 shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105 hover:shadow-xl dark:border-white/10 dark:bg-white/10"
+      className="group overflow-hidden rounded-xl border border-black/10 bg-white/40 p-6 font-serif text-4xl tracking-wide shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105 hover:shadow-xl dark:border-white/10 dark:bg-white/10"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -52,12 +50,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       <div className="relative flex items-center justify-between border-b border-black/10 px-6 py-4 dark:border-white/10">
         <div className="flex items-center space-x-2">
           <Globe className="h-5 w-5 text-white dark:text-white" />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
             {project.organizationName}
           </span>
         </div>
         <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(
+          className={`rounded-full px-2 py-2 text-xs font-medium animate-pulse ${getStatusColor(
             project.status,
           )}`}
         >
