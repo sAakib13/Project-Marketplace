@@ -5,16 +5,21 @@ import ProjectCard from "./ProjectCard";
 import SearchAndFilter from "./SearchAndFilter";
 import { Loader2, MessageSquare, TrendingUp, Users, Zap } from "lucide-react";
 
+/**
+ * Project type used in this component.
+ * Adjust fields as needed to match your backend/schema.
+ */
 interface Project {
+  id: string;
   projectId: string;
   projectName: string;
   projectDescription: string;
-  keyFeatures: string[];
   organizationName: string;
-  routesAvailable: string;
-  servicesAvailable: string;
-  projectUrl: string;
+  keyFeatures: string[];
   status: string;
+  routesAvailable?: boolean;
+  servicesAvailable: boolean;
+  projectUrl?: string;
 }
 
 export default function ProjectsClient() {
@@ -121,7 +126,7 @@ export default function ProjectsClient() {
         <div className="mx-auto max-w-7xl text-center">
           <h1 className="mb-6 text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
             Telerivet{" "}
-            <span className="bg-gradient-to-r text-white bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r bg-clip-text text-transparent text-white">
               Projects Hub
             </span>
           </h1>
@@ -168,9 +173,9 @@ export default function ProjectsClient() {
                 <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-400" />
               </div>
             ) : filteredProjects.length > 0 ? (
-              <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 py-6">
                 {filteredProjects.map((project) => (
-                  <ProjectCard project={project} key={project.id} />
+                  <ProjectCard project={project as any} key={project.projectId} />
                 ))}
               </div>
             ) : (
