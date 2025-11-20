@@ -170,7 +170,7 @@ export default function ProjectsClient() {
             ) : filteredProjects.length > 0 ? (
               <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
                 {filteredProjects.map((project) => (
-                  <ProjectCard project={project} />
+                  <ProjectCard project={project} key={project.id} />
                 ))}
               </div>
             ) : (

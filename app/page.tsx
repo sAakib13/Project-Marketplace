@@ -824,13 +824,7 @@ export default function ProjectHub() {
       </header>
 
       <main className="relative min-h-screen pb-12">
-        <Image
-          src="/background.jpg"
-          alt="Background"
-          fill
-          className="object-cover object-center"
-          priority={true} // change to true if above-the-fold and critical
-        />
+      
         {/* Hero Slider */}
         <div className="relative mx-auto max-w-6xl px-4 py-8">
           <div
@@ -890,7 +884,7 @@ export default function ProjectHub() {
 
         {/* Search and Filters */}
         <div className="mx-auto mt-8 max-w-6xl px-4 py-4">
-          <div className="mb-8 rounded-2xl border border-white/20 bg-black/30 p-6 shadow-lg backdrop-blur-md">
+          <div className="mb-8 rounded-2xl border border-white/20 bg-black p-6 shadow-lg backdrop-blur-md">
             <div className="flex flex-col items-center gap-4 lg:flex-row">
               {/* Search Bar */}
               <div className="relative min-w-0 flex-1">
@@ -900,7 +894,7 @@ export default function ProjectHub() {
                 <Input
                   type="search"
                   placeholder="Search services or descriptions..."
-                  className="h-12 rounded-xl border-white/20 bg-black/20 pl-10 text-lg text-white placeholder-white/60 backdrop-blur-sm focus-visible:ring-white/40"
+                  className="h-12 rounded-xl border-white/20 bg-black pl-10 text-lg text-white placeholder-white/60 backdrop-blur-sm focus-visible:ring-white/40"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -955,7 +949,7 @@ export default function ProjectHub() {
             {filteredProjects.map((project) => (
               <Card
                 key={project.rowId}
-                className="rounded-2xl border border-white/20 bg-black/30 text-white shadow-lg shadow-blue-500/10 backdrop-blur-md transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/20"
+                className="rounded-2xl border border-white/20 bg-black text-white shadow-lg shadow-blue-500/10 backdrop-blur-md transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-500/20"
               >
                 <div className="relative">
                   <img
