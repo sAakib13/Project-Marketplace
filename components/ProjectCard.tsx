@@ -3,12 +3,13 @@
 import { useState } from "react";
 import {
   ExternalLink,
-  Users,
-  MessageSquare,
   Settings,
   Zap,
   Globe,
+  Route,
+  Server,
 } from "lucide-react";
+import { clsx } from "clsx";
 
 interface Project {
   projectId: string;
@@ -16,8 +17,8 @@ interface Project {
   projectDescription: string;
   keyFeatures: string[];
   organizationName: string;
-  routesAvailable: string;
-  servicesAvailable: string;
+  routesAvailable: string; // e.g. "SMS, Voice"
+  servicesAvailable: string; // e.g. "1. Auto-reply"
   projectUrl: string;
   status: boolean;
 }
@@ -30,134 +31,154 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const getStatusColor = (status: boolean) => {
-    switch (status) {
-      case true:
-        return "bg-green-500 text-green-800";
-      case false:
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+    return status
+      ? "bg-green-500/10 text-green-700 border-green-200 dark:text-green-400 dark:border-green-500/30"
+      : "bg-gray-100 text-gray-600 border-gray-200 dark:bg-white/5 dark:text-gray-400 dark:border-white/10";
   };
+
+  // Helper to parse your string data into clean arrays
+  const parseItems = (text: string, type: "routes" | "services") => {
+    if (!text) return [];
+
+    // Split logic based on your data structure
+    const separator = type === "services" ? /\d+\.\s+/ : ",";
+
+    return text
+      .split(separator)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  };
+
+  const routes = parseItems(project.routesAvailable, "routes");
+  const services = parseItems(project.servicesAvailable, "services");
 
   return (
     <div
-      className="group overflow-hidden rounded-xl border border-black/10 bg-white/40 p-6 font-serif text-4xl tracking-wide shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105 hover:shadow-xl dark:border-white/10 dark:bg-white/10"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 bg-white/60 p-0 shadow-lg backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-white/10 dark:bg-slate-900/60"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Header */}
-      <div className="relative flex items-center justify-between border-b border-black/10 px-6 py-4 dark:border-white/10">
-        <div className="flex items-center space-x-2">
-          <Globe className="h-5 w-5 text-white dark:text-white" />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+      {/* --- Header Section --- */}
+      <div className="relative flex items-center justify-between border-b border-black/5 bg-white/40 px-6 py-4 dark:border-white/5 dark:bg-white/5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400">
+            <Globe className="h-4 w-4" />
+          </div>
+          <span className="text-sm font-semibold tracking-wide text-gray-700 dark:text-gray-200">
             {project.organizationName}
           </span>
         </div>
         <span
-          className={`rounded-full px-2 py-2 text-xs font-medium animate-pulse ${getStatusColor(
-            project.status,
-          )}`}
+          className={clsx(
+            "rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider",
+            getStatusColor(project.status),
+          )}
         >
-          {project.status}
+          {project.status ? "Active" : "Inactive"}
         </span>
       </div>
 
-      {/* Body */}
-      <div className="space-y-6 p-6">
-        {/* Project Name */}
-        <h3 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-          {project.projectName}
-        </h3>
-
-        {/* Description */}
-        <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-          {project.projectDescription}
-        </p>
-
-        {/* Key Features */}
-        <div>
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-100">
-            Key Features
-          </h4>
-
-          {project.keyFeatures && project.keyFeatures.length > 0 ? (
-            <ol className="list-inside list-decimal space-y-2 text-xs text-gray-600 dark:text-gray-300">
-              {project.keyFeatures
-                // Since keyFeatures is an array of one string, take the first element
-                .flatMap((featureStr) =>
-                  // Split by pattern: number + dot + optional space
-                  featureStr.split(/\d+\.\s+/).filter(Boolean),
-                )
-                .map((feature, index) => (
-                  <li key={index}>{feature.trim()}</li>
-                ))}
-            </ol>
-          ) : (
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              No features listed
-            </p>
-          )}
+      {/* --- Body Section --- */}
+      <div className="flex flex-1 flex-col p-6">
+        {/* Title & Description */}
+        <div className="mb-6">
+          <h3 className="mb-3 font-serif text-3xl text-gray-900 dark:text-white">
+            {project.projectName}
+          </h3>
+          <p className="line-clamp-3 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+            {project.projectDescription}
+          </p>
         </div>
 
-        {/* Additional Info */}
-        <div>
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-100">
-            Details
-          </h4>
-          <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 dark:text-gray-300">
-            {/* Routes */}
-            <div className="flex flex-col space-y-1">
-              <div className="flex items-center space-x-2">
-                <Settings className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                <span>Routes:</span>
-              </div>
-              {project.routesAvailable ? (
-                <ul className="ml-6 list-inside list-decimal space-y-1">
-                  {project.routesAvailable
-                    .split(",") // split by comma
-                    .map((route, index) => (
-                      <li key={index}>{route.trim()}</li>
-                    ))}
-                </ul>
+        {/* Key Features (Pills) */}
+        {project.keyFeatures && project.keyFeatures.length > 0 && (
+          <div className="mb-8">
+            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-400">
+              Highlights
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {project.keyFeatures
+                .flatMap((f) => f.split(/\d+\.\s+/).filter(Boolean))
+                .map((feature, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
+                  >
+                    {feature.trim()}
+                  </span>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* --- WOW Details Section (Two Columns) --- */}
+        <div className="mt-auto grid grid-cols-1 gap-4 sm:grid-cols-1">
+          {/* Column 1: Routes */}
+          <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 dark:border-indigo-500/20 dark:bg-indigo-900/20">
+            <div className="mb-3 flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+              <Route className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-wide">
+                Routes
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {routes.length > 0 ? (
+                routes.map((route, i) => (
+                  <span
+                    key={i}
+                    className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-indigo-600 shadow-sm dark:bg-indigo-500/20 dark:text-indigo-200"
+                  >
+                    {route}
+                  </span>
+                ))
               ) : (
-                <span className="ml-6">N/A</span>
+                <span className="text-xs italic text-indigo-400/70">
+                  No routes configured
+                </span>
               )}
             </div>
+          </div>
 
-            {/* Services */}
-            <div className="flex flex-col space-y-1">
-              <div className="flex items-center space-x-2">
-                <Zap className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                <span>Services:</span>
-              </div>
-              {project.servicesAvailable ? (
-                <ol className="ml-6 list-inside list-decimal space-y-1">
-                  {project.servicesAvailable
-                    .split(/\d+\.\s+/) // split by numbered pattern
-                    .filter(Boolean)
-                    .map((service, index) => (
-                      <li key={index}>{service.trim()}</li>
-                    ))}
-                </ol>
+          {/* Column 2: Services */}
+          <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4 dark:border-amber-500/20 dark:bg-amber-900/20">
+            <div className="mb-3 flex items-center gap-2 text-amber-700 dark:text-amber-300">
+              <Server className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-wide">
+                Services
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {services.length > 0 ? (
+                services.map((service, i) => (
+                  <span
+                    key={i}
+                    className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-amber-700 shadow-sm dark:bg-amber-500/20 dark:text-amber-200"
+                  >
+                    {service}
+                  </span>
+                ))
               ) : (
-                <span className="ml-6">N/A</span>
+                <span className="text-xs italic text-amber-400/70">
+                  No services active
+                </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Actions */}
+        {/* --- Action Footer --- */}
         {project.projectUrl && (
-          <a
-            href={project.projectUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex w-full items-center justify-center space-x-2 rounded-lg bg-blue-600/10 px-4 py-2 text-sm font-medium text-blue-700 transition-colors duration-200 hover:bg-blue-600/20 dark:bg-blue-500/20 dark:text-blue-200 dark:hover:bg-blue-500/30"
-          >
-            <ExternalLink className="h-4 w-4" />
-            <span>View Project</span>
-          </a>
+          <div className="mt-6 border-t border-black/5 pt-6 dark:border-white/5">
+            <a
+              href={project.projectUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group/btn flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-500/20 dark:bg-white dark:text-slate-900 dark:hover:bg-blue-400"
+            >
+              <span>Launch Dashboard</span>
+              <ExternalLink className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+            </a>
+          </div>
         )}
       </div>
     </div>
